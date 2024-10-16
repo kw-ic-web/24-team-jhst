@@ -4,14 +4,14 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var fs = require('fs');
 
-var db = require('./config/db');
+var db = require('./backend/config/db');
 
 // member_game.js의 테이블 생성 및 데이터 삽입 함수 가져오기
-var { createTableAndInsertData } = require('./game/db/member_game');
+var { createTableAndInsertData } = require('./backend/game/db/member_game');
 
-var {createWordTableAndInsertData } = require('./game/db/word')
-var { createGameTableAndInsertData } = require('./game/db/game_table'); 
-var { createRoundTableAndInsertData } = require('./game/db/round_table');
+var {createWordTableAndInsertData } = require('./backend/game/db/word')
+var { createGameTableAndInsertData } = require('./backend/game/db/game_table'); 
+var { createRoundTableAndInsertData } = require('./backend/game/db/round_table');
 
 
 // // 서버 시작 시 여러 테이블을 동시에 생성
@@ -68,12 +68,12 @@ const autoRegisterRoutes = (baseDir, basePath) => {
 };
 
 // '/game' 경로에 있는 모든 라우트 자동 등록
-autoRegisterRoutes('game/routes', '/game');
+autoRegisterRoutes('backend/game/routes', '/game');
 
 // '/users' 경로에 있는 모든 라우트 자동 등록
-autoRegisterRoutes('member/routes', '/users');
+autoRegisterRoutes('/backend/member/routes', '/users');
 
 // 기본 인덱스 라우트 등록 (필요할 경우 변경 가능)
-app.use('/', require('./game/routes/index'));
+app.use('/', require('./backend/game/routes/index'));
 
 module.exports = app;
