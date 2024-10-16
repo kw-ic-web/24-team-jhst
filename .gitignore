@@ -1,0 +1,40 @@
+# Node.js 관련
+node_modules/
+npm-debug.log
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# 환경 파일 (보안 정보 포함된 파일)
+.env
+
+# 로그 파일
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# 디렉토리별 로그
+logs/
+*.log
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# OS 또는 편집기 관련
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# 빌드 결과물
+dist/
+build/
+coverage/
