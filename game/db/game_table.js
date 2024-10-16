@@ -15,10 +15,8 @@ const createGameTableAndInsertData = () => {
     );
   `;
 
-  // 기존 데이터 삭제 쿼리
-  const deleteDataQuery = `
-    DELETE FROM game;
-  `;
+  // 테이블 초기화(기존 데이터 삭제) 쿼리
+  const deleteDataQuery = `DELETE FROM game`;
 
   // 데이터 삽입 쿼리
   const insertDataQuery = `
@@ -41,7 +39,7 @@ const createGameTableAndInsertData = () => {
       // 기존 데이터 삭제 쿼리 실행
       db.query(deleteDataQuery, (err) => {
         if (err) {
-          return reject('기존 게임 데이터 삭제 중 오류 발생: ' + err.stack);
+          return reject('기존 데이터 삭제 중 오류 발생: ' + err.stack);
         }
 
         // 데이터 삽입 쿼리 실행
@@ -49,7 +47,7 @@ const createGameTableAndInsertData = () => {
           if (err) {
             return reject('게임 데이터 삽입 중 오류 발생: ' + err.stack);
           }
-          resolve('게임 테이블 생성 및 데이터 삽입 성공');
+          resolve('게임 테이블 초기화 및 데이터 삽입 성공');
         });
       });
     });
