@@ -4,7 +4,7 @@ const getRankings = () => {
   const query = `
     SELECT id, win, lose, (win / (win + lose)) * 100 AS win_rate,
            RANK() OVER (ORDER BY (win / (win + lose)) * 100 DESC) AS ranking
-    FROM member
+    FROM member_game
     WHERE (win + lose) > 0
     ORDER BY ranking;
   `;
