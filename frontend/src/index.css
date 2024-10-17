@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: 'neodgm';
-  src: url('../assets/fonts/neodgm.woff') format('woff');
+  src: url('/src/assets/fonts/neodgm.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
