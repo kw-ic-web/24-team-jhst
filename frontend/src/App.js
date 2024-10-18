@@ -12,18 +12,10 @@ import Header from './components/Header.jsx';
 import GameMulti from './pages/GameMulti.jsx';
 
 function App() {
-  // // const audioRef = useRef(null);
-
-  // useEffect(() => {
-  //   audioRef.current.play();
-  // }, []);
-
   return (
     <Router>
-      <div className="pt-16"></div>
+      <div className="pt-4"></div>
       <Header />
-      {/* <audio ref={audioRef} src="/bgm.mp3" autoPlay loop /> */}
-
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
