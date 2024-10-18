@@ -1,29 +1,43 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import meow1 from '../assets/images/meow1.png';
-import meow2 from '../assets/images/meow2.png';
 import meow3 from '../assets/images/meow3.png';
-
-
 
 function Home() {
   const navigate = useNavigate();
 
-  const handleLogin = () => {
+  const handlePlay = () => {
     navigate('/login');
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-whitee flex-col">
-      <div className= "flex">
-      <img src={meow1} alt="cat image" style={{ width: '300px', height: '300px' }} />
-      <img src={meow2} alt="cat image" style={{ width: '300px', height: '300px' }} />
-      <img src={meow3} alt="cat image" style={{ width: '300px', height: '300px' }} />
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-white">
+      {/* 메인 */}
+      <div className="bg-white p-8 w-full max-w-md text-center">
+        <h2 className="text-2xl font-bold mb-4">SpellMeow</h2>
+        <p className="mb-8">재미있게 영어 단어 철자를 배우고 실력을 키워보세요! <br />
+          글자를 모아 단어를 완성하고 친구들과 대결을 펼치세요</p>
+        <button onClick={handlePlay} className="w-full bg-green-700 text-white py-3 rounded hover:bg-green-800 transition duration-200">
+          플레이 하기
+        </button>
       </div>
-      <h1 className="text-2xl mb-4">Spell Meow</h1>
-      <button onClick={handleLogin} className="bg-customGreen text-white px-8 py-2 rounded">
-        로그인
-      </button>
+
+      <div className="mt-16">
+        <div className="flex justify-center">
+          <p className="text-2xl font-bold mr-4">SPELL</p>
+          <img src={meow3} alt="Game Cat" className="w-32 h-32" />
+        </div>
+        <div className="grid grid-cols-5 gap-4 mt-4">
+          <span>A</span>
+          <span>E</span>
+          <span>W</span>
+          <span>D</span>
+          <span>M</span>
+          <span>L</span>
+          <span>B</span>
+          <span>O</span>
+          <span>C</span>
+        </div>
+      </div>
     </div>
   );
 }

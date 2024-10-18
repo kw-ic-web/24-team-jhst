@@ -31,71 +31,72 @@ function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-customWhite">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <form onSubmit={handleSubmit} className="bg-white p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">회원가입</h2>
+
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">이름</label>
-          <input 
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="이름을 입력하세요"
-            className=" focus:outline-none focus:ring-indigo-500 focus:border-customGreen mt-1 block w-full text-sm px-3 py-2 border rounded shadow-sm"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">아이디</label>
           <input 
             type="text"
             name="username"
             value={formData.username}
             onChange={handleChange}
-            placeholder="아이디를 입력하세요"
-            className=" focus:outline-none focus:ring-indigo-500 focus:border-customGreen mt-1 block w-full text-sm px-3 py-2 border rounded shadow-sm"
+            placeholder="아이디"
+            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-customGreen"
             required
           />
         </div>
+        
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">비밀번호</label>
           <input 
             type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
-            placeholder="비밀번호를 입력하세요"
-            className=" focus:outline-none focus:ring-indigo-500 focus:border-customGreen mt-1 block w-full px-3 py-2 border text-sm rounded shadow-sm"
+            placeholder="비밀번호"
+            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-customGreen"
             required
           />
         </div>
+
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">비밀번호 확인</label>
           <input 
             type="password"
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
-            placeholder="비밀번호를 다시 입력하세요"
-            className=" focus:outline-none focus:ring-indigo-500 focus:border-customGreen mt-1 block w-full px-3 py-2 border text-sm roundedl shadow-sm"
+            placeholder="비밀번호 확인"
+            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-customGreen"
             required
           />
         </div>
+
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">이메일</label>
+          <input 
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="이름"
+            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-customGreen"
+            required
+          />
+        </div>
+
+        <div className="mb-6">
           <input 
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="이메일을 입력하세요"
-            className=" focus:outline-none focus:ring-indigo-500 focus:border-customGreen mt-1 block w-full px-3 py-2  text-sm border rounded shadow-sm"
+            placeholder="이메일"
+            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-customGreen"
             required
           />
         </div>
-        <button type="submit" className="w-full bg-customGreen text-white py-2 px-4 rounded  hover:bg-customBlue transition duration-200">
-          완료
+
+        <button type="submit" className="w-full bg-green-700 text-white py-3 rounded hover:bg-green-800 transition duration-200">
+          회원가입
         </button>
       </form>
     </div>
