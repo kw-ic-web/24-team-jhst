@@ -10,6 +10,8 @@ import Setting from './pages/Setting.jsx';
 import Ranking from './pages/Ranking.jsx';
 import Header from './components/Header.jsx';  
 import GameMulti from './pages/GameMulti.jsx';
+import ResultSingle from './pages/ResultSingle.jsx';
+import ResultMulti from './pages/ResultMulti.jsx';
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
         <Route path="/gacha" element={<Gacha />} />
         <Route path="/ranking" element={<Ranking />} />
         <Route path="/setting" element={<Setting />} />
+        <Route path="/result-single" element={<ResultSingle />} />
+        <Route path="/result-multi" element={<ResultMulti />} />
         <Route path="/game-multi" element={<GameMulti />} />
       </Routes>
     </Router>
