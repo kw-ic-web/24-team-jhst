@@ -19,3 +19,5 @@ const getRankings = () => {
 };
 
 module.exports = { getRankings };
+
+//테스트
