@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const db = require('../../config/db');
 
 // 회원 정보 조회 
 exports.viewInfo = async (req, res) => {
