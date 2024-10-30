@@ -1,57 +1,57 @@
-const db = require('../../config/db');
+const sequelize = require('../../config/db'); // sequelize 인스턴스 가져오기
+const { DataTypes } = require('sequelize');
 
-// 테이블 생성 및 데이터 삽입 함수
-const createGameTableAndInsertData = () => {
-  // game 테이블 생성 쿼리
-  const createTableQuery = `
-    CREATE TABLE IF NOT EXISTS game (
-      game_id INT PRIMARY KEY AUTO_INCREMENT, -- AUTO_INCREMENT 추가
-      member_id VARCHAR(20) NOT NULL,
-      opposite_player VARCHAR(20),
-      create_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-      game_mode VARCHAR(10),
-      easy_or_hard VARCHAR(10),
-      winner VARCHAR(20)
-    );
-  `;
+const Game = sequelize.define('Game', {
+  game_id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  member_id: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+    references: {
+      model: 'member_game',
+      key: 'member_id',
+    },
+    onDelete: 'CASCADE',
+  },
+  opposite_player: {
+    type: DataTypes.STRING(20),
+  },
+  create_date: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+  },
+  game_mode: {
+    type: DataTypes.STRING(10),
+  },
+  easy_or_hard: {
+    type: DataTypes.STRING(10),
+  },
+  winner: {
+    type: DataTypes.STRING(20),
+  },
+}, {
+  tableName: 'game',
+  timestamps: false,
+});
 
-  // 테이블 초기화(기존 데이터 삭제) 쿼리
-  const deleteDataQuery = `DELETE FROM game`;
 
-  // 데이터 삽입 쿼리
-  const insertDataQuery = `
-    INSERT INTO game (member_id, opposite_player, create_date, game_mode, easy_or_hard, winner)
-    VALUES
-    ('user1', 'user2', NOW(), 'english', 'easy', 'user1'),
-    ('user3', 'user4', NOW(), 'english', 'hard', 'user3'),
-    ('user5', 'user1', NOW(), 'korean', 'easy', 'user5'),
-    ('user2', 'user3', NOW(), 'korean', 'hard', 'user3'),
-    ('user4', 'user5', NOW(), 'korean', 'easy', 'user4');
-  `;
-
-  return new Promise((resolve, reject) => {
-    // 테이블 생성 쿼리 실행
-    db.query(createTableQuery, (err) => {
-      if (err) {
-        return reject('게임 테이블 생성 중 오류 발생: ' + err.stack);
-      }
-
-      // 기존 데이터 삭제 쿼리 실행
-      db.query(deleteDataQuery, (err) => {
-        if (err) {
-          return reject('기존 데이터 삭제 중 오류 발생: ' + err.stack);
-        }
-
-        // 데이터 삽입 쿼리 실행
-        db.query(insertDataQuery, (err) => {
-          if (err) {
-            return reject('게임 데이터 삽입 중 오류 발생: ' + err.stack);
-          }
-          resolve('게임 테이블 초기화 및 데이터 삽입 성공');
-        });
-      });
-    });
-  });
+const createGameTableAndInsertData = async () => {
+  try {
+    await sequelize.sync();
+    await Game.bulkCreate([
+      { member_id: 'user1', opposite_player: 'user2', game_mode: 'english', easy_or_hard: 'easy', winner: 'user1' },
+      { member_id: 'user3', opposite_player: 'user4', game_mode: 'english', easy_or_hard: 'hard', winner: 'user3' },
+      { member_id: 'user5', opposite_player: 'user1', game_mode: 'korean', easy_or_hard: 'easy', winner: 'user5' },
+      { member_id: 'user2', opposite_player: 'user3', game_mode: 'korean', easy_or_hard: 'hard', winner: 'user3' },
+      { member_id: 'user4', opposite_player: 'user5', game_mode: 'korean', easy_or_hard: 'easy', winner: 'user4' }
+    ]);
+    console.log('Game 테이블 초기화 및 데이터 삽입 성공');
+  } catch (err) {
+    console.error('오류 발생: ', err);
+  }
 };
 
-module.exports = { createGameTableAndInsertData };
+module.exports = { Game, createGameTableAndInsertData };
