@@ -4,43 +4,56 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var fs = require('fs');
 var cors = require('cors'); 
-var db = require('./backend/config/db');
+const sequelize = require('./backend/config/db');
 
-// member_game.js의 테이블 생성 및 데이터 삽입 함수 가져오기
-var { createTableAndInsertData } = require('./backend/game/db/member_game');
-var {createWordTableAndInsertData } = require('./backend/game/db/word')
-var { createGameTableAndInsertData } = require('./backend/game/db/game_table'); 
-var { createRoundTableAndInsertData } = require('./backend/game/db/round_table');
+// DB 관련 데이터 삽입 함수 불러오기
+const { createTableAndInsertData: createMemberGameTableAndInsertData } = require('./backend/game/db/member_game');
+const { createWordTableAndInsertData } = require('./backend/game/db/word');
+const { createGameTableAndInsertData } = require('./backend/game/db/game_table');
+const { createRoundTableAndInsertData } = require('./backend/game/db/round_table');
+const{insertExampleData} = require('./backend/game/db/wrongAns');
+
+// 모델 관계 설정
+const { Game } = require('./backend/game/db/game_table');
+const { Round } = require('./backend/game/db/round_table');
+const { MemberGame } = require('./backend/game/db/member_game');
+const { Word } = require('./backend/game/db/word');
+const{ WrongAns }= require('./backend/game/db/wrongAns');
+
+
+// 모델 간 관계 설정
+Game.belongsTo(MemberGame, { foreignKey: 'member_id', onDelete: 'CASCADE' });
+MemberGame.hasMany(Game, { foreignKey: 'member_id', onDelete: 'CASCADE' });
+Game.hasMany(Round, { foreignKey: 'game_id', onDelete: 'CASCADE' });
+Round.belongsTo(Game, { foreignKey: 'game_id', onDelete: 'CASCADE' });
+Round.belongsTo(Word, { foreignKey: 'word_id', onDelete: 'CASCADE' });
+Word.hasMany(Round, { foreignKey: 'word_id', onDelete: 'CASCADE' });
+WrongAns.belongsTo(Word, { foreignKey: 'word_id', onDelete: 'CASCADE' });
+WrongAns.belongsTo(Game, { foreignKey: 'game_id', onDelete: 'CASCADE' });
+WrongAns.belongsTo(MemberGame, { foreignKey: 'member_id', onDelete: 'CASCADE' });
+
+Word.hasMany(WrongAns, { foreignKey: 'word_id', onDelete: 'CASCADE' });
+Game.hasMany(WrongAns, { foreignKey: 'game_id', onDelete: 'CASCADE' });
+MemberGame.hasMany(WrongAns, { foreignKey: 'member_id', onDelete: 'CASCADE' });
+
+
 
 const charactersRoutes = require('./backend/characters/charactersRoutes');
-
-// // 서버 시작 시 여러 테이블을 동시에 생성
-// Promise.all([createTableAndInsertData(), createGameTableAndInsertData(),createRoundTableAndInsertData(),createWordTableAndInsertData() ])
-//   .then((messages) => {
-//     messages.forEach((message) => console.log(message));
-//     console.log('모든 테이블 생성 완료');
-//   })
-//   .catch((error) => {
-//     console.error('테이블 생성 중 오류 발생:', error);
-//   });
-
 var app = express();
 
 app.use(cors({
   origin: 'http://localhost:3000' // 프론트엔드 URL
 }));
 
-createTableAndInsertData() // 가장 먼저 실행
-  .then(() => {
-    return createWordTableAndInsertData(); // 그 다음 word 테이블 생성
-  })
-  .then(() => {
-    return createGameTableAndInsertData(); // 그 다음 game 테이블 생성
-  })
-  .then(() => {
-    return createRoundTableAndInsertData(); // 마지막으로 round 테이블 생성
-  })
-  .then(() => {
+// DB 동기화 및 데이터 삽입
+sequelize.sync({ force: true })
+  .then(async () => {
+    console.log('데이터베이스가 성공적으로 초기화되었습니다.');
+    await createMemberGameTableAndInsertData(); // member_game 테이블 생성 및 데이터 삽입
+    await createWordTableAndInsertData();       // word 테이블 생성 및 데이터 삽입
+    await createGameTableAndInsertData();       // game 테이블 생성 및 데이터 삽입
+    await createRoundTableAndInsertData();      // round 테이블 생성 및 데이터 삽입
+    await insertExampleData();
     console.log('모든 테이블 생성 및 데이터 삽입 완료');
   })
   .catch((error) => {
@@ -54,7 +67,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/characters', charactersRoutes);
-
 
 // 자동 라우터 등록 함수
 const autoRegisterRoutes = (baseDir, basePath) => {
