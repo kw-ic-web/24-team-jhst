@@ -1,10 +1,11 @@
-const { Sequelize, member_game } = require('../../config/db');
+const { Sequelize } = require('../../config/db');
+const { MemberGame } = require('../db/member_game');
 
 const getRankings = async () => {
   try {
-    const results = await member_game.findAll({
+    const results = await MemberGame.findAll({
       attributes: [
-        'id',
+        'member_id',
         'win',
         'lose',
         [Sequelize.literal('(win / (win + lose)) * 100'), 'win_rate'],
@@ -16,7 +17,10 @@ const getRankings = async () => {
         ]
       ],
       where: {
-        [Sequelize.Op.gt]: [{ win: 0 }, { lose: 0 }]
+        [Sequelize.Op.and]: [
+          { win: { [Sequelize.Op.gt]: 0 } },
+          { lose: { [Sequelize.Op.gt]: 0 } }
+        ]
       },
       order: [Sequelize.literal('ranking')],
       raw: true
