@@ -3,7 +3,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var fs = require('fs');
-var cors = require('cors'); 
+var cors = require('cors');
 const sequelize = require('./backend/config/db');
 
 // DB 관련 데이터 삽입 함수 불러오기
@@ -11,15 +11,16 @@ const { createTableAndInsertData: createMemberGameTableAndInsertData } = require
 const { createWordTableAndInsertData } = require('./backend/game/db/word');
 const { createGameTableAndInsertData } = require('./backend/game/db/game_table');
 const { createRoundTableAndInsertData } = require('./backend/game/db/round_table');
-const{insertExampleData} = require('./backend/game/db/wrongAns');
+const { insertExampleData } = require('./backend/game/db/wrongAns');
+const { createMemberTableAndInsertData } = require('./backend/game/db/member_table'); // 멤버테이블 추가
 
 // 모델 관계 설정
 const { Game } = require('./backend/game/db/game_table');
 const { Round } = require('./backend/game/db/round_table');
 const { MemberGame } = require('./backend/game/db/member_game');
 const { Word } = require('./backend/game/db/word');
-const{ WrongAns }= require('./backend/game/db/wrongAns');
-
+const { WrongAns } = require('./backend/game/db/wrongAns');
+const { Member } = require('./backend/game/db/member_table'); // 멤버테이블 추가
 
 // 모델 간 관계 설정
 Game.belongsTo(MemberGame, { foreignKey: 'member_id', onDelete: 'CASCADE' });
@@ -36,24 +37,31 @@ Word.hasMany(WrongAns, { foreignKey: 'word_id', onDelete: 'CASCADE' });
 Game.hasMany(WrongAns, { foreignKey: 'game_id', onDelete: 'CASCADE' });
 MemberGame.hasMany(WrongAns, { foreignKey: 'member_id', onDelete: 'CASCADE' });
 
-
-
 const charactersRoutes = require('./backend/characters/charactersRoutes');
+
+const loginRoutes = require('./backend/member/routes/login'); // 로그인 라우터 등록
+
+const signupRoutes = require('./backend/member/routes/signup'); // 회원가입 라우터 등록
+
 var app = express();
 
-app.use(cors({
-  origin: 'http://localhost:3000' // 프론트엔드 URL
-}));
+app.use(
+  cors({
+    origin: 'http://localhost:3000', // 프론트엔드 URL
+  })
+);
 
 // DB 동기화 및 데이터 삽입
-sequelize.sync({ force: true })
+sequelize
+  .sync({ force: true })
   .then(async () => {
     console.log('데이터베이스가 성공적으로 초기화되었습니다.');
     await createMemberGameTableAndInsertData(); // member_game 테이블 생성 및 데이터 삽입
-    await createWordTableAndInsertData();       // word 테이블 생성 및 데이터 삽입
-    await createGameTableAndInsertData();       // game 테이블 생성 및 데이터 삽입
-    await createRoundTableAndInsertData();      // round 테이블 생성 및 데이터 삽입
+    await createWordTableAndInsertData(); // word 테이블 생성 및 데이터 삽입
+    await createGameTableAndInsertData(); // game 테이블 생성 및 데이터 삽입
+    await createRoundTableAndInsertData(); // round 테이블 생성 및 데이터 삽입
     await insertExampleData();
+    await createMemberTableAndInsertData(); // 멤버 테이블
     console.log('모든 테이블 생성 및 데이터 삽입 완료');
   })
   .catch((error) => {
@@ -67,6 +75,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/characters', charactersRoutes);
+
+app.use('/login', loginRoutes); // 로그인 라우터 등록
+
+app.use('/signup', signupRoutes); // 회원가입 라우터 등록
 
 // 자동 라우터 등록 함수
 const autoRegisterRoutes = (baseDir, basePath) => {
