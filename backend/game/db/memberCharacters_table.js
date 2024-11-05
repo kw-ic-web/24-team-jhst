@@ -1,6 +1,7 @@
 const sequelize = require('../../config/db');
 const { DataTypes } = require('sequelize');
 
+// 모델 정의
 const MemberCharacters = sequelize.define('MemberCharacters', {
   id: {
     type: DataTypes.INTEGER,
@@ -24,6 +25,7 @@ const MemberCharacters = sequelize.define('MemberCharacters', {
   timestamps: false,
 });
 
+// 생성
 const createMemberCharactersTableAndInsertData = async () => {
   try {
     await sequelize.sync();

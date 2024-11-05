@@ -1,6 +1,7 @@
 const sequelize = require('../../config/db');
 const { DataTypes } = require('sequelize');
 
+// 모델 정의
 const Characters = sequelize.define('Characters', {
   character_id: {
     type: DataTypes.INTEGER,
@@ -19,6 +20,8 @@ const Characters = sequelize.define('Characters', {
   timestamps: false,
 });
 
+
+// 생성
 const createCharactersTableAndInsertData = async () => {
   try {
     await sequelize.sync();
