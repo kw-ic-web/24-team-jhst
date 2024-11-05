@@ -7,7 +7,7 @@ exports.viewInfo = async (req, res) => {
   try {
     const result = await MemberGame.findOne({
       attributes: ['name', 'email', 'point'],
-      where: { member_id: memberId }
+      where: { member_id: memberId },
     });
     if (result) {
       res.status(200).json(result);
@@ -25,7 +25,7 @@ exports.deleteMember = async (req, res) => {
 
   try {
     const result = await MemberGame.destroy({
-      where: { member_id: memberId }
+      where: { member_id: memberId },
     });
     if (result > 0) {
       res.status(200).json({ message: '회원 탈퇴가 완료되었습니다.' });
@@ -43,11 +43,9 @@ exports.updateMember = async (req, res) => {
   const { name, email, pwd } = req.body;
 
   try {
-    const result = await MemberGame.update(
-      { name, email, pwd },
-      { where: { member_id: memberId } }
-    );
-    if (result[0] > 0) { // Sequelize returns an array; the first element indicates the number of affected rows
+    const result = await MemberGame.update({ name, email, pwd }, { where: { member_id: memberId } });
+    if (result[0] > 0) {
+      // Sequelize returns an array; the first element indicates the number of affected rows
       res.status(200).json({ message: '회원 정보가 성공적으로 수정되었습니다.' });
     } else {
       res.status(404).json({ message: '회원 정보를 찾을 수 없습니다.' });
