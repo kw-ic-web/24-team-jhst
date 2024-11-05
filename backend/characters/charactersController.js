@@ -1,7 +1,8 @@
-const db = require('../config/db');
+const { Characters } = require('../game/db/characters_table');
+const { MemberCharacters } = require('../game/db/memberCharacters_table');
 
 // 캐릭터 추가
-exports.addCharacter = (req, res) => {
+exports.addCharacter = async (req, res) => {
   const { name, imageFile } = req.body;
 
   console.log("name:", name);
@@ -12,77 +13,69 @@ exports.addCharacter = (req, res) => {
   }
 
   try {
-    // 이미지 파일을 Base64에서 Buffer로 변환
     const imageBuffer = Buffer.from(imageFile, 'base64');
-
-    const query = 'INSERT INTO characters (name, image) VALUES (?, ?)';
-    db.query(query, [name, imageBuffer], (err, result) => {
-      if (err) {
-        console.error('데이터베이스 저장 오류:', err);
-        return res.status(500).json({ message: '캐릭터 추가 실패', error: err });
-      }
-      return res.status(201).json({ message: '캐릭터 추가 성공', characterId: result.insertId });
+    const newCharacter = await Characters.create({
+      name: name,
+      image: imageBuffer,
     });
+
+    return res.status(201).json({ message: '캐릭터 추가 성공', characterId: newCharacter.character_id });
   } catch (err) {
-    console.error('이미지 변환 오류:', err);
-    res.status(500).json({ message: '서버 오류 발생', error: err });
+    console.error('데이터베이스 저장 오류:', err);
+    res.status(500).json({ message: '캐릭터 추가 실패', error: err });
   }
 };
 
 // 캐릭터 선택 
-exports.selectCharacter = (req, res) => {
+exports.selectCharacter = async (req, res) => {
   const { memberId, characterId } = req.body;
 
-  // 모든 캐릭터 is_active 값 false
-  const deactivateQuery = 'UPDATE member_characters SET is_active = 0 WHERE member_id = ?';
+  try {
+    // 모든 캐릭터 비활성화
+    await MemberCharacters.update({ is_active: false }, { where: { member_id: memberId } });
 
-  db.query(deactivateQuery, [memberId], (err) => {
-    if (err) {
-      console.error('캐릭터 비활성화 오류:', err);
-      return res.status(500).json({ message: '캐릭터 선택 실패', error: err });
+    // 선택한 캐릭터 활성화
+    const [updatedRows] = await MemberCharacters.update(
+      { is_active: true },
+      { where: { member_id: memberId, character_id: characterId } }
+    );
+
+    if (updatedRows === 0) {
+      return res.status(404).json({ message: '캐릭터가 없습니다.' });
     }
-
-    // 선택 캐릭터 is_active 값 true
-    const activateQuery = 'UPDATE member_characters SET is_active = 1 WHERE member_id = ? AND character_id = ?';
-    db.query(activateQuery, [memberId, characterId], (err, result) => {
-      if (err) {
-        console.error('캐릭터 활성화 오류:', err);
-        return res.status(500).json({ message: '캐릭터 선택 실패', error: err });
-      }
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: '캐릭터가 없습니다.' });
-      }
-      return res.status(200).json({ message: '캐릭터 선택 성공' });
-    });
-  });
+    
+    return res.status(200).json({ message: '캐릭터 선택 성공' });
+  } catch (err) {
+    console.error('캐릭터 활성화 오류:', err);
+    res.status(500).json({ message: '캐릭터 선택 실패', error: err });
+  }
 };
 
 // 랜덤 캐릭터 뽑기 및 저장
-exports.drawCharacter = (req, res) => {
-  const { memberId } = req.body;
+exports.drawCharacter = async (req, res) => {
+  const { memberId } = req.query; // req.query로 memberId 받아오기
 
-  const characterQuery = 'SELECT * FROM characters';
-  db.query(characterQuery, (err, characters) => {
-    if (err) {
-      console.error('캐릭터 목록 불러오기 오류:', err);
-      return res.status(500).json({ message: '캐릭터 목록을 불러오는 데 실패했습니다.', error: err });
-    }
+  try {
+    // 모든 캐릭터 조회
+    const characters = await Characters.findAll();
     if (characters.length === 0) {
       return res.status(404).json({ message: '등록된 캐릭터가 없습니다.' });
     }
 
-    // 랜덤 캐릭터 뽑기
+    // 랜덤 캐릭터 선택
     const randomIndex = Math.floor(Math.random() * characters.length);
     const randomCharacter = characters[randomIndex];
 
-    // 뽑은 캐릭터를 보유 캐릭터 목록에 저장
-    const insertQuery = 'INSERT INTO member_characters (member_id, character_id, is_active) VALUES (?, ?, 0)';
-    db.query(insertQuery, [memberId, randomCharacter.character_id], (err, result) => {
-      if (err) {
-        console.error('랜덤 캐릭터 저장 오류:', err);
-        return res.status(500).json({ message: '캐릭터를 보유 캐릭터 목록에 저장하는 데 실패했습니다.', error: err });
-      }
-      return res.status(200).json({ message: '랜덤 캐릭터 뽑기 성공', character: randomCharacter });
+    // 선택한 캐릭터를 MemberCharacters 테이블에 추가
+    await MemberCharacters.create({
+      member_id: memberId,
+      character_id: randomCharacter.character_id,
+      is_active: false,
     });
-  });
+
+    return res.status(200).json({ message: '랜덤 캐릭터 뽑기 성공', character: randomCharacter });
+  } catch (err) {
+    console.error('랜덤 캐릭터 저장 오류:', err);
+    res.status(500).json({ message: '캐릭터를 보유 캐릭터 목록에 저장하는 데 실패했습니다.', error: err });
+  }
 };

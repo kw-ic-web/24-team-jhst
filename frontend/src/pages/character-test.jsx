@@ -7,6 +7,7 @@ const CharacterTest = () => {
   const [memberId, setMemberId] = useState('');
   const [characterId, setCharacterId] = useState('');
   const [randomCharacter, setRandomCharacter] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const baseURL = 'http://localhost:8000';
 
@@ -24,22 +25,24 @@ const CharacterTest = () => {
   const handleAddCharacter = async (e) => {
     e.preventDefault();
     if (!image) {
-      alert('이미지를 선택해 주세요.');
+      setErrorMessage('이미지를 선택해 주세요.');
       return;
     }
 
     try {
       const imageBase64 = await convertToBase64(image);
-
       const res = await axios.post(`${baseURL}/characters/add`, {
         name,
         imageFile: imageBase64,
       });
       console.log(res.data);
       alert('캐릭터가 추가되었습니다.');
+      setName(''); // 입력 필드 초기화
+      setImage(null);
+      setErrorMessage(null); // 에러 메시지 초기화
     } catch (err) {
       console.error(err);
-      alert('캐릭터 추가에 실패했습니다.');
+      setErrorMessage('캐릭터 추가에 실패했습니다.');
     }
   };
 
@@ -53,9 +56,12 @@ const CharacterTest = () => {
       });
       console.log(res.data);
       alert('캐릭터가 선택되었습니다.');
+      setMemberId('');
+      setCharacterId('');
+      setErrorMessage(null);
     } catch (err) {
       console.error(err);
-      alert('캐릭터 선택에 실패했습니다.');
+      setErrorMessage('캐릭터 선택에 실패했습니다.');
     }
   };
 
@@ -67,9 +73,10 @@ const CharacterTest = () => {
       });
       setRandomCharacter(res.data.character);
       alert('랜덤 캐릭터 뽑기 성공');
+      setErrorMessage(null);
     } catch (err) {
       console.error(err);
-      alert('랜덤 캐릭터 뽑기에 실패했습니다.');
+      setErrorMessage('랜덤 캐릭터 뽑기에 실패했습니다.');
     }
   };
 
@@ -106,6 +113,9 @@ const CharacterTest = () => {
   return (
     <div style={containerStyle}>
       <h1>캐릭터 테스트</h1>
+
+      {/* 에러 메시지 표시 */}
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
 
       {/* 캐릭터 추가 폼 */}
       <form onSubmit={handleAddCharacter} style={formSectionStyle}>
