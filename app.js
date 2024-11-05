@@ -12,8 +12,8 @@ const { createWordTableAndInsertData } = require('./backend/game/db/word');
 const { createGameTableAndInsertData } = require('./backend/game/db/game_table');
 const { createRoundTableAndInsertData } = require('./backend/game/db/round_table');
 const { insertExampleData } = require('./backend/game/db/wrongAns');
-const { createCharactersTableAndInsertData } = require('./backend/game/db/characters_table'); // 추가된 부분
-const { createMemberCharactersTableAndInsertData } = require('./backend/game/db/memberCharacters_table'); // 추가된 부분
+const { createCharactersTableAndInsertData } = require('./backend/game/db/characters_table'); 
+const { createMemberCharactersTableAndInsertData } = require('./backend/game/db/memberCharacters_table');
 
 // 모델 관계 설정
 const { Game } = require('./backend/game/db/game_table');
