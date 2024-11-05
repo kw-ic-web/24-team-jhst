@@ -7,6 +7,10 @@ const loginController = require('../controllers/loginController');
 
 router.post('/', loginController.login);
 
+router.get('/test', loginController.verifyToken, (req, res) => {
+  res.json(req.decoded); // 인증된 토큰 정보 응답
+});
+
 // 회원 정보 조회
 //router.get('/info', memberController.viewInfo);
 

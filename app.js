@@ -12,7 +12,6 @@ const { createWordTableAndInsertData } = require('./backend/game/db/word');
 const { createGameTableAndInsertData } = require('./backend/game/db/game_table');
 const { createRoundTableAndInsertData } = require('./backend/game/db/round_table');
 const { insertExampleData } = require('./backend/game/db/wrongAns');
-const { createMemberTableAndInsertData } = require('./backend/game/db/member_table'); // 멤버테이블 추가
 
 // 모델 관계 설정
 const { Game } = require('./backend/game/db/game_table');
@@ -20,7 +19,6 @@ const { Round } = require('./backend/game/db/round_table');
 const { MemberGame } = require('./backend/game/db/member_game');
 const { Word } = require('./backend/game/db/word');
 const { WrongAns } = require('./backend/game/db/wrongAns');
-const { Member } = require('./backend/game/db/member_table'); // 멤버테이블 추가
 
 // 모델 간 관계 설정
 Game.belongsTo(MemberGame, { foreignKey: 'member_id', onDelete: 'CASCADE' });
@@ -61,7 +59,7 @@ sequelize
     await createGameTableAndInsertData(); // game 테이블 생성 및 데이터 삽입
     await createRoundTableAndInsertData(); // round 테이블 생성 및 데이터 삽입
     await insertExampleData();
-    await createMemberTableAndInsertData(); // 멤버 테이블
+
     console.log('모든 테이블 생성 및 데이터 삽입 완료');
   })
   .catch((error) => {

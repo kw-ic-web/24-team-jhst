@@ -1,12 +1,9 @@
 const express = require('express'); // express
-const jwt = require('jsonwebtoken'); // 토큰
-const mysql = require('mysql2/promise'); // mysql2를 통해 MySQL과 연결
-require('dotenv').config(); // .env 파일 로드
 const router = express.Router(); // 라우터 설정
-const db = require('../../game/db/member_table'); // MySQL 데이터베이스 연결 설정
-const member_table = require('../../game/db/member_table');
+require('dotenv').config(); // .env 파일 로드
+const member_game = require('../../game/db/member_game');
 
-member = member_table.Member;
+const MemberGame = member_game.MemberGame; // membergame으로 변경
 
 // checkid 함수: 아이디 중복 확인
 const checkid = async (req, res) => {
@@ -14,7 +11,7 @@ const checkid = async (req, res) => {
     const { id } = req.body;
 
     // Sequelize를 사용하여 사용자 아이디 중복 확인
-    const user = await member.findOne({
+    const user = await MemberGame.findOne({
       where: { member_id: id },
     });
 
@@ -35,7 +32,7 @@ const insertMemberTableData = async (req, res) => {
 
   try {
     // 회원 정보 생성
-    await member.create({
+    await MemberGame.create({
       member_id: id,
       pwd,
       name,
@@ -43,7 +40,7 @@ const insertMemberTableData = async (req, res) => {
     });
 
     res.status(201).json({ message: '새로운 회원 등록 성공' });
-    console.log('멤버테이블에 새로운 회원 삽입 성공');
+    console.log('멤버게임테이블에 새로운 회원 삽입 성공');
   } catch (error) {
     console.error('회원 등록 중 오류:', error);
     res.status(500).json({ error: '서버 오류' });

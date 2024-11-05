@@ -3,10 +3,10 @@ const jwt = require('jsonwebtoken'); //토큰
 const mysql = require('mysql2/promise');
 require('dotenv').config(); //.env
 const router = express.Router(); // 라우터 설정 why?
-const db = '../../config/db';
-const member_table = require('../../game/db/member_table');
+//const db = '../../config/db';
+const member_game = require('../../game/db/member_game');
 
-const Member = member_table.Member;
+const MemberGame = member_game.MemberGame; // member_Game 테이블로 변경
 
 verifyToken = (req, res, next) => {
   // 인증 완료
@@ -15,7 +15,7 @@ verifyToken = (req, res, next) => {
     return next();
   } catch (error) {
     // 인증 실패
-    if (error.name === 'TokenExpireError') {
+    if (error.name === 'TokenExpiredError') {
       return res.status(419).json({
         code: 419,
         message: '토큰이 만료되었습니다.',
@@ -37,18 +37,18 @@ const login = async (req, res) => {
     res.status(400).send('아이디또는 비밀번호를 입력해주세요.');
   } else {
     try {
-      const member = await Member.findOne({
+      const memberGame = await MemberGame.findOne({
         where: {
           member_id: id,
           pwd: pw,
         },
       });
 
-      if (member) {
+      if (memberGame) {
         const token = jwt.sign(
           {
-            id: rows[0].member_id,
-            name: rows[0].name,
+            id: memberGame.member_id,
+            name: memberGame.name,
           },
           process.env.JWT_SECRET,
           {
@@ -80,11 +80,7 @@ const login = async (req, res) => {
   }
 };
 
-router.get('/test', verifyToken, (req, res) => {
-  res.json(req.decoded);
-});
-
-module.exports = { login };
+module.exports = { login, verifyToken };
 
 // 예비코드 sequelize 사용x
 
