@@ -1,28 +1,29 @@
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var fs = require('fs');
-var cors = require('cors');
-const sequelize = require('./backend/config/db');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const fs = require('fs');
+const cors = require('cors');
+const sequelize = require('./config/db');
 
 // DB 관련 데이터 삽입 함수 불러오기
-const { createTableAndInsertData: createMemberGameTableAndInsertData } = require('./backend/game/db/member_game');
-const { createWordTableAndInsertData } = require('./backend/game/db/word');
-const { createGameTableAndInsertData } = require('./backend/game/db/game_table');
-const { createRoundTableAndInsertData } = require('./backend/game/db/round_table');
-const { insertExampleData } = require('./backend/game/db/wrongAns');
-const { createCharactersTableAndInsertData } = require('./backend/game/db/characters_table'); 
-const { createMemberCharactersTableAndInsertData } = require('./backend/game/db/memberCharacters_table');
+const { 
+  createTableAndInsertData,  
+  createMemberCharactersTableAndInsertData 
+} = require('./db/memberdb'); // MemberGame과 MemberCharacters가 합쳐진 파일
+const { createWordTableAndInsertData } = require('./db/assets/word');
+const { 
+  createGameTableAndInsertData, 
+  createRoundTableAndInsertData, 
+  insertExampleData 
+} = require('./db/gamedb'); // Game, Round, WrongAns 모델이 합쳐진 파일
+const { createCharactersTableAndInsertData } = require('./db/assets/characters_table');
 
 // 모델 관계 설정
-const { Game } = require('./backend/game/db/game_table');
-const { Round } = require('./backend/game/db/round_table');
-const { MemberGame } = require('./backend/game/db/member_game');
-const { Word } = require('./backend/game/db/word');
-const { WrongAns } = require('./backend/game/db/wrongAns');
-const { Characters } = require('./backend/game/db/characters_table');
-const { MemberCharacters } = require('./backend/game/db/memberCharacters_table');
+const { Game, Round, WrongAns } = require('./db/gamedb'); // 합쳐진 모델 파일에서 가져오기
+const { MemberGame, MemberCharacters } = require('./db/memberdb'); // MemberGame과 MemberCharacters가 합쳐진 파일
+const { Word } = require('./db/assets/word');
+const { Characters } = require('./db/assets/characters_table');
 
 // 모델 간 관계 설정
 Game.belongsTo(MemberGame, { foreignKey: 'member_id', onDelete: 'CASCADE' });
@@ -43,11 +44,7 @@ MemberCharacters.belongsTo(Characters, { foreignKey: 'character_id', onDelete: '
 Characters.hasMany(MemberCharacters, { foreignKey: 'character_id', onDelete: 'CASCADE' });
 MemberCharacters.belongsTo(MemberGame, { foreignKey: 'member_id', onDelete: 'CASCADE' });
 
-const charactersRoutes = require('./backend/characters/charactersRoutes');
-const loginRoutes = require('./backend/member/routes/login'); // 로그인 라우터 등록
-const signupRoutes = require('./backend/member/routes/signup'); // 회원가입 라우터 등록
-
-var app = express();
+const app = express();
 
 app.use(
   cors({
@@ -60,13 +57,15 @@ sequelize
   .sync({ force: true })
   .then(async () => {
     console.log('데이터베이스가 성공적으로 초기화되었습니다.');
-    await createMemberGameTableAndInsertData(); // member_game 테이블 생성 및 데이터 삽입
+
+    // 테이블 순서대로 데이터 삽입
+    await createCharactersTableAndInsertData(); // characters 테이블 생성 및 데이터 삽입
+    await createTableAndInsertData(); // member_game 테이블 생성 및 데이터 삽입
+    await createMemberCharactersTableAndInsertData(); // member_characters 테이블 생성 및 데이터 삽입
     await createWordTableAndInsertData(); // word 테이블 생성 및 데이터 삽입
     await createGameTableAndInsertData(); // game 테이블 생성 및 데이터 삽입
     await createRoundTableAndInsertData(); // round 테이블 생성 및 데이터 삽입
-    await createCharactersTableAndInsertData(); // characters 테이블
-    await createMemberCharactersTableAndInsertData(); // membercharacters 테이블
-    await insertExampleData();
+    await insertExampleData(); // WrongAns 테이블 예시 데이터 삽입
 
     console.log('모든 테이블 생성 및 데이터 삽입 완료');
   })
@@ -80,11 +79,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/characters', charactersRoutes);
-
-app.use('/login', loginRoutes); // 로그인 라우터 등록
-
-app.use('/signup', signupRoutes); // 회원가입 라우터 등록
 
 // 자동 라우터 등록 함수
 const autoRegisterRoutes = (baseDir, basePath) => {
@@ -105,12 +99,12 @@ const autoRegisterRoutes = (baseDir, basePath) => {
 };
 
 // '/game' 경로에 있는 모든 라우트 자동 등록
-autoRegisterRoutes('backend/game/routes', '/game');
+autoRegisterRoutes('game/multiplay/routes', '/game/multi');
+autoRegisterRoutes('game/singleplay/routes', '/game');
+autoRegisterRoutes('game/characters/routes', '/game/characters');
 
 // '/users' 경로에 있는 모든 라우트 자동 등록
-autoRegisterRoutes('/backend/member/routes', '/users');
+autoRegisterRoutes('member/routes', '/users');
 
-// 기본 인덱스 라우트 등록 (필요할 경우 변경 가능)
-app.use('/', require('./backend/game/routes/index'));
 
 module.exports = app;

@@ -1,5 +1,5 @@
-const { Characters } = require('../game/db/characters_table');
-const { MemberCharacters } = require('../game/db/memberCharacters_table');
+const { Characters } = require('../../../db/assets/characters_table');
+const { MemberCharacters } = require('../../../db/memberdb');
 
 // 캐릭터 추가
 exports.addCharacter = async (req, res) => {
