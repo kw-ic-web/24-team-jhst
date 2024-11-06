@@ -4,7 +4,7 @@ const mysql = require('mysql2/promise');
 require('dotenv').config(); //.env
 const router = express.Router(); // 라우터 설정 why?
 //const db = '../../config/db';
-const member_game = require('../../game/db/member_game');
+const member_game = require('../../db/memberdb');
 
 const MemberGame = member_game.MemberGame; // member_Game 테이블로 변경
 

@@ -1,7 +1,7 @@
 const express = require('express'); // express
 const router = express.Router(); // 라우터 설정
 require('dotenv').config(); // .env 파일 로드
-const member_game = require('../../game/db/member_game');
+const member_game = require('../../db/memberdb');
 
 const MemberGame = member_game.MemberGame; // membergame으로 변경
 
