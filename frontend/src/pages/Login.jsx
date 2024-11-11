@@ -16,7 +16,12 @@ function Login() {
         });
         console.log("로그인 성공:", response.data);
         alert(response.data.message);
+        
+        // 로컬 스토리지에 토큰 저장
+        localStorage.setItem('token', response.data.token);
+        
         navigate('/main');
+        window.location.reload(); // 페이지 새로고침
       } catch (error) {
         console.error("로그인 중 오류:", error.response?.data);
         alert("로그인에 실패했습니다.");
@@ -25,6 +30,7 @@ function Login() {
       alert('아이디와 비밀번호를 입력해주세요.');
     }
   };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">

@@ -1,12 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import meow3 from '../assets/images/meow3.png';
+import axios from 'axios';
 
 function Main() {
-  const [showSelection, setShowSelection] = useState(false); 
-  const [selectedMode, setSelectedMode] = useState(''); 
-  const [selectedDifficulty, setSelectedDifficulty] = useState(''); 
-  const navigate = useNavigate(); 
+  const [showSelection, setShowSelection] = useState(false);
+  const [selectedMode, setSelectedMode] = useState('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      navigate('/login');
+    } else {
+      // 토큰 유효성 검증
+      axios.get('http://localhost:8000/login/verifyToken', {
+        headers: { Authorization: `Bearer ${token}` }
+      }).catch(() => {
+        alert("로그인이 만료되었습니다.");
+        localStorage.removeItem('token');
+        navigate('/login');
+      });
+               
+    }
+  }, [navigate]);
 
   const handleGameStartClick = () => {
     setShowSelection(true);
@@ -15,7 +34,7 @@ function Main() {
   const handleGameStart = () => {
     if (selectedMode && selectedDifficulty) {
       alert(`모드: ${selectedMode}, 난이도: ${selectedDifficulty}`);
-      setShowSelection(false); 
+      setShowSelection(false);
       navigate('/game-multi');
     } else {
       alert('모드와 난이도를 선택하세요.');
@@ -23,7 +42,7 @@ function Main() {
   };
 
   const handleCloseModal = () => {
-    setShowSelection(false); 
+    setShowSelection(false);
   };
 
   return (
@@ -39,13 +58,13 @@ function Main() {
           </button>
           <button
             className="w-full bg-gray-200 text-black py-3 rounded hover:bg-gray-300 transition duration-200"
-            onClick={() => navigate('/ranking')} 
+            onClick={() => navigate('/ranking')}
           >
             랭킹
           </button>
           <button
             className="w-full bg-gray-200 text-black py-3 rounded hover:bg-gray-300 transition duration-200"
-            onClick={() => navigate('/setting')} 
+            onClick={() => navigate('/setting')}
           >
             설정
           </button>
@@ -64,13 +83,12 @@ function Main() {
 
         {/* 오른쪽 상단 코인 및 상점 버튼 */}
         <div className="flex flex-col items-end space-y-4">
-          {/* 보유 금액 */}
           <div className="w-full bg-yellow-300 text-black py-3 px-4 rounded-lg text-center mb-4">
             보유 금액: 1000원
           </div>
           <button
             className="w-full bg-gray-200 text-black py-3 rounded hover:bg-gray-300 transition duration-200"
-            onClick={() => navigate('/shop')} 
+            onClick={() => navigate('/shop')}
           >
             상점
           </button>
@@ -80,7 +98,6 @@ function Main() {
         {showSelection && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
             <div className="bg-gray-200 p-8 rounded-lg shadow-lg text-black relative w-full max-w-sm">
-              {/* 모달창 닫기 버튼 */}
               <button
                 onClick={handleCloseModal}
                 className="absolute top-2 right-2 text-gray-500 hover:text-black"
@@ -90,7 +107,6 @@ function Main() {
 
               <h2 className="text-xl font-bold mb-4 text-center">모드와 난이도를 선택하세요</h2>
 
-              {/* 모드 선택 */}
               <div className="mb-6">
                 <h3 className="text-lg mb-4 text-center">모드 선택</h3>
                 <div className="flex justify-between">
@@ -113,7 +129,6 @@ function Main() {
                 </div>
               </div>
 
-              {/* 난이도 선택 */}
               <div className="mb-6">
                 <h3 className="text-lg mb-4 text-center">난이도 선택</h3>
                 <div className="flex justify-between">
@@ -136,7 +151,6 @@ function Main() {
                 </div>
               </div>
 
-              {/* 게임 시작 버튼 */}
               <button
                 onClick={handleGameStart}
                 className="w-full bg-blue-500 text-white py-2 px-4 rounded-md mt-4"

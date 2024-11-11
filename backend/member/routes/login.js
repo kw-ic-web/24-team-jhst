@@ -2,16 +2,12 @@ var express = require('express');
 var router = express.Router();
 const loginController = require('../controllers/loginController');
 
-// /login post 메서드로 req 받으면 logincontroller의 login함수 실행
-// 현재는 그냥 토큰 발급
-
+// 로그인 엔드포인트
 router.post('/', loginController.login);
 
-router.get('/test', loginController.verifyToken, (req, res) => {
-  res.json(req.decoded); // 인증된 토큰 정보 응답
+// verifyToken 엔드포인트 
+router.get('/verifyToken', loginController.verifyToken, (req, res) => {
+  res.status(200).json({ message: '토큰이 유효합니다.' });
 });
-
-// 회원 정보 조회
-//router.get('/info', memberController.viewInfo);
 
 module.exports = router;
