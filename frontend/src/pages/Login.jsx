@@ -1,28 +1,29 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
-
   const navigate = useNavigate();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (id && password) {
-      alert(`ID: ${id}, Password: ${password}`);
-      navigate('/main');
+      try {
+        const response = await axios.post('http://localhost:8000/login', {
+          id: id,
+          pw: password,
+        });
+        console.log("로그인 성공:", response.data);
+        alert(response.data.message);
+        navigate('/main');
+      } catch (error) {
+        console.error("로그인 중 오류:", error.response?.data);
+        alert("로그인에 실패했습니다.");
+      }
     } else {
       alert('아이디와 비밀번호를 입력해주세요.');
     }
-  };
-
-  const handleKakaoLogin = () => {
-    alert('카카오톡 로그인');
-  };
-
-  const handleSignUp = () => {
-    navigate('/signup');
-    alert('회원가입 페이지로 이동합니다.');
   };
 
   return (
@@ -55,13 +56,6 @@ function Login() {
           className="w-full bg-customGreen text-white py-3 rounded hover:bg-customBlue transition duration-200"
         >
           로그인
-        </button>
-
-        <button
-          onClick={handleKakaoLogin}
-          className="w-full bg-yellow-400 text-black py-3 rounded mt-4 flex items-center justify-center hover:bg-yellow-500 transition duration-200"
-        >
-          카카오톡으로 로그인
         </button>
 
         <div className="mt-6 text-center text-sm">

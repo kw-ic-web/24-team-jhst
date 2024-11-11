@@ -1,7 +1,6 @@
 const { Sequelize } = require('../../../config/db');
 const { MemberGame } = require('../../../db/memberdb');
 
-
 const getRankings = async (req, res) => {
   try {
     const rankings = await MemberGame.findAll({
@@ -9,20 +8,19 @@ const getRankings = async (req, res) => {
         'member_id',
         'win',
         'lose',
-        [Sequelize.literal('(win / (win + lose)) * 100'), 'win_rate'],
         [
           Sequelize.literal(
-            'RANK() OVER (ORDER BY (win / (win + lose)) * 100 DESC)'
+            `CASE WHEN (win + lose) > 0 THEN (win / (win + lose)) * 100 ELSE 0 END`
+          ),
+          'win_rate'
+        ],
+        [
+          Sequelize.literal(
+            'DENSE_RANK() OVER (ORDER BY (win / (win + lose)) * 100 DESC)'
           ),
           'ranking'
         ]
       ],
-      where: {
-        [Sequelize.Op.and]: [
-          { win: { [Sequelize.Op.gt]: 0 } },
-          { lose: { [Sequelize.Op.gt]: 0 } }
-        ]
-      },
       order: [Sequelize.literal('ranking')],
       raw: true
     });
