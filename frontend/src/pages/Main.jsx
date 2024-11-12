@@ -7,6 +7,7 @@ function Main() {
   const [showSelection, setShowSelection] = useState(false);
   const [selectedMode, setSelectedMode] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState('');
+  const [point, setPoint] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,15 +16,22 @@ function Main() {
       alert("로그인이 필요합니다.");
       navigate('/login');
     } else {
-      // 토큰 유효성 검증
       axios.get('http://localhost:8000/login/verifyToken', {
         headers: { Authorization: `Bearer ${token}` }
-      }).catch(() => {
+      })
+      .then(() => {
+        return axios.get('http://localhost:8000/users/viewInfo', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      })
+      .then((response) => {
+        setPoint(response.data.point); 
+      })
+      .catch(() => {
         alert("로그인이 만료되었습니다.");
         localStorage.removeItem('token');
         navigate('/login');
       });
-               
     }
   }, [navigate]);
 
@@ -84,7 +92,7 @@ function Main() {
         {/* 오른쪽 상단 코인 및 상점 버튼 */}
         <div className="flex flex-col items-end space-y-4">
           <div className="w-full bg-yellow-300 text-black py-3 px-4 rounded-lg text-center mb-4">
-            보유 금액: 1000원
+            보유 금액: {point}
           </div>
           <button
             className="w-full bg-gray-200 text-black py-3 rounded hover:bg-gray-300 transition duration-200"
