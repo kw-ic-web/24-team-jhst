@@ -1,14 +1,32 @@
-import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom"; 
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 function Setting({ audioRef }) {
   const navigate = useNavigate(); 
   const [userInfo, setUserInfo] = useState({
-    name: '홍길동',
-    email: 'test@naver.com',
+    name: '',
+    email: '',
     password: '',
     confirmPassword: ''
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    axios.get('http://localhost:8000/users/viewInfo', {
+      headers: {
+        Authorization: `Bearer ${token}`, 
+      },
+    })
+    .then((response) => {
+      const { name, email } = response.data;
+      setUserInfo((prevInfo) => ({ ...prevInfo, name, email }));
+    })
+    .catch((error) => {
+      console.error("Error fetching member info:", error);
+      alert("회원 정보를 가져오지 못했습니다.");
+    });
+  }, []);
 
   const handleChange = (e) => {
     setUserInfo({
@@ -18,12 +36,46 @@ function Setting({ audioRef }) {
   };
 
   const handleUpdate = () => {
-    alert('수정이 완료되었습니다.');
+    if (userInfo.password !== userInfo.confirmPassword) {
+      alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    axios.put('http://localhost:8000/users/updateMember', {
+      name: userInfo.name,
+      email: userInfo.email,
+      pwd: userInfo.password,
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`, 
+      },
+    })
+    .then(() => {
+      alert('수정이 완료되었습니다.');
+    })
+    .catch((error) => {
+      console.error("Error updating member info:", error);
+      alert("회원 정보 수정에 실패했습니다.");
+    });
   };
 
   const handleDeleteAccount = () => {
     if (window.confirm('정말로 회원탈퇴를 하시겠습니까?')) {
-      alert('회원탈퇴가 완료되었습니다.');
+      const token = localStorage.getItem('token');
+      axios.delete('http://localhost:8000/users/deleteMember', {
+        headers: {
+          Authorization: `Bearer ${token}`, 
+        },
+      })
+      .then(() => {
+        alert('회원탈퇴가 완료되었습니다.');
+        navigate('/'); 
+      })
+      .catch((error) => {
+        console.error("Error deleting account:", error);
+        alert("회원 탈퇴에 실패했습니다.");
+      });
     }
   };
 
