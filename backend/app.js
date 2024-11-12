@@ -83,11 +83,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 const signupRouter = require('./member/routes/signup');
 const loginRouter = require('./member/routes/login');
 const rankingsRouter = require('./game/singleplay/routes/rankings');
+const usersRouter = require('./member/routes/users');
 
 // 라우터 수동 등록
 app.use('/users', signupRouter);  // 회원가입 라우터
 app.use('/login', loginRouter);   // 로그인 라우터
 app.use('/rankings', rankingsRouter);
+app.use('/users', usersRouter);
 
 // 자동 라우터 등록 함수
 const autoRegisterRoutes = (baseDir, basePath) => {
