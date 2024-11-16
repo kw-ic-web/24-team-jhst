@@ -1,3 +1,5 @@
+const Game = require('../../db/gamedb');
+
 let queues={
     'english-hard':[],
     'english-easy':[],
@@ -20,7 +22,7 @@ async function matching (socket,mode,difficulty,member_id,io){
         //매칭된 client를 room에 조인
         matchedClient.join(roomName);
         socket.join(roomName);
-        
+
         matchedClient.roomName = roomName;
         socket.roomName = roomName;
 
