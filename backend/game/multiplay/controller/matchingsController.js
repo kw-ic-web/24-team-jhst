@@ -11,13 +11,16 @@ async function matching (socket,mode,difficulty,member_id,io){
     const queueKey=`${mode}-${difficulty}`;
     const queue= queues[queueKey];
 
-    //member_id저장
     socket.member_id=member_id;
 
     if(queue.length>0){
         //대기열에 다른 클라언트 존재
         const matchedClient = queue.shift();
         const roomName = `${socket.id}-${matchedClient.id}`;
+
+        //나와 상대방 위치 정보
+        const myPlayer = { id: socket.id, member_id, x: 100, y: 100};
+        const otherPlayer = { id: matchedClient.id,member_id:matchedClient.member_id, x: 300, y: 300};-
 
         //매칭된 client를 room에 조인
         matchedClient.join(roomName);
@@ -39,9 +42,14 @@ async function matching (socket,mode,difficulty,member_id,io){
             console.error('Game 데이터 저장 중 오류 발생:', error);
         }
 
-        matchedClient.emit("matched", roomName);
-        socket.emit("matched", roomName);
+        // 상대방에게 초기 데이터 전송
+        matchedClient.emit("matched", roomName, { myPlayer: otherPlayer, otherPlayer: myPlayer });
+        socket.emit("matched", roomName, { myPlayer, otherPlayer });
+
         console.log(`매칭 성공: ${socket.id} <-> ${matchedClient.id}`);
+
+        // 양쪽 클라이언트에 플레이어 정보 전송
+        io.to(roomName).emit("updatePlayers", { myPlayer, otherPlayer });
     }
     else{
         //대기열에 클라이언트 없음
