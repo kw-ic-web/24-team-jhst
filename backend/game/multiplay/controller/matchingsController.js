@@ -5,9 +5,12 @@ let queues={
     'korea-easy':[]
 };
 
-function matching (socket,mode,difficulty,io){
+async function matching (socket,mode,difficulty,member_id,io){
     const queueKey=`${mode}-${difficulty}`;
     const queue= queues[queueKey];
+
+    //member_id저장
+    socket.member_id=member_id;
 
     if(queue.length>0){
         //대기열에 다른 클라언트 존재
@@ -17,9 +20,22 @@ function matching (socket,mode,difficulty,io){
         //매칭된 client를 room에 조인
         matchedClient.join(roomName);
         socket.join(roomName);
-
+        
         matchedClient.roomName = roomName;
         socket.roomName = roomName;
+
+        // Game 테이블에 데이터 저장
+        try {
+            await Game.create({
+             member_id: member_id,
+             opposite_player: matchedClient.member_id,
+             game_mode: mode,
+             easy_or_hard: difficulty
+            });
+            console.log(`Game 데이터 저장 성공: ${member_id} vs ${matchedClient.member_id}`);
+        } catch (error) {
+            console.error('Game 데이터 저장 중 오류 발생:', error);
+        }
 
         matchedClient.emit("matched", roomName);
         socket.emit("matched", roomName);
