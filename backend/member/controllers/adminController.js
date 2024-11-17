@@ -4,16 +4,6 @@ const { MemberGame } = require('../../db/memberdb');
 
 const { Words } = require('../../db/assets/word');
 
-// 멤버 조회
-// exports.getAllMembers = async (req, res) => {
-//   try {
-//     const records = await MemberGame.findAll();
-//     res.status(200).json(records);
-//   } catch (error) {
-//     res.status(500).json({ error: '서버오류' });
-//   }
-// };
-
 exports.getAllMembers = async (req, res) => {
   try {
     console.log('MemberGame 모델:', MemberGame); // 모델 확인
