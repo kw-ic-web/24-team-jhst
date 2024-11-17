@@ -6,9 +6,12 @@ const charactersController = require('../controller/charactersController');
 router.post('/add', charactersController.addCharacter);
 
 // 캐릭터 선택 라우트
-router.post('/select', charactersController.selectCharacter);
+router.post('/select', verifyToken, charactersController.selectCharacter);
 
 // 캐릭터 뽑기 라우트
-router.get('/draw', charactersController.drawCharacter);
+router.get('/draw', verifyToken, charactersController.drawCharacter);
+
+// 보유 캐릭터 조회 라우트
+router.get('/owned', verifyToken, charactersController.getOwnedCharacters); // 미들웨어 추가
 
 module.exports = router;
