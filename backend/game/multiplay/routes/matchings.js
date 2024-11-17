@@ -1,13 +1,11 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const { Game } = require('../../../db/gamedb'); // 게임 결과 저장 테이블 모델
+const { WrongAns } = require('../../../db/gamedb'); // WrongAns 테이블 모델
+const { Word } = require('../../../db/assets/word');
+const Sequelize = require('sequelize');
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
 
-
-module.exports = router;
 
 router.get('/multiplay', async (req, res) => {
   try {
@@ -29,3 +27,7 @@ router.get('/multiplay', async (req, res) => {
     res.status(500).json({ message: '서버 오류 발생' });
   }
 });
+
+
+
+module.exports = router;
