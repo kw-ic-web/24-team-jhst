@@ -47,7 +47,7 @@ app.use(
 
 // DB 동기화 및 데이터 삽입
 sequelize
-  .sync({ alter: true })
+  .sync()
   .then(async () => {
     console.log('데이터베이스가 성공적으로 초기화되었습니다.');
 
@@ -79,8 +79,8 @@ const usersRouter = require('./member/routes/users');
 const charactersRouter = require('./game/characters/routes/characters');
 
 // 라우터 수동 등록
-app.use('/users', signupRouter);  // 회원가입 라우터
-app.use('/login', loginRouter);   // 로그인 라우터
+app.use('/users', signupRouter); // 회원가입 라우터
+app.use('/login', loginRouter); // 로그인 라우터
 app.use('/rankings', rankingsRouter);
 app.use('/users', usersRouter);
 app.use('/characters', charactersRouter);

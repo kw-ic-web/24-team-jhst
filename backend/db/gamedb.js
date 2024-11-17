@@ -129,6 +129,12 @@ const WrongAns = sequelize.define(
 // Game 테이블 생성 및 데이터 삽입 함수
 const createGameTableAndInsertData = async () => {
   try {
+    // 테이블에 데이터가 이미 있는지 확인
+    const count = await Game.count();
+    if (count > 0) {
+      console.log('game 테이블에 데이터가 이미 존재합니다.');
+      return;
+    }
     await sequelize.sync();
     await Game.bulkCreate([
       { member_id: 'user1', opposite_player: 'user2', game_mode: 'english', easy_or_hard: 'easy', winner: 'user1' },
@@ -146,6 +152,12 @@ const createGameTableAndInsertData = async () => {
 // Round 테이블 생성 및 데이터 삽입 함수
 const createRoundTableAndInsertData = async () => {
   try {
+    // 테이블에 데이터가 이미 있는지 확인
+    const count = await Round.count();
+    if (count > 0) {
+      console.log('Round 테이블에 데이터가 이미 존재합니다.');
+      return;
+    }
     await sequelize.sync();
     const gameIds = await sequelize.query('SELECT game_id FROM game', { type: Sequelize.QueryTypes.SELECT });
 
@@ -167,6 +179,12 @@ const createRoundTableAndInsertData = async () => {
 // WrongAns 테이블 예시 데이터 삽입 함수
 const insertExampleData = async () => {
   try {
+    // 테이블에 데이터가 이미 있는지 확인
+    const count = await WrongAns.count();
+    if (count > 0) {
+      console.log('WrongAns 테이블에 데이터가 이미 존재합니다.');
+      return;
+    }
     await WrongAns.bulkCreate([
       { word_id: 1, game_id: 1, member_id: 'user1' },
       { word_id: 2, game_id: 1, member_id: 'user2' },
