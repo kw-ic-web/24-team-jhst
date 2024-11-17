@@ -9,12 +9,16 @@ const member_game = require('../../db/memberdb');
 const MemberGame = member_game.MemberGame; // member_Game 테이블로 변경
 
 verifyToken = (req, res, next) => {
-  // 인증 완료
   try {
-    req.decoded = jwt.verify(req.headers.authorization, process.env.JWT_SECRET);
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: '토큰이 제공되지 않았습니다.' });
+    }
+
+    req.user = jwt.verify(token, process.env.JWT_SECRET); // req.user에 설정
     return next();
   } catch (error) {
-    // 인증 실패
     if (error.name === 'TokenExpiredError') {
       return res.status(419).json({
         code: 419,
@@ -27,6 +31,7 @@ verifyToken = (req, res, next) => {
     });
   }
 };
+
 
 //토큰
 
@@ -67,7 +72,7 @@ const login = async (req, res) => {
         return res.status(401).json({
           code: 401,
           message: '아이디 또는 비밀번호가 일치하지 않습니다.',
-          redirectTo: '/login', // 프론트에서 /login에 머물 수 있도록 경로 포함
+          redirectTo: '/login', 
         });
       }
     } catch (error) {
@@ -82,6 +87,7 @@ const login = async (req, res) => {
 
 module.exports = { login, verifyToken };
 
+<<<<<<< HEAD
 
 
 
@@ -135,3 +141,5 @@ module.exports = { login, verifyToken };
 // router.get('/test', verifyToken, (req, res) => {
 //   res.json(req.decoded);
 // });
+=======
+>>>>>>> ecb1111595ce37b1652410ba697d6b41ef74e622

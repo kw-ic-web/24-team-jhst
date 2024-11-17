@@ -1,18 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import meow1 from '../assets/images/meow1.png';
 import meow2 from '../assets/images/meow2.png';
 import meow3 from '../assets/images/meow3.png';
+import axios from 'axios';
 
 function Shop() {
   const navigate = useNavigate();
-  const [balance] = useState(5864851);
+  const [balance, setBalance] = useState(0); // 보유 포인트 상태 추가
   const characters = [meow1, meow2, meow3]; 
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.get('http://localhost:8000/users/viewInfo', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then((response) => {
+        setBalance(response.data.point); // 포인트 설정
+      })
+      .catch((error) => {
+        console.error("Error fetching balance:", error);
+      });
+    } else {
+      alert("로그인이 필요합니다.");
+      navigate('/login');
+    }
+  }, [navigate]);
 
   const handleGachaClick = () => {
     navigate('/gacha');
   };
-
 
   const totalSlots = 4;
   const placeholders = Array.from({ length: totalSlots - characters.length });

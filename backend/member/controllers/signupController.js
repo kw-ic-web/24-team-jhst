@@ -31,7 +31,16 @@ const insertMemberTableData = async (req, res) => {
   const { id, pwd, name, email } = req.body;
 
   try {
-    // 회원 정보 생성
+    // 먼저 member_id 중복 체크
+    const existingMember = await MemberGame.findOne({
+      where: { member_id: id },
+    });
+
+    if (existingMember) {
+      return res.status(409).json({ message: '이미 존재하는 아이디입니다.' });
+    }
+
+    // 중복이 없으면 새 회원 생성
     await MemberGame.create({
       member_id: id,
       pwd,
@@ -46,7 +55,6 @@ const insertMemberTableData = async (req, res) => {
     res.status(500).json({ error: '서버 오류' });
   }
 };
-
 // 모듈 내보내기
 module.exports = { checkid, insertMemberTableData };
 

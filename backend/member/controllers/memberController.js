@@ -1,10 +1,10 @@
-const { MemberGame } = require('../../config/db'); // Import the MemberGame model
+const { MemberGame } = require('../../db/memberdb'); 
 
 // 회원 정보 조회
 exports.viewInfo = async (req, res) => {
-  const memberId = req.user.id;
-
   try {
+    const memberId = req.user.id;
+    console.log("조회 중인 사용자 ID:", memberId); 
     const result = await MemberGame.findOne({
       attributes: ['name', 'email', 'point'],
       where: { member_id: memberId },
@@ -15,9 +15,11 @@ exports.viewInfo = async (req, res) => {
       res.status(404).json({ message: '회원 정보를 찾을 수 없습니다.' });
     }
   } catch (error) {
+    console.error("회원 정보 조회 에러:", error);
     res.status(500).json({ error: '회원 정보 조회에 실패했습니다.' });
   }
 };
+
 
 // 회원 탈퇴
 exports.deleteMember = async (req, res) => {
@@ -45,7 +47,6 @@ exports.updateMember = async (req, res) => {
   try {
     const result = await MemberGame.update({ name, email, pwd }, { where: { member_id: memberId } });
     if (result[0] > 0) {
-      // Sequelize returns an array; the first element indicates the number of affected rows
       res.status(200).json({ message: '회원 정보가 성공적으로 수정되었습니다.' });
     } else {
       res.status(404).json({ message: '회원 정보를 찾을 수 없습니다.' });
