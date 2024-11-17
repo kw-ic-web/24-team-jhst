@@ -79,3 +79,30 @@ exports.drawCharacter = async (req, res) => {
     res.status(500).json({ message: '캐릭터를 보유 캐릭터 목록에 저장하는 데 실패했습니다.', error: err });
   }
 };
+
+// 보유 캐릭터 조회
+exports.getOwnedCharacters = async (req, res) => {
+  const memberId = req.user.id; 
+
+  try {
+    const ownedCharacters = await MemberCharacters.findAll({
+      where: { member_id: memberId },
+      include: [{
+        model: Characters,
+        attributes: ['character_id', 'name', 'image'],
+      }],
+    });
+
+    const characters = ownedCharacters.map((record) => ({
+      characterId: record.Character.character_id,
+      name: record.Character.name,
+      image: record.Character.image,
+      isActive: record.is_active,
+    }));
+
+    res.status(200).json(characters);
+  } catch (err) {
+    console.error('캐릭터 조회 오류:', err);
+    res.status(500).json({ message: '보유 캐릭터 조회에 실패했습니다.', error: err });
+  }
+};

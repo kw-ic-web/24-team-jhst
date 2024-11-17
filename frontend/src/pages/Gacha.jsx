@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function Gacha() {
   const [isOpened, setIsOpened] = useState(false); 
@@ -7,17 +8,26 @@ function Gacha() {
   const [showCharacter, setShowCharacter] = useState(false); 
 
   const navigate = useNavigate();
-  
-  const handleOpenBox = () => {
-    const characters = ['캐릭터 1', '캐릭터 2', '캐릭터 3', '캐릭터 4'];
-    const randomCharacter = characters[Math.floor(Math.random() * characters.length)];
-    setCharacter(randomCharacter);
-    setIsOpened(true);
-    
-    // 서서히 나타나도록
-    setTimeout(() => {
-      setShowCharacter(true);
-    }, 500); // 0.5초 후 캐릭터 등장
+
+  const handleOpenBox = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/characters/draw', {
+        params: { memberId: 1 }, 
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+
+      const { character } = response.data;
+      setCharacter(character.name); 
+      setIsOpened(true);
+      
+      // 서서히 나타나도록
+      setTimeout(() => {
+        setShowCharacter(true);
+      }, 500); // 0.5초 후 캐릭터 등장
+    } catch (err) {
+      console.error('캐릭터 뽑기 실패:', err);
+      alert('캐릭터 뽑기 중 문제가 발생했습니다.');
+    }
   };
 
   const handleClose = () => {

@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import meow1 from '../assets/images/meow1.png';
-import meow2 from '../assets/images/meow2.png';
-import meow3 from '../assets/images/meow3.png';
 import axios from 'axios';
 
 function Shop() {
   const navigate = useNavigate();
   const [balance, setBalance] = useState(0); // 보유 포인트 상태 추가
-  const characters = [meow1, meow2, meow3]; 
+  const [characters, setCharacters] = useState([]); // 보유 캐릭터 상태 추가
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
+      // 보유 금액 조회
       axios.get('http://localhost:8000/users/viewInfo', {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -21,6 +19,17 @@ function Shop() {
       })
       .catch((error) => {
         console.error("Error fetching balance:", error);
+      });
+
+      // 보유 캐릭터 조회
+      axios.get('http://localhost:8000/characters/owned', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then((response) => {
+        setCharacters(response.data); // 보유 캐릭터 설정
+      })
+      .catch((error) => {
+        console.error("Error fetching owned characters:", error);
       });
     } else {
       alert("로그인이 필요합니다.");
@@ -31,9 +40,6 @@ function Shop() {
   const handleGachaClick = () => {
     navigate('/gacha');
   };
-
-  const totalSlots = 4;
-  const placeholders = Array.from({ length: totalSlots - characters.length });
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-white">
@@ -49,22 +55,17 @@ function Shop() {
             key={index}
             className="w-40 h-40 bg-gray-200 flex items-center justify-center rounded-lg p-4"
           >
-            <img src={character} alt={`캐릭터 ${index + 1}`} className="w-24 h-24" />
+            {character.image ? (
+              <img
+                src={`data:image/png;base64,${Buffer.from(character.image).toString('base64')}`}
+                alt={character.name}
+                className="w-24 h-24"
+              />
+            ) : (
+              <div>{character.name}</div>
+            )}
           </div>
         ))}
-
-        {placeholders.map((_, index) => (
-          <div
-            key={`placeholder-${index}`}
-            className="w-40 h-40 bg-gray-100 flex items-center justify-center rounded-lg p-4"
-          ></div>
-        ))}
-      </div>
-
-      <div className="text-center mt-4">
-        <span className="text-lg">1</span>
-        <span className="mx-2">2</span>
-        <span className="text-lg">3</span>
       </div>
 
       <div className="w-full max-w-md">
