@@ -60,7 +60,7 @@ function Main() {
         <div className="flex flex-col space-y-4 mb-6">
           <button
             className="w-full bg-gray-200 text-black py-3 rounded hover:bg-gray-300 transition duration-200"
-            onClick={() => navigate('/wrong-note')}
+            onClick={() => navigate('/game-single')}
           >
             오답노트
           </button>
