@@ -1,5 +1,5 @@
 const { Server } = require("socket.io");
-const { matching,removeFromQueue } = require("../service/matchingService");
+const { matching,removeFromQueue } = require("../controller/matchingsController");
 
 const socketHandler=(server)=>{
     const io = new Server(server);

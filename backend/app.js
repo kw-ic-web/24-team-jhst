@@ -7,16 +7,9 @@ const cors = require('cors');
 const sequelize = require('./config/db');
 
 // DB 관련 데이터 삽입 함수 불러오기
-const { 
-  createTableAndInsertData,  
-  createMemberCharactersTableAndInsertData 
-} = require('./db/memberdb'); // MemberGame과 MemberCharacters가 합쳐진 파일
+const { createTableAndInsertData, createMemberCharactersTableAndInsertData } = require('./db/memberdb'); // MemberGame과 MemberCharacters가 합쳐진 파일
 const { createWordTableAndInsertData } = require('./db/assets/word');
-const { 
-  createGameTableAndInsertData, 
-  createRoundTableAndInsertData, 
-  insertExampleData 
-} = require('./db/gamedb'); // Game, Round, WrongAns 모델이 합쳐진 파일
+const { createGameTableAndInsertData, createRoundTableAndInsertData, insertExampleData } = require('./db/gamedb'); // Game, Round, WrongAns 모델이 합쳐진 파일
 const { createCharactersTableAndInsertData } = require('./db/assets/characters_table');
 
 // 모델 관계 설정
@@ -54,7 +47,7 @@ app.use(
 
 // DB 동기화 및 데이터 삽입
 sequelize
-  .sync({ force: true })
+  .sync({ alter: true })
   .then(async () => {
     console.log('데이터베이스가 성공적으로 초기화되었습니다.');
 
@@ -78,7 +71,6 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
 // 수동
 const signupRouter = require('./member/routes/signup');
 const loginRouter = require('./member/routes/login');
@@ -119,5 +111,8 @@ autoRegisterRoutes('game/characters/routes', '/game/characters');
 // '/users' 경로에 있는 모든 라우트 자동 등록
 autoRegisterRoutes('member/routes', '/users');
 
+//const adminRoutes = require('./member/routes/admin');
+
+// app.use('/admin', adminRoutes); //
 
 module.exports = app;
