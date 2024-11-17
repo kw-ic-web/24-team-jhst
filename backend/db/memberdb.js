@@ -75,6 +75,12 @@ const MemberGame = sequelize.define(
 // MemberCharacters 테이블 생성 및 데이터 삽입 함수
 const createMemberCharactersTableAndInsertData = async () => {
   try {
+    // 테이블에 데이터가 이미 있는지 확인
+    const count = await MemberCharacters.count();
+    if (count > 0) {
+      console.log('member_characters 테이블에 데이터가 이미 존재합니다.');
+      return;
+    }
     await sequelize.sync(); // 테이블 생성
     await MemberCharacters.bulkCreate([
       { member_id: 'user1', character_id: 1, is_active: true },
@@ -90,6 +96,12 @@ const createMemberCharactersTableAndInsertData = async () => {
 // MemberGame 테이블 생성 및 데이터 삽입 함수
 const createTableAndInsertData = async () => {
   try {
+    // 테이블에 데이터가 이미 있는지 확인
+    const count = await MemberGame.count();
+    if (count > 0) {
+      console.log('member_game 테이블에 데이터가 이미 존재합니다.');
+      return;
+    }
     await sequelize.sync(); // 테이블 생성
     await MemberGame.bulkCreate(
       [
