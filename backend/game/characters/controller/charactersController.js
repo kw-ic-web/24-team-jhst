@@ -30,6 +30,12 @@ exports.addCharacter = async (req, res) => {
 exports.selectCharacter = async (req, res) => {
   const { memberId, characterId } = req.body;
 
+  console.log("요청 데이터:", { memberId, characterId });
+
+  if (!memberId || !characterId) {
+    return res.status(400).json({ message: 'memberId 또는 characterId가 누락되었습니다.' });
+  }
+
   try {
     // 모든 캐릭터 비활성화
     await MemberCharacters.update({ is_active: false }, { where: { member_id: memberId } });
@@ -41,9 +47,9 @@ exports.selectCharacter = async (req, res) => {
     );
 
     if (updatedRows === 0) {
-      return res.status(404).json({ message: '캐릭터가 없습니다.' });
+      return res.status(404).json({ message: '캐릭터를 찾을 수 없습니다.' });
     }
-    
+
     return res.status(200).json({ message: '캐릭터 선택 성공' });
   } catch (err) {
     console.error('캐릭터 활성화 오류:', err);

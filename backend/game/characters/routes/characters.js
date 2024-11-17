@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const charactersController = require('../controller/charactersController');
-const verifyToken = require('../../middlewares/verifyToken');
 
 // 캐릭터 추가 라우트
 router.post('/add', charactersController.addCharacter);

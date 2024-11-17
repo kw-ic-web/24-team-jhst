@@ -1,13 +1,13 @@
 const express = require('express'); // express
-const jwt = require('jsonwebtoken'); //토큰
+const jwt = require('jsonwebtoken'); // 토큰
 const mysql = require('mysql2/promise');
-require('dotenv').config(); //.env
-const router = express.Router(); // 라우터 설정 why?
-//const db = '../../config/db';
+require('dotenv').config(); // .env
+const router = express.Router(); // 라우터 설정
 const member_game = require('../../db/memberdb');
 
-const MemberGame = member_game.MemberGame; // member_Game 테이블로 변경
+const MemberGame = member_game.MemberGame; // member_game 테이블로 변경
 
+// 토큰 검증 미들웨어
 verifyToken = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -32,14 +32,12 @@ verifyToken = (req, res, next) => {
   }
 };
 
-
-//토큰
-
+// 로그인 로직
 const login = async (req, res) => {
   const { id, pw } = req.body;
 
   if (!id || !pw) {
-    res.status(400).send('아이디또는 비밀번호를 입력해주세요.');
+    res.status(400).send('아이디 또는 비밀번호를 입력해주세요.');
   } else {
     try {
       const memberGame = await MemberGame.findOne({
@@ -65,6 +63,7 @@ const login = async (req, res) => {
           code: 200,
           message: '토큰이 발급되었습니다.',
           token,
+          memberId: memberGame.member_id, // memberId 추가
           redirectTo: '/main',
         });
       } else {
@@ -72,7 +71,7 @@ const login = async (req, res) => {
         return res.status(401).json({
           code: 401,
           message: '아이디 또는 비밀번호가 일치하지 않습니다.',
-          redirectTo: '/login', 
+          redirectTo: '/login',
         });
       }
     } catch (error) {
@@ -86,5 +85,3 @@ const login = async (req, res) => {
 };
 
 module.exports = { login, verifyToken };
-
-

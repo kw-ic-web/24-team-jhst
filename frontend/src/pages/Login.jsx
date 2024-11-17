@@ -14,14 +14,19 @@ function Login() {
           id: id,
           pw: password,
         });
-        console.log("로그인 성공:", response.data);
-        alert(response.data.message);
-        
-        // 로컬 스토리지에 토큰 저장
+  
+        console.log("로그인 응답 데이터:", response.data);
+  
+        // 토큰 및 memberId 저장
         localStorage.setItem('token', response.data.token);
-        
+        if (response.data.memberId) {
+          localStorage.setItem('memberId', response.data.memberId);
+        } else {
+          alert("memberId를 저장하지 못했습니다. 관리자에게 문의하세요.");
+        }
+  
+        alert(response.data.message);
         navigate('/main');
-        window.location.reload(); // 페이지 새로고침
       } catch (error) {
         console.error("로그인 중 오류:", error.response?.data);
         alert("로그인에 실패했습니다.");
@@ -31,7 +36,7 @@ function Login() {
     }
   };
   
-
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="bg-white p-8 w-full max-w-md">
