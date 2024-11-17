@@ -1,29 +1,32 @@
 const sequelize = require('../../config/db');
-const { DataTypes , Sequelize} = require('sequelize');
+const { DataTypes, Sequelize } = require('sequelize');
 
-const Word = sequelize.define('word', {
-  word_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+const Word = sequelize.define(
+  'word',
+  {
+    word_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    en_word: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+    },
+    ko_word: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+    },
+    easy_or_hard: {
+      type: DataTypes.STRING(10),
+      allowNull: false,
+    },
   },
-  en_word: {
-    type: DataTypes.STRING(20),
-    allowNull: false,
-  },
-  ko_word: {
-    type: DataTypes.STRING(20),
-    allowNull: false,
-  },
-  easy_or_hard: {
-    type: DataTypes.STRING(10),
-    allowNull: false,
-  },
-}, {
-  tableName: 'word',
-  timestamps: false,
-});
-
+  {
+    tableName: 'word',
+    timestamps: false,
+  }
+);
 
 // word 테이블 생성 및 데이터 삽입 함수
 const createWordTableAndInsertData = async () => {

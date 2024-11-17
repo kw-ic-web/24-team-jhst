@@ -82,6 +82,9 @@ const login = async (req, res) => {
 
 module.exports = { login, verifyToken };
 
+
+
+
 // 예비코드 sequelize 사용x
 
 // const login = async (req, res) => {
