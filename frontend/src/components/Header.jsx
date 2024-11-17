@@ -1,15 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // 로그인 상태 확인
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+  }, []);
 
   const handleLogoClick = () => {
     navigate('/main');
   };
 
-  const handleLoginClick = () => {
-    navigate('/login');
+  const handleLoginLogoutClick = () => {
+    if (isLoggedIn) {
+      // 로그아웃
+      localStorage.removeItem('token');
+      setIsLoggedIn(false);
+      alert('로그아웃 되었습니다.');
+      navigate('/login');
+    } else {
+      // 로그인 페이지로 이동
+      navigate('/login');
+    }
   };
 
   return (
@@ -18,16 +34,16 @@ const Header = () => {
       style={{ boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)' }}
     >
       <h1
-        className=" text-2xl cursor-pointer"
+        className="text-2xl cursor-pointer"
         onClick={handleLogoClick}
       >
         Spell Meow
       </h1>
       <button
-        onClick={handleLoginClick}
-        className=" px-4 py-2 rounded"
+        onClick={handleLoginLogoutClick}
+        className="px-4 py-2 rounded"
       >
-        로그인
+        {isLoggedIn ? '로그아웃' : '로그인'}
       </button>
     </header>
   );

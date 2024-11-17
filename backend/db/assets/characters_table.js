@@ -13,13 +13,12 @@ const Characters = sequelize.define('Characters', {
     allowNull: false,
   },
   image: {
-    type: DataTypes.BLOB,
+    type: DataTypes.BLOB('long'),
   },
 }, {
   tableName: 'characters',
   timestamps: false,
 });
-
 
 // 생성
 const createCharactersTableAndInsertData = async () => {
