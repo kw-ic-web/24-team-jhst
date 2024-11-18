@@ -2,7 +2,7 @@ require('dotenv').config(); //.env
 
 const { MemberGame } = require('../../db/memberdb');
 
-const { Words } = require('../../db/assets/word');
+const { Word } = require('../../db/assets/word');
 
 exports.getAllMembers = async (req, res) => {
   try {
@@ -71,10 +71,10 @@ exports.deleteMembers = async (req, res) => {
 
 ///////////////////////
 
-// WrongAns 가져오기
+// Word 가져오기
 exports.getAllWords = async (req, res) => {
   try {
-    const records = await Words.findAll();
+    const records = await Word.findAll();
     res.status(200).json(records);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch records' });
@@ -85,7 +85,7 @@ exports.getAllWords = async (req, res) => {
 exports.getWordsById = async (req, res) => {
   try {
     const { word_id } = req.params;
-    const records = await Words.findAll({ where: { word_id } });
+    const records = await Word.findAll({ where: { word_id } });
     if (!records.length) {
       return res.status(404).json({ error: '해당되는 단어가 없습니다' });
     }
@@ -98,7 +98,7 @@ exports.getWordsById = async (req, res) => {
 // 새 단어 생성
 exports.createWords = async (req, res) => {
   try {
-    const newRecord = await Words.create(req.body);
+    const newRecord = await Word.create(req.body);
     res.status(201).json(newRecord);
   } catch (error) {
     res.status(500).json({ error: '단어 생성 성공' });
@@ -109,7 +109,7 @@ exports.createWords = async (req, res) => {
 exports.updateWords = async (req, res) => {
   try {
     const { word_id } = req.params;
-    const updatedRecord = await Words.update(req.body, { where: { word_id } });
+    const updatedRecord = await Word.update(req.body, { where: { word_id } });
     if (updatedRecord[0] === 0) {
       return res.status(404).json({ error: '해당되는 단어가 없습니다' });
     }
@@ -123,7 +123,7 @@ exports.updateWords = async (req, res) => {
 exports.deleteWords = async (req, res) => {
   try {
     const { word_id } = req.params;
-    const deleted = await Words.destroy({ where: { word_id } });
+    const deleted = await Word.destroy({ where: { word_id } });
     if (!deleted) {
       return res.status(404).json({ error: '삭제할 단어가 없습니다' });
     }

@@ -139,10 +139,10 @@ const Admin = () => {
       <h1>Admin Page</h1>
       <TableSection
         title="Member Game Table"
-        endpoint="members"
+        endpoint="member"
         columns={['member_id', 'pwd', 'name', 'email', 'point', 'win', 'lose', 'create_date']}
       />
-      <TableSection title="Words Table" endpoint="words" columns={['word_id', 'word', 'definition', 'createdAt']} />
+      <TableSection title="Words Table" endpoint="word" columns={['word_id', 'en_word', 'ko_word', 'easy_or_hard']} />
     </div>
   );
 };

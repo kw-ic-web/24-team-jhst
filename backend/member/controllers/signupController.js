@@ -1,6 +1,9 @@
 const express = require('express'); // express
 const router = express.Router(); // 라우터 설정
 require('dotenv').config(); // .env 파일 로드
+
+const crypto = require('crypto'); // 암호화 도전
+
 const member_game = require('../../db/memberdb');
 
 const MemberGame = member_game.MemberGame; // membergame으로 변경
@@ -40,16 +43,24 @@ const insertMemberTableData = async (req, res) => {
       return res.status(409).json({ message: '이미 존재하는 아이디입니다.' });
     }
 
-    // 중복이 없으면 새 회원 생성
-    await MemberGame.create({
+    // crypto.randomBytes(64, async (err, buf) => {
+    //   const salt = buf.toString('base64');
+
+    //   crypto.pbkdf2(pwd, salt, 100000, 64, 'sha512', async (err, key) => {
+    //     user.password = key.toString('base64');
+
+    const result = await MemberGame.create({
       member_id: id,
       pwd,
       name,
       email,
+      //salt,
     });
 
     res.status(201).json({ message: '새로운 회원 등록 성공' });
     console.log('멤버게임테이블에 새로운 회원 삽입 성공');
+    //   });
+    // });
   } catch (error) {
     console.error('회원 등록 중 오류:', error);
     res.status(500).json({ error: '서버 오류' });

@@ -39,6 +39,15 @@ const login = async (req, res) => {
   if (!id || !pw) {
     res.status(400).send('아이디 또는 비밀번호를 입력해주세요.');
   } else {
+    // crypto.pbkdf2(pw, salt, 100000, 64, 'sha512', async (err, key) => {
+    //   check_password = key.toString('base64');
+
+    //   if (pw !== check_password) {
+    //     // 비밀번호가 일치하지 않는 경우
+    //     res.json({ type: 'wrong_pw' });
+    //   } else {
+    //     // 비밀번호가 일치하는 경우 - 이 때가 로그인 성공
+
     try {
       const memberGame = await MemberGame.findOne({
         where: {
@@ -80,9 +89,10 @@ const login = async (req, res) => {
         code: 500,
         message: '서버 에러',
       });
-    }
-  }
-};
+    } // 이게  try
+    //   }
+    // });
+  } // 이게 원래 else
+}; // 이거 함수
 
 module.exports = { login, verifyToken };
-
