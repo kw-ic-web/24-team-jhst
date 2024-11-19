@@ -12,7 +12,7 @@ function Main() {
   const [selectedMode, setSelectedMode] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState('');
   const [point, setPoint] = useState(0);
-  const [isMatching, setIsMatching] = useState(false); // 매칭 상태 확인
+  const [isMatching, setIsMatching] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
