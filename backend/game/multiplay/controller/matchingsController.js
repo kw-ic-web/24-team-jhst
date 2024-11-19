@@ -1,4 +1,4 @@
-const Game = require('../../../db/gamedb');
+const { Game } = require('../../../db/gamedb'); 
 
 
 let queues={
