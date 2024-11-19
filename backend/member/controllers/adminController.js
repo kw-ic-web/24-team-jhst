@@ -1,134 +1,114 @@
-require('dotenv').config(); //.env
-
+require('dotenv').config();
 const { MemberGame } = require('../../db/memberdb');
-
+const { Characters } = require('../../db/assets/characters_table');
 const { Word } = require('../../db/assets/word');
 
-exports.getAllMembers = async (req, res) => {
-  try {
-    console.log('MemberGame 모델:', MemberGame); // 모델 확인
-    const records = await MemberGame.findAll();
-    console.log('조회된 데이터:', records); // 데이터 확인
-    res.status(200).json(records);
-  } catch (error) {
-    console.error('데이터 조회 중 오류:', error);
-    res.status(500).json({ error: '서버 오류', details: error.message });
-  }
-};
+// 1. 특정 회원 탈퇴
+exports.deleteMember = async (req, res) => {
+  const { member_id } = req.body;
 
-// member id로 찾기
-exports.getMembersById = async (req, res) => {
   try {
-    const { member_id } = req.params;
-    const records = await MemberGame.findAll({ where: { member_id } });
-    if (!records.length) {
-      return res.status(404).json({ error: '일치하는 member가 없습니다' });
+    const member = await MemberGame.destroy({ where: { member_id } });
+    if (!member) {
+      return res.status(404).json({ message: '회원이 존재하지 않습니다.' });
     }
-    res.status(200).json(records);
-  } catch (error) {
-    res.status(500).json({ error: '서버오류' });
+    return res.status(200).json({ message: '회원 탈퇴 성공' });
+  } catch (err) {
+    console.error('회원 탈퇴 오류:', err);
+    res.status(500).json({ message: '회원 탈퇴 실패', error: err });
   }
 };
 
-// 새로운 멤버 생성
-exports.createMembers = async (req, res) => {
-  try {
-    const newRecord = await MemberGame.create(req.body);
-    res.status(201).json(newRecord);
-  } catch (error) {
-    res.status(500).json({ error: '서버오류' });
-  }
-};
+// 2. 특정 회원 포인트 수정
+exports.updateMemberPoint = async (req, res) => {
+  const { member_id, point } = req.body;
 
-// 멤버 업데이트
-exports.updateMembers = async (req, res) => {
   try {
-    const { member_id } = req.params;
-    const updatedMember = await MemberGame.update(req.body, { where: { member_id } });
-    if (updatedMember[0] === 0) {
-      return res.status(404).json({ error: '회원이 없습니다' });
+    const member = await MemberGame.findOne({ where: { member_id } });
+    if (!member) {
+      return res.status(404).json({ message: '회원이 존재하지 않습니다.' });
     }
-    res.status(200).json({ message: '수정 완료' });
-  } catch (error) {
-    res.status(500).json({ error: '서버 오류' });
+
+    member.point = point;
+    await member.save();
+
+    return res.status(200).json({ message: '포인트 수정 성공', updatedPoint: member.point });
+  } catch (err) {
+    console.error('포인트 수정 오류:', err);
+    res.status(500).json({ message: '포인트 수정 실패', error: err });
   }
 };
 
-// 멤버 삭제
-exports.deleteMembers = async (req, res) => {
-  try {
-    const { member_id } = req.params;
-    const deletedMember = await MemberGame.destroy({ where: { member_id } });
+// 3. 캐릭터 추가
+exports.addCharacter = async (req, res) => {
+  const { name, imageFile } = req.body;
 
-    if (!deletedMember) {
-      return res.status(404).json({ error: '삭제할 회원이 없습니다' });
+  if (!imageFile) {
+    return res.status(400).json({ message: '이미지 파일이 없습니다.' });
+  }
+
+  try {
+    const imageBuffer = Buffer.from(imageFile, 'base64');
+    const newCharacter = await Characters.create({ name, image: imageBuffer });
+
+    return res.status(201).json({ message: '캐릭터 추가 성공', characterId: newCharacter.character_id });
+  } catch (err) {
+    console.error('캐릭터 추가 오류:', err);
+    res.status(500).json({ message: '캐릭터 추가 실패', error: err });
+  }
+};
+
+// 4. 캐릭터 삭제
+exports.deleteCharacter = async (req, res) => {
+  const { character_id } = req.body;
+
+  try {
+    const character = await Characters.destroy({ where: { character_id } });
+    if (!character) {
+      return res.status(404).json({ message: '캐릭터가 존재하지 않습니다.' });
     }
-    res.status(200).json({ message: '삭제 완료' });
-  } catch (error) {
-    res.status(500).json({ error: '서버 오류' });
+    return res.status(200).json({ message: '캐릭터 삭제 성공' });
+  } catch (err) {
+    console.error('캐릭터 삭제 오류:', err);
+    res.status(500).json({ message: '캐릭터 삭제 실패', error: err });
   }
 };
 
-///////////////////////
+// 5. 새 단어 추가
+exports.addWord = async (req, res) => {
+  const { en_word, ko_word, difficulty } = req.body;
 
-// Word 가져오기
-exports.getAllWords = async (req, res) => {
+  if (!['easy', 'hard'].includes(difficulty)) {
+    return res.status(400).json({ message: '올바른 난이도를 입력하세요 (easy 또는 hard)' });
+  }
+
   try {
-    const records = await Word.findAll();
-    res.status(200).json(records);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch records' });
+    const newWord = await Word.create({ en_word, ko_word, easy_or_hard: difficulty });
+
+    return res.status(201).json({ message: '단어 추가 성공', wordId: newWord.word_id });
+  } catch (err) {
+    console.error('단어 추가 오류:', err);
+    res.status(500).json({ message: '단어 추가 실패', error: err });
   }
 };
 
-// 특정 word_id에 맞는 단어 가져오기
-exports.getWordsById = async (req, res) => {
+// 6. 단어 수정 (word_id로 조회 후 영단어와 뜻 수정)
+exports.updateWord = async (req, res) => {
+  const { word_id, en_word, ko_word } = req.body;
+
   try {
-    const { word_id } = req.params;
-    const records = await Word.findAll({ where: { word_id } });
-    if (!records.length) {
-      return res.status(404).json({ error: '해당되는 단어가 없습니다' });
+    const word = await Word.findOne({ where: { word_id } });
+    if (!word) {
+      return res.status(404).json({ message: '단어가 존재하지 않습니다.' });
     }
-    res.status(200).json(records);
-  } catch (error) {
-    res.status(500).json({ error: '서버 오류' });
-  }
-};
 
-// 새 단어 생성
-exports.createWords = async (req, res) => {
-  try {
-    const newRecord = await Word.create(req.body);
-    res.status(201).json(newRecord);
-  } catch (error) {
-    res.status(500).json({ error: '단어 생성 성공' });
-  }
-};
+    word.en_word = en_word || word.en_word; // 입력된 값이 없으면 기존 값 유지
+    word.ko_word = ko_word || word.ko_word; // 입력된 값이 없으면 기존 값 유지
+    await word.save();
 
-// 단어 업데이트
-exports.updateWords = async (req, res) => {
-  try {
-    const { word_id } = req.params;
-    const updatedRecord = await Word.update(req.body, { where: { word_id } });
-    if (updatedRecord[0] === 0) {
-      return res.status(404).json({ error: '해당되는 단어가 없습니다' });
-    }
-    res.status(200).json({ message: '단어 수정 완료' });
-  } catch (error) {
-    res.status(500).json({ error: '서버 오류' });
-  }
-};
-
-// 단어 삭제
-exports.deleteWords = async (req, res) => {
-  try {
-    const { word_id } = req.params;
-    const deleted = await Word.destroy({ where: { word_id } });
-    if (!deleted) {
-      return res.status(404).json({ error: '삭제할 단어가 없습니다' });
-    }
-    res.status(200).json({ message: '단어 삭제 성공' });
-  } catch (error) {
-    res.status(500).json({ error: '서버 오류' });
+    return res.status(200).json({ message: '단어 수정 성공', updatedWord: word });
+  } catch (err) {
+    console.error('단어 수정 오류:', err);
+    res.status(500).json({ message: '단어 수정 실패', error: err });
   }
 };
