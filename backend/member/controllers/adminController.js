@@ -19,7 +19,23 @@ exports.deleteMember = async (req, res) => {
   }
 };
 
-// 2. 특정 회원 포인트 수정
+// 2. 특정 회원 포인트 조회
+exports.getMemberPoint = async (req, res) => {
+  const { member_id } = req.params;
+
+  try {
+    const member = await MemberGame.findOne({ where: { member_id } });
+    if (!member) {
+      return res.status(404).json({ message: '회원이 존재하지 않습니다.' });
+    }
+    return res.status(200).json({ point: member.point });
+  } catch (err) {
+    console.error('포인트 조회 오류:', err);
+    res.status(500).json({ message: '포인트 조회 실패', error: err });
+  }
+};
+
+// 3. 특정 회원 포인트 수정
 exports.updateMemberPoint = async (req, res) => {
   const { member_id, point } = req.body;
 
@@ -39,7 +55,7 @@ exports.updateMemberPoint = async (req, res) => {
   }
 };
 
-// 3. 캐릭터 추가
+// 4. 캐릭터 추가
 exports.addCharacter = async (req, res) => {
   const { name, imageFile } = req.body;
 
@@ -58,12 +74,12 @@ exports.addCharacter = async (req, res) => {
   }
 };
 
-// 4. 캐릭터 삭제
-exports.deleteCharacter = async (req, res) => {
-  const { character_id } = req.body;
+// 5. 캐릭터 삭제 (이름 기준)
+exports.deleteCharacterByName = async (req, res) => {
+  const { name } = req.body;
 
   try {
-    const character = await Characters.destroy({ where: { character_id } });
+    const character = await Characters.destroy({ where: { name } });
     if (!character) {
       return res.status(404).json({ message: '캐릭터가 존재하지 않습니다.' });
     }
@@ -74,7 +90,7 @@ exports.deleteCharacter = async (req, res) => {
   }
 };
 
-// 5. 새 단어 추가
+// 6. 새 단어 추가
 exports.addWord = async (req, res) => {
   const { en_word, ko_word, difficulty } = req.body;
 
@@ -92,7 +108,23 @@ exports.addWord = async (req, res) => {
   }
 };
 
-// 6. 단어 수정 (word_id로 조회 후 영단어와 뜻 수정)
+// 7. 단어 조회
+exports.getWord = async (req, res) => {
+  const { word_id } = req.params;
+
+  try {
+    const word = await Word.findOne({ where: { word_id } });
+    if (!word) {
+      return res.status(404).json({ message: '단어가 존재하지 않습니다.' });
+    }
+    return res.status(200).json({ en_word: word.en_word, ko_word: word.ko_word });
+  } catch (err) {
+    console.error('단어 조회 오류:', err);
+    res.status(500).json({ message: '단어 조회 실패', error: err });
+  }
+};
+
+// 8. 단어 수정
 exports.updateWord = async (req, res) => {
   const { word_id, en_word, ko_word } = req.body;
 
@@ -102,8 +134,8 @@ exports.updateWord = async (req, res) => {
       return res.status(404).json({ message: '단어가 존재하지 않습니다.' });
     }
 
-    word.en_word = en_word || word.en_word; // 입력된 값이 없으면 기존 값 유지
-    word.ko_word = ko_word || word.ko_word; // 입력된 값이 없으면 기존 값 유지
+    word.en_word = en_word || word.en_word; // 입력값이 없으면 기존 값 유지
+    word.ko_word = ko_word || word.ko_word; // 입력값이 없으면 기존 값 유지
     await word.save();
 
     return res.status(200).json({ message: '단어 수정 성공', updatedWord: word });
