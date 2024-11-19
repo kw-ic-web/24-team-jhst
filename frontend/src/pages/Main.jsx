@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { io } from 'socket.io-client';
 import meow3 from '../assets/images/meow3.png';
 import axios from 'axios';
+
+// 소켓 서버 연결
+const socket = io('http://localhost:8000');
 
 function Main() {
   const [showSelection, setShowSelection] = useState(false);
   const [selectedMode, setSelectedMode] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState('');
   const [point, setPoint] = useState(0);
+  const [isMatching, setIsMatching] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,23 +21,48 @@ function Main() {
       alert("로그인이 필요합니다.");
       navigate('/login');
     } else {
-      axios.get('http://localhost:8000/login/verifyToken', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      .then(() => {
-        return axios.get('http://localhost:8000/users/viewInfo', {
-          headers: { Authorization: `Bearer ${token}` }
+      axios
+        .get('http://localhost:8000/login/verifyToken', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then(() => {
+          return axios.get('http://localhost:8000/users/viewInfo', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+        })
+        .then((response) => {
+          setPoint(response.data.point);
+        })
+        .catch(() => {
+          alert("로그인이 만료되었습니다.");
+          localStorage.removeItem('token');
+          navigate('/login');
         });
-      })
-      .then((response) => {
-        setPoint(response.data.point); 
-      })
-      .catch(() => {
-        alert("로그인이 만료되었습니다.");
-        localStorage.removeItem('token');
-        navigate('/login');
-      });
     }
+  }, [navigate]);
+
+  // 매칭 완료 이벤트
+  useEffect(() => {
+    socket.on('matched', (roomName, { myPlayer, otherPlayer }) => {
+      alert(`매칭 성공! 방 이름: ${roomName}`);
+      setIsMatching(false);
+      navigate('/game-multi', { state: { myPlayer, otherPlayer, roomName } }); // 게임 화면으로 이동
+    });
+
+    socket.on('msg', (message) => {
+      console.log(message); // 대기 중 메시지 로그
+    });
+
+    socket.on('opponentDisconnected', () => {
+      alert('상대방이 접속을 종료했습니다.');
+      setIsMatching(false);
+    });
+
+    return () => {
+      socket.off('matched');
+      socket.off('msg');
+      socket.off('opponentDisconnected');
+    };
   }, [navigate]);
 
   const handleGameStartClick = () => {
@@ -41,12 +71,29 @@ function Main() {
 
   const handleGameStart = () => {
     if (selectedMode && selectedDifficulty) {
+      const token = localStorage.getItem('token');
+      const member_id = token; // 사용자 ID (토큰 활용)
+
       alert(`모드: ${selectedMode}, 난이도: ${selectedDifficulty}`);
       setShowSelection(false);
-      navigate('/game-multi');
+      setIsMatching(true);
+
+      // 서버로 매칭 요청
+      socket.emit('matching', {
+        mode: selectedMode,
+        difficulty: selectedDifficulty,
+        member_id,
+      });
     } else {
       alert('모드와 난이도를 선택하세요.');
     }
+  };
+
+  const handleCancelMatching = () => {
+    // 매칭 취소 요청
+    socket.emit('cancelMatching');
+    setIsMatching(false);
+    alert('매칭이 취소되었습니다.');
   };
 
   const handleCloseModal = () => {
@@ -78,15 +125,27 @@ function Main() {
           </button>
         </div>
 
-        {/* 가운데 캐릭터와 게임 시작 버튼 */}
+        {/* 가운데 캐릭터와 게임 시작/매칭 취소 버튼 */}
         <div className="flex flex-col items-center mb-6">
           <img src={meow3} alt="cat image" className="w-48 h-48 mb-6" />
-          <button
-            onClick={handleGameStartClick}
-            className="w-full bg-customGreen text-white py-3 rounded hover:bg-customBlue transition duration-200"
-          >
-            게임 시작
-          </button>
+          {!isMatching ? (
+            <button
+              onClick={handleGameStartClick}
+              className="w-full bg-customGreen text-white py-3 rounded hover:bg-customBlue transition duration-200"
+            >
+              게임 시작
+            </button>
+          ) : (
+            <div className="w-full">
+              <p className="text-center text-gray-700 mb-2">매칭 중입니다...</p>
+              <button
+                onClick={handleCancelMatching}
+                className="w-full bg-red-500 text-white py-3 rounded hover:bg-red-700 transition duration-200"
+              >
+                매칭 취소
+              </button>
+            </div>
+          )}
         </div>
 
         {/* 오른쪽 상단 코인 및 상점 버튼 */}
@@ -119,17 +178,17 @@ function Main() {
                 <h3 className="text-lg mb-4 text-center">모드 선택</h3>
                 <div className="flex justify-between">
                   <button
-                    onClick={() => setSelectedMode('영어 모드')}
+                    onClick={() => setSelectedMode('english')}
                     className={`py-2 px-4 w-1/2 rounded-md mr-2 ${
-                      selectedMode === '영어 모드' ? 'bg-green-500 text-white' : 'bg-gray-200'
+                      selectedMode === 'english' ? 'bg-green-500 text-white' : 'bg-gray-200'
                     }`}
                   >
                     영어
                   </button>
                   <button
-                    onClick={() => setSelectedMode('한글 모드')}
+                    onClick={() => setSelectedMode('korea')}
                     className={`py-2 px-4 w-1/2 rounded-md ${
-                      selectedMode === '한글 모드' ? 'bg-green-500 text-white' : 'bg-gray-200'
+                      selectedMode === 'korea' ? 'bg-green-500 text-white' : 'bg-gray-200'
                     }`}
                   >
                     한글
