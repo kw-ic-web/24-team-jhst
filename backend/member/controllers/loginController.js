@@ -1,11 +1,8 @@
-const express = require('express'); // express
 const jwt = require('jsonwebtoken'); // 토큰
-const mysql = require('mysql2/promise');
 require('dotenv').config(); // .env
-const router = express.Router(); // 라우터 설정
 const member_game = require('../../db/memberdb');
-
 const MemberGame = member_game.MemberGame; // member_game 테이블로 변경
+const bcrypt = require('bcrypt');
 
 // 토큰 검증 미들웨어
 verifyToken = (req, res, next) => {
@@ -32,6 +29,12 @@ verifyToken = (req, res, next) => {
   }
 };
 
+// 비밀번호 검증
+const verifyPwd = async (pwd, hashedPwd) => {
+  const isMatch = await bcrypt.compare(pwd, hashedPwd);
+  return isMatch;
+};
+
 // 로그인 로직
 const login = async (req, res) => {
   const { id, pw } = req.body;
@@ -39,24 +42,16 @@ const login = async (req, res) => {
   if (!id || !pw) {
     res.status(400).send('아이디 또는 비밀번호를 입력해주세요.');
   } else {
-    // crypto.pbkdf2(pw, salt, 100000, 64, 'sha512', async (err, key) => {
-    //   check_password = key.toString('base64');
-
-    //   if (pw !== check_password) {
-    //     // 비밀번호가 일치하지 않는 경우
-    //     res.json({ type: 'wrong_pw' });
-    //   } else {
-    //     // 비밀번호가 일치하는 경우 - 이 때가 로그인 성공
-
     try {
       const memberGame = await MemberGame.findOne({
         where: {
           member_id: id,
-          pwd: pw,
         },
       });
 
-      if (memberGame) {
+      const verifyPw = await verifyPwd(pw, memberGame.pwd);
+
+      if (memberGame && verifyPw) {
         const token = jwt.sign(
           {
             id: memberGame.member_id,
@@ -95,4 +90,4 @@ const login = async (req, res) => {
   } // 이게 원래 else
 }; // 이거 함수
 
-module.exports = { login, verifyToken };
+module.exports = { login, verifyToken, verifyPwd };

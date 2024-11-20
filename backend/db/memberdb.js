@@ -38,7 +38,7 @@ const MemberGame = sequelize.define(
       primaryKey: true,
     },
     pwd: {
-      type: DataTypes.STRING(20),
+      type: DataTypes.STRING(255),
       allowNull: false,
     },
     name: {
