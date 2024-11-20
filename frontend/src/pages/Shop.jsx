@@ -101,7 +101,7 @@ function Shop() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-white">
+    <div className="min-h-screen flex flex-col items-center justify-center mt-10 p-8 bg-white">
       <h1 className="text-2xl font-bold mb-8">내 캐릭터</h1>
 
       <div className="absolute top-32 right-8 bg-yellow-300 text-black py-2 px-4 rounded-lg">
@@ -119,7 +119,9 @@ function Shop() {
           >
             {character.image ? (
               <img
-                src={`data:image/png;base64,${Buffer.from(character.image).toString('base64')}`}
+                src={`data:image/png;base64,${btoa(
+                  String.fromCharCode(...new Uint8Array(character.image.data))
+                )}`}
                 alt={character.name}
                 className="w-24 h-24"
               />

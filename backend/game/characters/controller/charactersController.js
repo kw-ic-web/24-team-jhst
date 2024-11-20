@@ -1,5 +1,6 @@
 const { Characters } = require('../../../db/assets/characters_table');
 const { MemberCharacters, MemberGame } = require('../../../db/memberdb');
+const { Op } = require('sequelize');
 
 // 캐릭터 추가
 exports.addCharacter = async (req, res) => {
@@ -63,40 +64,53 @@ exports.drawCharacter = async (req, res) => {
 
   const member = await MemberGame.findOne({ where: { member_id: memberId } });
   const characterCost = 100; // 캐릭터 뽑기 가격
-  var point = member.point; // 회원 포인트
+  let point = member.point; // 회원 포인트
 
   if (point < characterCost) {
     return res.status(304).json({ message: '포인트가 부족합니다.' });
-  } else {
-    try {
-      // 모든 캐릭터 조회
-      const characters = await Characters.findAll();
-      if (characters.length === 0) {
-        return res.status(404).json({ message: '등록된 캐릭터가 없습니다.' });
-      }
+  }
 
-      // 랜덤 캐릭터 선택
-      const randomIndex = Math.floor(Math.random() * characters.length);
-      const randomCharacter = characters[randomIndex];
+  try {
+    const ownedCharacterIds = await MemberCharacters.findAll({
+      where: { member_id: memberId },
+      attributes: ['character_id'],
+    });
 
-      // 선택한 캐릭터를 MemberCharacters 테이블에 추가
-      await MemberCharacters.create({
-        member_id: memberId,
-        character_id: randomCharacter.character_id,
-        is_active: false,
-      });
+    const ownedIds = ownedCharacterIds.map((record) => record.character_id);
 
-      //포인트 차감
-      point = point - characterCost;
+    const availableCharacters = await Characters.findAll({
+      where: {
+        character_id: {
+          [Op.notIn]: ownedIds, // 보유한 캐릭터 제외
+        },
+      },
+    });
 
-      // 포인트 차감내역 db에 저장
-      await MemberGame.update({ point }, { where: { member_id: memberId } });
-
-      return res.status(200).json({ message: '랜덤 캐릭터 뽑기 성공', character: randomCharacter });
-    } catch (err) {
-      console.error('랜덤 캐릭터 저장 오류:', err);
-      res.status(500).json({ message: '캐릭터를 보유 캐릭터 목록에 저장하는 데 실패했습니다.', error: err });
+    if (availableCharacters.length === 0) {
+      return res.status(404).json({ message: '뽑을 수 있는 캐릭터가 없습니다.' });
     }
+
+    // 랜덤 캐릭터 선택
+    const randomIndex = Math.floor(Math.random() * availableCharacters.length);
+    const randomCharacter = availableCharacters[randomIndex];
+
+    await MemberCharacters.create({
+      member_id: memberId,
+      character_id: randomCharacter.character_id,
+      is_active: false,
+    });
+
+    // 포인트 차감
+    point -= characterCost;
+    await MemberGame.update({ point }, { where: { member_id: memberId } });
+
+    return res.status(200).json({
+      message: '랜덤 캐릭터 뽑기 성공',
+      character: randomCharacter,
+    });
+  } catch (err) {
+    console.error('랜덤 캐릭터 저장 오류:', err);
+    res.status(500).json({ message: '캐릭터 뽑기 실패', error: err });
   }
 };
 
