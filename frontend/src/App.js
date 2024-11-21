@@ -14,7 +14,7 @@ import ResultSingle from './pages/ResultSingle.jsx';
 import ResultMulti from './pages/ResultMulti.jsx';
 import CharacterTest from './pages/character-test.jsx';
 import GameSingle from './pages/GameSingle.jsx';
-import Admin from './pages/Admin.jsx';
+import Admin from './pages/AdminPage.jsx';
 
 function App() {
   return (
