@@ -60,29 +60,25 @@ exports.selectCharacter = async (req, res) => {
 
 // 랜덤 캐릭터 뽑기 및 저장
 exports.drawCharacter = async (req, res) => {
-  const { memberId } = req.query; // req.query로 memberId 받아오기
-
-  const member = await MemberGame.findOne({ where: { member_id: memberId } });
-  const characterCost = 100; // 캐릭터 뽑기 가격
-  let point = member.point; // 회원 포인트
-
-  if (point < characterCost) {
-    return res.status(304).json({ message: '포인트가 부족합니다.' });
-  }
+  const { memberId } = req.query;
 
   try {
+    const member = await MemberGame.findOne({ where: { member_id: memberId } });
+    const characterCost = 100;
+
+    if (member.point < characterCost) {
+      return res.status(304).json({ message: '포인트가 부족합니다.' });
+    }
+
     const ownedCharacterIds = await MemberCharacters.findAll({
       where: { member_id: memberId },
       attributes: ['character_id'],
     });
-
     const ownedIds = ownedCharacterIds.map((record) => record.character_id);
 
     const availableCharacters = await Characters.findAll({
       where: {
-        character_id: {
-          [Op.notIn]: ownedIds, // 보유한 캐릭터 제외
-        },
+        character_id: { [Op.notIn]: ownedIds },
       },
     });
 
@@ -90,9 +86,13 @@ exports.drawCharacter = async (req, res) => {
       return res.status(404).json({ message: '뽑을 수 있는 캐릭터가 없습니다.' });
     }
 
-    // 랜덤 캐릭터 선택
     const randomIndex = Math.floor(Math.random() * availableCharacters.length);
     const randomCharacter = availableCharacters[randomIndex];
+
+    // 이미지 Base64 변환
+    const base64Image = randomCharacter.image
+      ? `data:image/png;base64,${randomCharacter.image.toString('base64')}`
+      : null;
 
     await MemberCharacters.create({
       member_id: memberId,
@@ -100,13 +100,15 @@ exports.drawCharacter = async (req, res) => {
       is_active: false,
     });
 
-    // 포인트 차감
-    point -= characterCost;
-    await MemberGame.update({ point }, { where: { member_id: memberId } });
+    member.point -= characterCost;
+    await member.save();
 
     return res.status(200).json({
       message: '랜덤 캐릭터 뽑기 성공',
-      character: randomCharacter,
+      character: {
+        name: randomCharacter.name,
+        image: base64Image,
+      },
     });
   } catch (err) {
     console.error('랜덤 캐릭터 저장 오류:', err);
@@ -140,5 +142,40 @@ exports.getOwnedCharacters = async (req, res) => {
   } catch (err) {
     console.error('캐릭터 조회 오류:', err);
     res.status(500).json({ message: '보유 캐릭터 조회에 실패했습니다.', error: err });
+  }
+};
+
+// 활성화된 캐릭터를 반환
+exports.getActiveCharacter = async (req, res) => {
+  const { memberId } = req.query;
+
+  if (!memberId) {
+    return res.status(400).json({ message: 'memberId가 누락되었습니다.' });
+  }
+
+  try {
+    const activeCharacter = await MemberCharacters.findOne({
+      where: { member_id: memberId, is_active: true },
+      include: [
+        {
+          model: Characters,
+          attributes: ['name', 'image'],
+        },
+      ],
+    });
+
+    if (!activeCharacter) {
+      return res.status(404).json({ message: '활성화된 캐릭터가 없습니다.' });
+    }
+
+    const character = {
+      name: activeCharacter.Character.name,
+      image: `data:image/png;base64,${activeCharacter.Character.image.toString('base64')}`,
+    };
+
+    res.status(200).json(character);
+  } catch (err) {
+    console.error('활성 캐릭터 조회 오류:', err);
+    res.status(500).json({ message: '활성 캐릭터 조회 실패', error: err });
   }
 };
