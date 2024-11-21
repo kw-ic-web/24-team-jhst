@@ -14,4 +14,7 @@ router.get('/draw', verifyToken, charactersController.drawCharacter);
 // 보유 캐릭터 조회 라우트
 router.get('/owned', verifyToken, charactersController.getOwnedCharacters); // 미들웨어 추가
 
+// 활성 캐릭터 조회
+router.get('/active', verifyToken, charactersController.getActiveCharacter);
+
 module.exports = router;

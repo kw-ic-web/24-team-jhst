@@ -22,7 +22,8 @@ const GameSingle = () => {
   });
   const [letters, setLetters] = useState([]);
   const [gameStatus, setGameStatus] = useState('ongoing'); // 'ongoing', 'win', 'lose', 'complete'
-
+  const [results, setResults] = useState([]);
+  
   const fetchWordsFromBackend = async () => {
     try {
       const memberId = localStorage.getItem('memberId');

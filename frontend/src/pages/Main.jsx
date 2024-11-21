@@ -13,6 +13,7 @@ function Main() {
   const [selectedDifficulty, setSelectedDifficulty] = useState('');
   const [point, setPoint] = useState(0);
   const [isMatching, setIsMatching] = useState(false);
+  const [activeCharacter, setActiveCharacter] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,6 +41,29 @@ function Main() {
         });
     }
   }, [navigate]);
+
+   // 활성화된 캐릭터 정보 가져오기
+   useEffect(() => {
+    const fetchActiveCharacter = async () => {
+      const token = localStorage.getItem('token'); 
+      const memberId = localStorage.getItem('memberId');
+      if (!token || !memberId) {
+        console.error('토큰 또는 memberId가 없습니다.');
+        return;
+      }
+  
+      try {
+        const response = await axios.get(`http://localhost:8000/characters/active?memberId=${memberId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setActiveCharacter(response.data);
+      } catch (error) {
+        console.error('활성 캐릭터 로드 오류:', error);
+      }
+    };
+  
+    fetchActiveCharacter();
+  }, []);
 
   // 매칭 완료 이벤트
   useEffect(() => {
@@ -127,7 +151,15 @@ function Main() {
 
         {/* 가운데 캐릭터와 게임 시작/매칭 취소 버튼 */}
         <div className="flex flex-col items-center mb-6">
-          <img src={meow3} alt="cat image" className="w-48 h-48 mb-6" />
+        {activeCharacter ? (
+            <img
+              src={activeCharacter.image}
+              alt={activeCharacter.name}
+              className="w-48 h-48 mb-6"
+            />
+          ) : (
+            <p>캐릭터 정보를 로드 중입니다...</p>
+          )}
           {!isMatching ? (
             <button
               onClick={handleGameStartClick}
