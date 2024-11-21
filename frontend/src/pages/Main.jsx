@@ -158,7 +158,7 @@ function Main() {
               className="w-48 h-48 mb-6"
             />
           ) : (
-            <p>캐릭터 정보를 로드 중입니다...</p>
+            <p>선택된 캐릭터가 없습니다. 상점에서 선택해주세요.</p>
           )}
           {!isMatching ? (
             <button
