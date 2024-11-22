@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Game } = require('../../../db/gamedb'); // 게임 결과 저장 테이블 모델
 const { WrongAns } = require('../../../db/gamedb'); // WrongAns 테이블 모델
-const { Word } = require('../../../db/assets/word');
+
 const Sequelize = require('sequelize');
 
 
