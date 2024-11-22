@@ -36,6 +36,19 @@ const socketHandler=(server)=>{
         });
 
 
+        //보유 단어 정보 바꼈을 때 호출
+        socket.on("updateWord",(data)=>{
+            const {roomName,letter,playerId} = data;
+            console.log(`Player ${playerId} sent word: ${letter}`);
+
+            // "EMPTY" 문자열을 받은 경우 상대방 단어를 비움
+            const updateLetter = letter === "EMPTY" ? "" : letter;
+            //바뀐정보 전송
+            socket.to(roomName).emit("receiveWord", { updateLetter, playerId });
+        });
+
+
+
         // 클라이언트 접속 종료 시 처리
         socket.on("disconnect", () => {
             if (socket.roomName) {
