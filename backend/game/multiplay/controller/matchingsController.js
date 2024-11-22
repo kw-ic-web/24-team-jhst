@@ -39,13 +39,14 @@ async function matching (socket,mode,difficulty,member_id,io){
              easy_or_hard: difficulty
             });
             console.log(`Game 데이터 저장 성공: ${member_id} vs ${matchedClient.member_id}`);
+            console.log(`저장된 game_id: ${newGame.game_id}`);
         } catch (error) {
             console.error('Game 데이터 저장 중 오류 발생:', error);
         }
 
         // 상대방에게 초기 데이터 전송
-        matchedClient.emit("matched", roomName, { myPlayer: otherPlayer, otherPlayer: myPlayer });
-        socket.emit("matched", roomName, { myPlayer, otherPlayer });
+        matchedClient.emit("matched", roomName, { myPlayer: otherPlayer, otherPlayer: myPlayer, game_id: newGame.game_id });
+        socket.emit("matched", roomName, { myPlayer, otherPlayer , game_id: newGame.game_id});
 
         console.log(`매칭 성공: ${socket.id} <-> ${matchedClient.id}`);
 

@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { Word } = require('../../../db/assets/word'); // Word 모델을 불러옵니다.
-const { WrongAns } = require('../../../db/gamedb');
+const { WrongAns ,Game} = require('../../../db/gamedb');
+
 const Sequelize = require('sequelize');
 
-// 게임 단어 가져오기
 router.get('/singleplay', async (req, res) => {
   try {
     const { member_id } = req.query;
@@ -51,12 +51,27 @@ router.get('/singleplay', async (req, res) => {
     const allWords = [...selectedWords, ...additionalWords];
     console.log('All Words (final result):', allWords);
 
-    return res.status(200).json(allWords);
+    // 새로운 game_id 생성
+    const newGame = await Game.create({
+      member_id: member_id, // 전달받은 member_id
+      game_mode: null, // null로 설정
+      easy_or_hard: null, // null로 설정
+      opposite_player: null, // null로 설정
+    });
+
+    console.log('New Game Created:', newGame);
+
+    // 프론트엔드에 game_id와 단어 반환
+    return res.status(200).json({
+      game_id: newGame.game_id,
+      words: allWords,
+    });
   } catch (error) {
     console.error('Error occurred:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 // 게임 결과 처리
 router.post('/roundplay/result', async (req, res) => {
