@@ -7,24 +7,31 @@ const { MemberGame } = require('../../../db/memberdb');
 
 
 router.post("/winner", async (req, res, next) => {
-    const { member_id, opposite_player, game_mode, easy_or_hard, winner } = req.body;
+  const { game_id, winner } = req.body;
 
-    try {
-        // Sequelize를 사용하여 Game 테이블에 데이터 삽입
-        const game = await Game.create({
-            member_id,
-            opposite_player,
-            game_mode,
-            easy_or_hard,
-            winner,
-        });
+  try {
+      // 요청 데이터 유효성 검사
+      if (!game_id || !winner) {
+          return res.status(400).json({ message: "game_id와 winner를 모두 제공해야 합니다." });
+      }
 
-        console.log(`Game 데이터 저장 성공: ${game.member_id} vs ${game.opposite_player}`);
-        res.status(200).json({ message: "Game 데이터 저장 성공", data: game });
-    } catch (error) {
-        console.error("Game 데이터 저장 중 오류 발생:", error.message);
-        res.status(500).json({ message: "Game 데이터 저장 실패", error: error.message });
-    }
+      // game_id에 해당하는 Game 행을 조회
+      const game = await Game.findByPk(game_id);
+
+      if (!game) {
+          return res.status(404).json({ message: "해당 game_id를 찾을 수 없습니다." });
+      }
+
+      // winner 값을 업데이트
+      game.winner = winner;
+      await game.save();
+
+      console.log(`Game 데이터 업데이트 성공: game_id=${game_id}, winner=${winner}`);
+      res.status(200).json({ message: "Game 데이터 업데이트 성공", data: game });
+  } catch (error) {
+      console.error("Game 데이터 업데이트 중 오류 발생:", error.message);
+      res.status(500).json({ message: "Game 데이터 업데이트 실패", error: error.message });
+  }
 });
 router.post("/wrongans", async (req, res) => {
     try {
