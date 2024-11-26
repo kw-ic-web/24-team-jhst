@@ -79,6 +79,8 @@ const usersRouter = require('./member/routes/users');
 const charactersRouter = require('./game/characters/routes/characters');
 const adminRouter = require('./member/routes/admin');
 const singleplayRouter = require('./game/singleplay/routes/singleplay');
+const multiplayRouter = require('./game/multiplay/routes/multiplay'); // .js 생략 가능
+
 
 // 라우터 수동 등록
 app.use('/users', signupRouter); // 회원가입 라우터
@@ -88,6 +90,7 @@ app.use('/users', usersRouter);
 app.use('/characters', charactersRouter);
 app.use('/admin', adminRouter);
 app.use('/game', singleplayRouter);
+app.use('/multiplay', multiplayRouter);
 
 // 자동 라우터 등록 함수
 const autoRegisterRoutes = (baseDir, basePath) => {
