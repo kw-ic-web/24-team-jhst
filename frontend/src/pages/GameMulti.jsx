@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const PlayerScore = ({ name, score }) => (
   <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
@@ -8,6 +9,9 @@ const PlayerScore = ({ name, score }) => (
 );
 
 const GameMulti = () => {
+  const location = useLocation();
+  const { myPlayer, otherPlayer, roomName } = location.state || {}; // 전달된 상태 받기
+
   const [round, setRound] = useState(1);
   const [word, setWord] = useState('APPLE');
   const [players, setPlayers] = useState([
@@ -48,8 +52,15 @@ const GameMulti = () => {
   }, []);
 
   return (
+    
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
       {/* 상단 라운드와 제시 단어 */}
+      <div>
+      <h1>게임 멀티플레이 화면</h1>
+      <p>방 이름: {roomName}</p>
+      <p>플레이어1: {myPlayer?.member_id}</p>
+      <p>플레이어2: {otherPlayer?.member_id}</p>
+    </div>
       <div className="flex justify-between items-center w-full max-w-4xl mb-8 space-x-4">
         <PlayerScore name={players[0].name} score={players[0].score} />
         <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
