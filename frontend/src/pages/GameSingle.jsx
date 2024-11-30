@@ -31,31 +31,23 @@ const GameSingle = () => {
         params: { member_id: memberId },
       });
 
-      if (!Array.isArray(response.data)) {
+      console.log('Response Data:', response.data);
+      if (response.data && response.data.words && Array.isArray(response.data.words)) {
+        const fetchedWords = response.data.words.map((item) => item.en_word).filter(Boolean);
+        
+        if (fetchedWords.length === 0) {
+          throw new Error('No valid words found in the response');
+        }
+
+        setWords(fetchedWords);
+        setWord(fetchedWords[0]); // 첫 번째 단어 설정
+
+        console.log('Fetched Words:', fetchedWords);
+      } else {
         throw new Error('Invalid response data structure');
       }
-
-      // 단어 리스트 추출
-      const fetchedWords = response.data.map((item) => {
-        if (item.en_word) {
-          return item.en_word; // en_word만 추출
-        } else {
-          console.warn('Invalid item structure:', item);
-          return null;
-        }
-      }).filter(Boolean);
-
-      if (fetchedWords.length === 0) {
-        throw new Error('No valid words found in the response');
-      }
-
-      setWords(fetchedWords); 
-      setWord(fetchedWords[0]); 
-
-      // 단어 목록 콘솔 출력
-      console.log('Fetched Words:', fetchedWords);
     } catch (error) {
-      console.error('Failed to fetch words:', error);
+      console.error('Failed to fetch words:', error.message);
     }
   };
 
@@ -207,7 +199,6 @@ const GameSingle = () => {
   }, [word]);
 
   useEffect(() => {
-    // 플레이어가 만든 단어와 제시된 단어가 일치하는지 확인
     if (player.collectedLetters.length === 0 || !word) return;
 
     const collectedWord = player.collectedLetters.join('');
