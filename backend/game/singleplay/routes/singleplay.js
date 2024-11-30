@@ -76,7 +76,7 @@ router.get('/singleplay', async (req, res) => {
 // 게임 결과 처리
 router.post('/roundplay/result', async (req, res) => {
   try {
-    const { member_id, results, game_id } = req.body; // game_id도 요청에서 가져옴
+    const { member_id, results, game_id } = req.body;
 
     if (!member_id || !results || !Array.isArray(results)) {
       return res.status(400).json({ message: 'Invalid data. Please provide member_id, game_id, and results.' });
@@ -85,14 +85,19 @@ router.post('/roundplay/result', async (req, res) => {
     console.log(`member_id: ${member_id}`);
     console.log('Results:', results);
 
-    // 맞춘 단어와 못 맞춘 단어 분리
-    const correctWords = results.filter((result) => result.isCorrect).map((result) => result.word_id);
-    const wrongWords = results.filter((result) => !result.isCorrect).map((result) => result.word_id);
+    // 유효하지 않은 데이터 필터링
+    const validResults = results.filter((result) => result.word_id !== undefined && result.word_id !== null);
+    const correctWords = validResults
+      .filter((result) => result.status === 'success')
+      .map((result) => result.word_id);
+    const wrongWords = validResults
+      .filter((result) => result.status === 'fail')
+      .map((result) => result.word_id);
 
     console.log('Correct Words:', correctWords);
     console.log('Wrong Words:', wrongWords);
 
-    // 1. 맞춘 단어 삭제
+    // 맞춘 단어 삭제
     if (correctWords.length > 0) {
       await WrongAns.destroy({
         where: {
@@ -100,11 +105,10 @@ router.post('/roundplay/result', async (req, res) => {
           word_id: correctWords,
         },
       });
-
       console.log('Correct words removed from WrongAns:', correctWords);
     }
 
-    // 2. 못 맞춘 단어 저장
+    // 못 맞춘 단어 저장
     if (wrongWords.length > 0) {
       const existingWrongWords = await WrongAns.findAll({
         where: {
@@ -121,7 +125,7 @@ router.post('/roundplay/result', async (req, res) => {
         const newEntries = newWrongWords.map((word_id) => ({
           member_id,
           word_id,
-          game_id, // game_id 추가
+          game_id,
         }));
 
         await WrongAns.bulkCreate(newEntries);
