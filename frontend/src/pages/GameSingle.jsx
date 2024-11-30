@@ -14,7 +14,7 @@ const GameSingle = () => {
   const INITIAL_TIMER = 30; // 초기 타이머 값
   const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
-  const [words, setWords] = useState([]); // 단어 리스트 상태 추가
+  const [words, setWords] = useState([]);
   const [player, setPlayer] = useState({
     name: localStorage.getItem('memberId'), // 현재 로그인한 사용자
     timer: INITIAL_TIMER,
@@ -24,7 +24,7 @@ const GameSingle = () => {
   const [letters, setLetters] = useState([]);
   const [gameStatus, setGameStatus] = useState('ongoing'); // 'ongoing', 'win', 'lose', 'complete'
   const [results, setResults] = useState([]);
-  const navigate = useNavigate(); // 라우터 네비게이션 객체
+  const navigate = useNavigate();
 
   const fetchWordsFromBackend = async () => {
     try {
@@ -35,13 +35,15 @@ const GameSingle = () => {
 
       if (response.data && response.data.words && Array.isArray(response.data.words)) {
         const fetchedWords = response.data.words.map((item) => item.en_word).filter(Boolean);
-
         if (fetchedWords.length === 0) {
           throw new Error('No valid words found in the response');
         }
 
-        setWords(fetchedWords.slice(0, TOTAL_ROUNDS)); // 총 라운드에 맞춰 단어 제한
-        setWord(fetchedWords[0]); // 첫 번째 단어 설정
+        setWords(fetchedWords.slice(0, TOTAL_ROUNDS));
+        setWord(fetchedWords[0]);
+
+        // 게임 ID 저장
+        localStorage.setItem('gameId', response.data.game_id);
 
         console.log('Fetched Words:', fetchedWords);
       } else {
@@ -66,34 +68,6 @@ const GameSingle = () => {
       x: Math.random() * 700 + 50, // 랜덤 X 위치
       y: Math.random() * 300 + 50, // 랜덤 Y 위치
     }));
-  };
-
-  const startNextRound = () => {
-    setResults((prevResults) => [
-      ...prevResults,
-      {
-        word,
-        status: gameStatus === 'win' ? 'success' : 'fail',
-      },
-    ]);
-
-    const nextRound = round + 1;
-
-    if (nextRound <= TOTAL_ROUNDS) {
-      setRound(nextRound);
-      setWord(words[nextRound - 1]);
-      setPlayer((prevPlayer) => ({
-        ...prevPlayer,
-        timer: INITIAL_TIMER,
-        collectedLetters: [],
-        position: { x: 100, y: 100 },
-      }));
-      setLetters(generateRandomLetters(words[nextRound - 1]));
-      setGameStatus('ongoing');
-    } else {
-      // 모든 라운드 완료 시 결과 페이지로 이동
-      navigate('/result-single', { state: { results } });
-    }
   };
 
   const handleKeyPress = (event) => {
@@ -168,6 +142,50 @@ const GameSingle = () => {
     }
   };
 
+  const startNextRound = async () => {
+    // 현재 라운드 결과를 계산하고 기록
+    const currentResult = gameStatus === 'win' ? 'success' : 'fail';
+    console.log(`Round ${round} Result: ${currentResult}`);
+
+    setResults((prevResults) => [
+      ...prevResults,
+      {
+        word_id: words[round - 1]?.id || null, // 단어 ID 추가
+        word,
+        status: currentResult,
+      },
+    ]);
+
+    const nextRound = round + 1;
+
+    if (nextRound <= TOTAL_ROUNDS) {
+      setRound(nextRound);
+      setWord(words[nextRound - 1]);
+      setPlayer((prevPlayer) => ({
+        ...prevPlayer,
+        timer: INITIAL_TIMER,
+        collectedLetters: [],
+        position: { x: 100, y: 100 },
+      }));
+      setLetters(generateRandomLetters(words[nextRound - 1]));
+      setGameStatus('ongoing');
+    } else {
+      try {
+        const memberId = localStorage.getItem('memberId');
+        const gameId = localStorage.getItem('gameId');
+        await axios.post('http://localhost:8000/game/roundplay/result', {
+          member_id: memberId,
+          results,
+          game_id: gameId,
+        });
+        console.log('Results successfully sent to the server');
+      } catch (error) {
+        console.error('Failed to send results:', error);
+      }
+      navigate('/result-single', { state: { results } });
+    }
+  };
+
   useEffect(() => {
     if (words.length === 0) {
       fetchWordsFromBackend();
@@ -188,12 +206,6 @@ const GameSingle = () => {
         });
       }, 1000);
       return () => clearInterval(timerInterval);
-    } else if (gameStatus === 'lose') {
-      // 실패 상태에서 2초 후 다음 라운드로 이동
-      const timeout = setTimeout(() => {
-        startNextRound();
-      }, 2000);
-      return () => clearTimeout(timeout);
     }
   }, [gameStatus]);
 
@@ -209,9 +221,18 @@ const GameSingle = () => {
     const collectedWord = player.collectedLetters.join('');
     if (collectedWord === word) {
       setGameStatus('win');
-      setTimeout(startNextRound, 2000); // 2초 후에 다음 라운드 시작
     }
   }, [player.collectedLetters, word]);
+
+  useEffect(() => {
+    if (gameStatus === 'win') {
+      console.log(`Round ${round}: Player succeeded!`);
+      setTimeout(() => startNextRound(), 2000); // 다음 라운드로 이동
+    } else if (gameStatus === 'lose') {
+      console.log(`Round ${round}: Player failed.`);
+      setTimeout(() => startNextRound(), 2000); // 다음 라운드로 이동
+    }
+  }, [gameStatus]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyPress);
@@ -227,59 +248,44 @@ const GameSingle = () => {
           <p>{round} / {TOTAL_ROUNDS}</p>
         </div>
       </div>
-      {gameStatus === 'complete' ? (
-        <div>
-          <h2 className="text-2xl font-bold">게임 결과</h2>
-          <ul>
-            {results.map((result, index) => (
-              <li key={index}>
-                단어: {result.word}, 결과: {result.status === 'success' ? '성공' : '실패'}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-        <>
-          <div className="text-center bg-gray-300 p-4 rounded-md text-2xl mb-8 max-w-2xl w-full">
-            <p>제시 단어</p>
-            <p>{word}</p>
-          </div>
-          <div className="relative w-full max-w-4xl h-96 bg-white rounded-md">
-            <div
-              className="bg-blue-500 w-12 h-12 rounded-full absolute flex items-center justify-center"
-              style={{
-                left: `${player.position.x}px`,
-                top: `${player.position.y}px`,
-              }}
-            >
-              <div className="absolute top-[-30px] left-0 flex gap-2">
-                {player.collectedLetters.map((letter, index) => (
-                  <div
-                    key={index}
-                    className="bg-white text-black text-sm font-bold px-2 py-1 border rounded"
-                  >
-                    {letter}
-                  </div>
-                ))}
-              </div>
-            </div>
-            {letters.map((letterObj, index) => (
+      <div className="text-center bg-gray-300 p-4 rounded-md text-2xl mb-8 max-w-2xl w-full">
+        <p>제시 단어</p>
+        <p>{word}</p>
+      </div>
+      <div className="relative w-full max-w-4xl h-96 bg-white rounded-md">
+        <div
+          className="bg-blue-500 w-12 h-12 rounded-full absolute flex items-center justify-center"
+          style={{
+            left: `${player.position.x}px`,
+            top: `${player.position.y}px`,
+          }}
+        >
+          <div className="absolute top-[-30px] left-0 flex gap-2">
+            {player.collectedLetters.map((letter, index) => (
               <div
                 key={index}
-                className="absolute text-black text-xl font-bold"
-                style={{
-                  left: `${letterObj.x}px`,
-                  top: `${letterObj.y}px`,
-                }}
+                className="bg-white text-black text-sm font-bold px-2 py-1 border rounded"
               >
-                {letterObj.letter}
+                {letter}
               </div>
             ))}
           </div>
-          {gameStatus === 'win' && (
-            <div className="text-green-500 text-2xl mt-4">승리! 다음 라운드로 이동합니다.</div>
-          )}
-        </>
+        </div>
+        {letters.map((letterObj, index) => (
+          <div
+            key={index}
+            className="absolute text-black text-xl font-bold"
+            style={{
+              left: `${letterObj.x}px`,
+              top: `${letterObj.y}px`,
+            }}
+          >
+            {letterObj.letter}
+          </div>
+        ))}
+      </div>
+      {gameStatus === 'win' && (
+        <div className="text-green-500 text-2xl mt-4">승리! 다음 라운드로 이동합니다.</div>
       )}
     </div>
   );
