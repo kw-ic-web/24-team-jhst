@@ -15,29 +15,32 @@ import ResultMulti from './pages/ResultMulti.jsx';
 import CharacterTest from './pages/character-test.jsx';
 import GameSingle from './pages/GameSingle.jsx';
 import Admin from './pages/AdminPage.jsx';
-
+import { SocketProvider } from './context/SocketContext';
 function App() {
   return (
-    <Router>
-      <div className="pt-4"></div>
-      <Header />
-      <Routes>
-        <Route path="/character-test" element={<CharacterTest />} />
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/main" element={<Main />} />
-        <Route path="/shop" element={<Shop />} />
-        <Route path="/gacha" element={<Gacha />} />
-        <Route path="/ranking" element={<Ranking />} />
-        <Route path="/setting" element={<Setting />} />
-        <Route path="/result-single" element={<ResultSingle />} />
-        <Route path="/result-multi" element={<ResultMulti />} />
-        <Route path="/game-multi" element={<GameMulti />} />
-        <Route path="/game-single" element={<GameSingle />} />
-        <Route path="/admin" element={<Admin />} />
-      </Routes>
-    </Router>
+    <SocketProvider>
+      <Router>
+        <div className="pt-4"></div>
+        <Header />
+        <Routes>
+          <Route path="/character-test" element={<CharacterTest />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/main" element={<Main />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/gacha" element={<Gacha />} />
+          <Route path="/ranking" element={<Ranking />} />
+          <Route path="/setting" element={<Setting />} />
+          <Route path="/result-single" element={<ResultSingle />} />
+          <Route path="/result-multi" element={<ResultMulti />} />
+          <Route path="/game-multi" element={<GameMulti />} />
+          <Route path="/game-single" element={<GameSingle />} />
+          <Route path="/admin" element={<Admin />} />
+        </Routes>
+      </Router>
+    </SocketProvider>
+    
   );
 }
 

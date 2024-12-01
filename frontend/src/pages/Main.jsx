@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import meow3 from '../assets/images/meow3.png';
 import axios from 'axios';
+import { useSocket } from '../context/SocketContext';
 
-// 소켓 서버 연결
-const socket = io('http://localhost:8000');
+
 
 function Main() {
+  const socket = useSocket();
   const [showSelection, setShowSelection] = useState(false);
   const [selectedMode, setSelectedMode] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState('');
