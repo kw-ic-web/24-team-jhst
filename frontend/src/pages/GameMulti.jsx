@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 
+import { useSocket } from '../context/SocketContext';
+
 const PlayerScore = ({ name, score }) => (
   <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
     <p>{name}</p>
@@ -10,6 +12,7 @@ const PlayerScore = ({ name, score }) => (
 );
 
 const GameMulti = () => {
+  const socket = useSocket(); // 소켓 Context에서 소켓 가져오기
   const location = useLocation();
   const { myPlayer, otherPlayer, roomName } = location.state || {}; // 전달된 상태 받기
 
@@ -40,8 +43,8 @@ const GameMulti = () => {
   useEffect(() => {
     if (myPlayer && otherPlayer) {
       setPlayers([
-        { name: `플레이어 1: ${myPlayer.member_id}`, score: 0, position: { x: 0, y: 0 } },
-        { name: `플레이어 2: ${otherPlayer.member_id}`, score: 0, position: { x: 0, y: 0 } },
+        { name: `플레이어 1: ${myPlayer.member_id}`, socket_id:myPlayer.id, score: 0, position: { x: myPlayer.x, y: myPlayer.y } },
+        { name: `플레이어 2: ${otherPlayer.member_id}`,socket_id:otherPlayer.id, score: 0, position: {  x: otherPlayer.x, y: otherPlayer.y  } },
       ]);
     }
   }, [myPlayer, otherPlayer]);
@@ -69,9 +72,45 @@ const GameMulti = () => {
 
       const updatedPlayers = [...prevPlayers];
       updatedPlayers[0] = { ...updatedPlayers[0], position: newPosition };
+
+      //소켓으로 위치 전송
+      socket.emit('updatePosition',{
+        roomName,
+        player:{
+          id:socket.id,
+          position:newPosition
+      }});
+
       return updatedPlayers;
     });
   };
+
+  
+  useEffect(() => {
+    //서버에서 업데이트된 위치 받아오기
+    socket.on('updatePlayers', ({ id, x, y }) => {
+      console.log(`플레이어 ${id} 위치 업데이트 (${x}, ${y})`);
+      setPlayers((prevPlayers)=>{
+        const updatedPlayers = [...prevPlayers];
+        // ID에 해당하는 플레이어를 업데이트
+        const playerIndex = updatedPlayers.findIndex((player) => player.socket_id === id);
+
+        if (playerIndex !== -1) {
+          updatedPlayers[playerIndex] = {
+            ...updatedPlayers[playerIndex],
+            position: { x, y },
+          };
+        }
+        console.log('Updated Players:', updatedPlayers); // 상태 업데이트 확인
+        return updatedPlayers;
+      });
+    });
+
+    
+    return () => {
+      socket.off('updatePlayers');
+    };
+  }, []);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyPress);
@@ -108,6 +147,13 @@ const GameMulti = () => {
           style={{
             left: `${players[0]?.position.x || 0}px`,
             top: `${players[0]?.position.y || 0}px`,
+          }}
+        ></div>
+        <div
+          className="bg-red-500 w-12 h-12 rounded-full absolute"
+          style={{
+            left: `${players[1]?.position.x || 0}px`,
+            top: `${players[1]?.position.y || 0}px`,
           }}
         ></div>
         <div className="flex flex-col items-center absolute right-10 bottom-10">
