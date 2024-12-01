@@ -111,7 +111,7 @@ const autoRegisterRoutes = (baseDir, basePath) => {
 };
 
 // '/game' 경로에 있는 모든 라우트 자동 등록
-autoRegisterRoutes('game/multiplay/routes', '/game/multi');
+//autoRegisterRoutes('game/multiplay/routes', '/game/multi');
 autoRegisterRoutes('game/singleplay/routes', '/game');
 autoRegisterRoutes('game/characters/routes', '/game/characters');
 

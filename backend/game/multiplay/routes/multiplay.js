@@ -1,31 +1,50 @@
 const express = require('express');
 const router = express.Router();
-const { Game, WrongAns } = require('../../../db/gamedb');
+const { Game, WrongAns , Round} = require('../../../db/gamedb');
 const { Word } = require('../../../db/assets/word');
 const Sequelize = require('sequelize');
 const { MemberGame } = require('../../../db/memberdb');
 
-// GET /multiplay - 테스트용 기본 엔드포인트
+
+// GET /multiplay - 게임 ID를 받고 Word 테이블에서 랜덤 단어 5개 선택
 router.get('/', async (req, res) => {
   try {
+    const gameId = parseInt(req.query.gameId, 10); // gameId를 정수로 변환
+    if (isNaN(gameId)) {
+      return res.status(400).json({ message: '유효한 gameId를 제공해야 합니다.' });
+    }
+
     // Word 테이블에서 랜덤으로 5개의 단어를 가져옵니다.
     const words = await Word.findAll({
       order: Sequelize.literal('RAND()'), // 랜덤으로 정렬
-      limit: 5,                           // 5개만 선택
+      limit: 5, // 5개만 선택
     });
 
-    // { round1: 단어 } 형식으로 데이터 변환
-    const rounds = {};
-    words.forEach((word, index) => {
-      rounds[`round${index + 1}`] = { en_word: word.en_word, ko_word: word.ko_word };
-    });
+    const roundsData = words.map((word, index) => ({
+      word_id: word.word_id,
+      game_id: gameId,
+      round_num: index + 1, // 1, 2, 3, 4, 5 순서대로 저장
+    }));
 
-    res.status(200).json(rounds); // JSON 응답
+    // round 테이블에 데이터 삽입
+    await Round.bulkCreate(roundsData);
+
+    // 삽입한 데이터 응답으로 반환
+    const response = words.map((word, index) => ({
+      round_num: index + 1,
+      word_id: word.word_id,
+      en_word: word.en_word,
+      ko_word: word.ko_word,
+    }));
+
+    res.status(200).json(response); // JSON 응답
   } catch (error) {
-    console.error('단어를 가져오는 중 오류 발생:', error);
+    console.error('데이터 처리 중 오류 발생:', error);
     res.status(500).json({ message: '서버 오류 발생' });
   }
 });
+
+module.exports = router;
 
 // POST /winner - 게임 승자 업데이트
 router.post('/winner', async (req, res, next) => {
