@@ -32,13 +32,15 @@ async function matching (socket,mode,difficulty,member_id,io){
 
         // Game 테이블에 데이터 저장
         try {
-            await Game.create({
-             member_id: member_id,
-             opposite_player: matchedClient.member_id,
-             game_mode: mode,
-             easy_or_hard: difficulty
+            const newGame = await Game.create({
+                member_id: member_id,
+                opposite_player: matchedClient.member_id,
+                game_mode: mode,
+                easy_or_hard: difficulty
             });
+
             console.log(`Game 데이터 저장 성공: ${member_id} vs ${matchedClient.member_id}`);
+            console.log(`새로운 Game ID: ${newGame.game_id}`); // game_id 출력
         } catch (error) {
             console.error('Game 데이터 저장 중 오류 발생:', error);
         }
