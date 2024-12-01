@@ -34,11 +34,11 @@ async function matching(socket, mode, difficulty, token, io) {
         socket.roomName = roomName;
 
         try {
-            await Game.create({
-             member_id: member_id,
-             opposite_player: matchedClient.member_id,
-             game_mode: mode,
-             easy_or_hard: difficulty
+            const newGame = await Game.create({
+                member_id: member_id,
+                opposite_player: matchedClient.member_id,
+                game_mode: mode,
+                easy_or_hard: difficulty,
             });
 
 
@@ -61,7 +61,7 @@ async function matching(socket, mode, difficulty, token, io) {
 
         } catch (error) {
             console.error('Game 데이터 저장 중 오류 발생:', error);
-        }
+        } 
     } else {
         queue.push(socket);
         socket.emit('msg', '대기중....');
