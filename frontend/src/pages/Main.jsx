@@ -68,10 +68,10 @@ function Main() {
 
   // 매칭 완료 이벤트
   useEffect(() => {
-    socket.on('matched', (roomName, { myPlayer, otherPlayer }) => {
+    socket.on('matched', (roomName, { myPlayer, otherPlayer, rounds }) => {
       alert(`매칭 성공! 방 이름: ${roomName}`);
       setIsMatching(false);
-      navigate('/game-multi', { state: { myPlayer, otherPlayer, roomName } }); // 게임 화면으로 이동
+      navigate('/game-multi', { state: { myPlayer, otherPlayer, roomName, rounds, selectedMode } }); // 게임 화면으로 이동
     });
 
     socket.on('msg', (message) => {

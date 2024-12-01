@@ -14,30 +14,41 @@ const PlayerScore = ({ name, score }) => (
 const GameMulti = () => {
   const socket = useSocket(); // 소켓 Context에서 소켓 가져오기
   const location = useLocation();
-  const { myPlayer, otherPlayer, roomName } = location.state || {}; // 전달된 상태 받기
+  const { myPlayer, otherPlayer, roomName, rounds} = location.state || {}; // 전달된 상태 받기
 
   const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
   const [roundWords, setRoundWords] = useState([]); // 5라운드 단어 저장
   const [players, setPlayers] = useState([]);
 
+
+
   // /multiplay API 호출
+  // useEffect(() => {
+  //   const fetchWords = async () => {
+  //     try {
+  //       const response = await axios.get('http://localhost:8000/multiplay');
+
+  //       const words = response.data;
+  //       console.log('5라운드 단어:', words); // 단어 콘솔 출력
+  //       setRoundWords(Object.values(words)); // 라운드 단어 설정
+  //       setWord(Object.values(words)[0]?.en_word || ''); // 첫 라운드 단어 설정
+
+  //       console.log('socket으로 가져온거',rounds);
+  //     } catch (error) {
+  //       console.error('단어를 가져오는 중 오류 발생:', error);
+  //     }
+  //   };
+
+  //   fetchWords();
+  // }, []);
+
+  //단어 받아오기
   useEffect(() => {
-    const fetchWords = async () => {
-      try {
-        const response = await axios.get('http://localhost:8000/multiplay');
-
-        const words = response.data;
-        console.log('5라운드 단어:', words); // 단어 콘솔 출력
-        setRoundWords(Object.values(words)); // 라운드 단어 설정
-        setWord(Object.values(words)[0]?.en_word || ''); // 첫 라운드 단어 설정
-      } catch (error) {
-        console.error('단어를 가져오는 중 오류 발생:', error);
-      }
-    };
-
-    fetchWords();
-  }, []);
+    if (rounds && rounds[`round${round}`]) {
+        setWord(rounds[`round${round}`].en_word); // 현재 라운드 영어 단어 설정
+    }
+}, [rounds, round]);
 
   // 플레이어 정보 설정
   useEffect(() => {
@@ -106,7 +117,6 @@ const GameMulti = () => {
       });
     });
 
-    
     return () => {
       socket.off('updatePlayers');
     };

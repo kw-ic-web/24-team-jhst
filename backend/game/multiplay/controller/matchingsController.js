@@ -1,4 +1,6 @@
-const { Game } = require('../../../db/gamedb'); 
+const { Sequelize } = require('sequelize');
+const { Game } = require('../../../db/gamedb');
+const { Word } = require('../../../db/assets/word');
 const jwt = require('jsonwebtoken');
 
 let queues = {
@@ -39,8 +41,20 @@ async function matching(socket, mode, difficulty, token, io) {
                 easy_or_hard: difficulty,
             });
 
-            matchedClient.emit('matched', roomName, { myPlayer: otherPlayer, otherPlayer: myPlayer, game_id: newGame.game_id });
-            socket.emit('matched', roomName, { myPlayer, otherPlayer, game_id: newGame.game_id });
+            // Word 데이터 가져오기
+            const words=await Word.findAll({
+                order: Sequelize.literal('RAND()'),
+                limit:5,
+            });
+            const rounds = {};
+            words.forEach((word, index) => {
+                rounds[`round${index + 1}`] = { en_word: word.en_word, ko_word: word.ko_word };
+            });
+
+            matchedClient.emit('matched', roomName, { myPlayer: otherPlayer, otherPlayer: myPlayer, game_id: newGame.game_id, rounds});
+            socket.emit('matched', roomName, { myPlayer, otherPlayer, game_id: newGame.game_id, rounds});
+
+            console.log("라운드 데이터 전송:", rounds);
         } catch (error) {
             console.error('Game 데이터 저장 중 오류 발생:', error);
         }
