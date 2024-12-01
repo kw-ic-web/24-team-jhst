@@ -13,17 +13,18 @@ const PlayerScore = ({ name, score }) => (
 const GameMulti = () => {
   const socket = useSocket();
   const location = useLocation();
-  const { myPlayer, otherPlayer, roomName, rounds} = location.state || {}; // 전달된 상태 받기
+  const { myPlayer, otherPlayer, roomName, rounds, selectedMode} = location.state || {}; // 전달된 상태 받기
 
   const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
   const [roundWords, setRoundWords] = useState([]);
   const [letters, setLetters] = useState([]); // 추가된 상태
   const [players, setPlayers] = useState([]);
+  const [collectedLetters, setCollectedLetters] = useState([]);
 
   // const generateRandomLetters = (currentWord) => {
   //   const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-  //   const wordLetters = [...currentWord].sort(() => Math.random() - 0.5);
+  //   const wordLetters = [...curredlntWord].sort(() => Math.random() - 0.5);
   //   const randomLetters = Array.from({ length: 10 }, () =>
   //     alphabet[Math.floor(Math.random() * alphabet.length)]
   //   );
@@ -68,9 +69,13 @@ const GameMulti = () => {
 
   useEffect(() => {
     if (rounds && rounds[`round${round}`]) {
-        setWord(rounds[`round${round}`].en_word); // 현재 라운드 영어 단어 설정
+        if (selectedMode === 'english') {
+            setWord(rounds[`round${round}`].en_word); // 영어 단어 설정
+        } else if (selectedMode === 'korea') {
+            setWord(rounds[`round${round}`].ko_word); // 한국어 단어 설정
+        }
     }
-}, [rounds, round]);
+}, [rounds, round, selectedMode]);
 
 useEffect(() => {
   if (word) {
@@ -92,8 +97,8 @@ useEffect(() => {
   useEffect(() => {
     if (myPlayer && otherPlayer) {
       setPlayers([
-        { name: `플레이어 1: ${myPlayer.member_id}`, socket_id: myPlayer.id, score: 0, position: { x: myPlayer.x, y: myPlayer.y } },
-        { name: `플레이어 2: ${otherPlayer.member_id}`, socket_id: otherPlayer.id, score: 0, position: { x: otherPlayer.x, y: otherPlayer.y } },
+        { name: `플레이어 1: ${myPlayer.member_id}`, socket_id: myPlayer.id, score: 0, position: { x: myPlayer.x, y: myPlayer.y },},
+        { name: `플레이어 2: ${otherPlayer.member_id}`, socket_id: otherPlayer.id, score: 0, position: { x: otherPlayer.x, y: otherPlayer.y },},
       ]);
     }
   }, [myPlayer, otherPlayer]);
@@ -121,75 +126,56 @@ useEffect(() => {
         case 'd':
           newPosition.x += moveDistance;
           break;
-          //여기부터
-          case 'Enter': // Collect closest letter
-          setLetters((prevLetters) => {
-            const playerPos = prevPlayers[0].position; // Get player's position
-            let closestIndex = -1;
+        case 'Enter':{
+          setLetters((prevLetters)=>{
+            const playerPos = newPosition;
+            let closestIndex =-1;
             let minDistance = Infinity;
-  
-            // Find the closest letter within 30px
-            prevLetters.forEach((letterObj, index) => {
+
+            //가장 가까운 알파벳
+            prevLetters.forEach((letterObj,index)=>{
               const dx = letterObj.x - playerPos.x;
               const dy = letterObj.y - playerPos.y;
               const distance = Math.sqrt(dx * dx + dy * dy);
-  
               if (distance < 30 && distance < minDistance) {
                 closestIndex = index;
                 minDistance = distance;
               }
             });
-  
+
             if (closestIndex !== -1) {
-              const collectedLetter = prevLetters[closestIndex];
-              // Update player's collected letters
-              const updatedPlayers = [...prevPlayers];
-              updatedPlayers[0] = {
-                ...updatedPlayers[0],
-                collectedLetters: [
-                  ...(updatedPlayers[0].collectedLetters || []),
-                  collectedLetter.letter,
-                ],
-              };
-              setPlayers(updatedPlayers);
-  
-              // Remove collected letter from the letters array
+              const collectedLetter = prevLetters[closestIndex].letter;
+        
+              setCollectedLetters((prevCollected) => {
+                const updatedCollected = [...prevCollected, collectedLetter];
+                console.log('Enter로 추가된 알파벳:', updatedCollected);
+                return updatedCollected;
+              });
+        
               return prevLetters.filter((_, index) => index !== closestIndex);
             }
-  
             return prevLetters;
           });
           break;
-  
-        case 'Backspace': // Drop the last collected letter
-          const updatedPlayers = [...prevPlayers];
-          if (
-            updatedPlayers[0].collectedLetters &&
-            updatedPlayers[0].collectedLetters.length > 0
-          ) {
-            const droppedLetter =
-              updatedPlayers[0].collectedLetters.slice(-1)[0];
-  
-            // Add dropped letter back to the letters array
-            setLetters((prevLetters) => [
-              ...prevLetters,
-              {
-                letter: droppedLetter,
-                x: newPosition.x, // Drop at current player position
-                y: newPosition.y,
-              },
-            ]);
-  
-            // Remove the letter from player's collected letters
-            updatedPlayers[0].collectedLetters = updatedPlayers[0].collectedLetters.slice(
-              0,
-              -1
-            );
-          }
-          setPlayers(updatedPlayers);
-          break; 
-          //여기까지
-  
+        }
+        case 'Backspace':{
+          setCollectedLetters((prevCollectedLetters) => {
+            if (prevCollectedLetters.length > 0) {
+              const droppedLetter = prevCollectedLetters[prevCollectedLetters.length - 1];
+              console.log('Backspace로 제거된 알파벳:', droppedLetter);
+        
+              setLetters((prevLetters) => [
+                ...prevLetters,
+                { letter: droppedLetter, x: newPosition.x, y: newPosition.y },
+              ]);
+        
+              return prevCollectedLetters.slice(0, -1);
+            }
+            console.log('Backspace를 눌렀지만 수집된 알파벳이 없습니다.');
+            return prevCollectedLetters;
+          });
+          break;
+        }
         default:
           return prevPlayers;
       }
@@ -208,6 +194,11 @@ useEffect(() => {
       return updatedPlayers;
     });
   };
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
 
   useEffect(() => {
     socket.on('updatePlayers', ({ id, x, y }) => {
@@ -229,11 +220,6 @@ useEffect(() => {
     return () => {
       socket.off('updatePlayers');
     };
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
 
   return (
