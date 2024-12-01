@@ -48,7 +48,6 @@ const socketHandler=(server)=>{
         });
 
 
-
         // 클라이언트 접속 종료 시 처리
         socket.on("disconnect", () => {
             if (socket.roomName) {

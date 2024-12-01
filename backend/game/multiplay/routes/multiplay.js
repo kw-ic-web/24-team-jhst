@@ -67,6 +67,15 @@ router.post('/winner', async (req, res, next) => {
     game.winner = winner;
     await game.save();
 
+    //member_game테이블에 포인트 업데이트
+    const member = await MemberGame.findOne({ where: { member_id: winner } });
+
+    if (!member) {
+      return res.status(404).json({ message: "해당 winner를 member_game 테이블에서 찾을 수 없습니다." });
+    }
+    member.point += 70;
+    await member.save();
+
     console.log(`Game 데이터 업데이트 성공: game_id=${game_id}, winner=${winner}`);
     res.status(200).json({ message: "Game 데이터 업데이트 성공", data: game });
   } catch (error) {

@@ -13,42 +13,42 @@ const PlayerScore = ({ name, score }) => (
 const GameMulti = () => {
   const socket = useSocket();
   const location = useLocation();
-  const { myPlayer, otherPlayer, roomName } = location.state || {};
+  const { myPlayer, otherPlayer, roomName, rounds} = location.state || {}; // 전달된 상태 받기
+
   const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
   const [roundWords, setRoundWords] = useState([]);
   const [letters, setLetters] = useState([]); // 추가된 상태
   const [players, setPlayers] = useState([]);
 
-  const generateRandomLetters = (currentWord) => {
-    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-    const wordLetters = [...currentWord].sort(() => Math.random() - 0.5);
-    const randomLetters = Array.from({ length: 10 }, () =>
-      alphabet[Math.floor(Math.random() * alphabet.length)]
-    );
-    const allLetters = [...wordLetters, ...randomLetters].sort(
-      () => Math.random() - 0.5
-    );
-    return allLetters.map((letter) => ({
-      letter,
-      x: Math.random() * 700 + 50,
-      y: Math.random() * 300 + 50,
-    }));
-  };
 
+
+  // /multiplay API 호출
+  // useEffect(() => {
+  //   const fetchWords = async () => {
+  //     try {
+  //       const response = await axios.get('http://localhost:8000/multiplay');
+
+  //       const words = response.data;
+  //       console.log('5라운드 단어:', words); // 단어 콘솔 출력
+  //       setRoundWords(Object.values(words)); // 라운드 단어 설정
+  //       setWord(Object.values(words)[0]?.en_word || ''); // 첫 라운드 단어 설정
+
+  //       console.log('socket으로 가져온거',rounds);
+  //     } catch (error) {
+  //       console.error('단어를 가져오는 중 오류 발생:', error);
+  //     }
+  //   };
+
+  //   fetchWords();
+  // }, []);
+
+  //단어 받아오기
   useEffect(() => {
-    const fetchWords = async () => {
-      try {
-        const response = await axios.get('http://localhost:8000/multiplay');
-        const words = response.data;
-        setRoundWords(Object.values(words));
-        setWord(Object.values(words)[0]?.en_word || '');
-      } catch (error) {
-        console.error('단어를 가져오는 중 오류 발생:', error);
-      }
-    };
-    fetchWords();
-  }, []);
+    if (rounds && rounds[`round${round}`]) {
+        setWord(rounds[`round${round}`].en_word); // 현재 라운드 영어 단어 설정
+    }
+}, [rounds, round]);
 
   useEffect(() => {
     if (myPlayer && otherPlayer) {
@@ -116,6 +116,7 @@ const GameMulti = () => {
         return updatedPlayers;
       });
     });
+
     return () => {
       socket.off('updatePlayers');
     };
