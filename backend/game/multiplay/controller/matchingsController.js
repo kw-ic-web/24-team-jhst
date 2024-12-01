@@ -32,16 +32,18 @@ async function matching(socket, mode, difficulty, token, io) {
         socket.roomName = roomName;
 
         try {
-            await Game.create({
-             member_id: member_id,
-             opposite_player: matchedClient.member_id,
-             game_mode: mode,
-             easy_or_hard: difficulty
+            const newGame = await Game.create({
+                member_id: member_id,
+                opposite_player: matchedClient.member_id,
+                game_mode: mode,
+                easy_or_hard: difficulty,
             });
-            console.log(`Game 데이터 저장 성공: ${member_id} vs ${matchedClient.member_id}`);
+
+            matchedClient.emit('matched', roomName, { myPlayer: otherPlayer, otherPlayer: myPlayer, game_id: newGame.game_id });
+            socket.emit('matched', roomName, { myPlayer, otherPlayer, game_id: newGame.game_id });
         } catch (error) {
             console.error('Game 데이터 저장 중 오류 발생:', error);
-        }
+        } 
     } else {
         queue.push(socket);
         socket.emit('msg', '대기중....');

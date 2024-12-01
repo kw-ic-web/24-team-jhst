@@ -32,7 +32,7 @@ const socketHandler=(server)=>{
         //나의 상태 업데이트됐을때
         socket.on("updatePosition", ({ roomName, player }) => {
             // 다른 클라이언트에게 플레이어 데이터 전송
-            socket.to(roomName).emit("updatePlayers", { id: player.id, x: player.x, y: player.y });
+            socket.to(roomName).emit("updatePlayers", { id: player.id, x: player.position.x, y: player.position.y });
         });
 
 
