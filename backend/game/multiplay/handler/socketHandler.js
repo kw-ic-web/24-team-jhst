@@ -1,6 +1,26 @@
 const { Server } = require("socket.io");
 const { matching,removeFromQueue } = require("../controller/matchingsController");
 
+
+const generateRandomLetters = (currentWord) => {
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    const wordLetters = [...currentWord].sort(() => Math.random() - 0.5);
+    const randomLetters = Array.from({ length: 10 }, () =>
+      alphabet[Math.floor(Math.random() * alphabet.length)]
+    );
+    const allLetters = [...wordLetters, ...randomLetters].sort(
+      () => Math.random() - 0.5
+    );
+    return allLetters.map((letter) => ({
+      letter,
+      x: Math.random() * 700 + 50, // 랜덤 X 위치
+      y: Math.random() * 300 + 50, // 랜덤 Y 위치
+    }));
+    
+  };
+
+
+
 const socketHandler=(server)=>{
     const io = new Server(server, {
         cors: {
@@ -15,11 +35,20 @@ const socketHandler=(server)=>{
         const socket_id = socket.id;
         console.log("connection!", socket_id);
 
+        
+
 
         socket.on("showID", (msg) => { 
             console.log(msg);
             socket.emit("getID", socket.id); // 소켓 아이디를 넘겨줌
         });
+
+        socket.on('requestLetters', ({ word, roomName }) => {
+            const letters = generateRandomLetters(word); // 랜덤 알파벳 생성
+            io.to(roomName).emit('updateLetters', letters); // 해당 방에 브로드캐스트
+          });
+
+        
 
         //매칭 요청
         socket.on("matching", (data) => {

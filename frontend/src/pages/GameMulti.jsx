@@ -21,6 +21,26 @@ const GameMulti = () => {
   const [letters, setLetters] = useState([]); // 추가된 상태
   const [players, setPlayers] = useState([]);
 
+  // const generateRandomLetters = (currentWord) => {
+  //   const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+  //   const wordLetters = [...currentWord].sort(() => Math.random() - 0.5);
+  //   const randomLetters = Array.from({ length: 10 }, () =>
+  //     alphabet[Math.floor(Math.random() * alphabet.length)]
+  //   );
+  //   const allLetters = [...wordLetters, ...randomLetters].sort(
+  //     () => Math.random() - 0.5
+  //   );
+  //   return allLetters.map((letter) => ({
+  //     letter,
+  //     x: Math.random() * 700 + 50, // 랜덤 X 위치
+  //     y: Math.random() * 300 + 50, // 랜덤 Y 위치
+  //   }));
+    
+  // };
+
+
+
+
 
 
   // /multiplay API 호출
@@ -44,11 +64,30 @@ const GameMulti = () => {
   // }, []);
 
   //단어 받아오기
+
+
   useEffect(() => {
     if (rounds && rounds[`round${round}`]) {
         setWord(rounds[`round${round}`].en_word); // 현재 라운드 영어 단어 설정
     }
 }, [rounds, round]);
+
+useEffect(() => {
+  if (word) {
+    // 서버에 랜덤 알파벳 요청
+    socket.emit('requestLetters', { word, roomName });
+
+    // 서버로부터 랜덤 알파벳 수신
+    socket.on('updateLetters', (sharedLetters) => {
+      setLetters(sharedLetters); // 수신한 알파벳으로 상태 업데이트
+    });
+
+    return () => {
+      socket.off('updateLetters'); // 이벤트 클린업
+    };
+  }
+}, [word, socket, roomName]);
+
 
   useEffect(() => {
     if (myPlayer && otherPlayer) {
@@ -59,11 +98,11 @@ const GameMulti = () => {
     }
   }, [myPlayer, otherPlayer]);
 
-  useEffect(() => {
-    if (word) {
-      setLetters(generateRandomLetters(word)); // 알파벳 무작위 배치
-    }
-  }, [word]);
+  // useEffect(() => {
+  //   if (word) {
+  //     setLetters(generateRandomLetters(word)); // 알파벳 무작위 배치
+  //   }
+  // }, [word]);
 
   const handleKeyPress = (event) => {
     const moveDistance = 20;
@@ -82,9 +121,79 @@ const GameMulti = () => {
         case 'd':
           newPosition.x += moveDistance;
           break;
+          //여기부터
+          case 'Enter': // Collect closest letter
+          setLetters((prevLetters) => {
+            const playerPos = prevPlayers[0].position; // Get player's position
+            let closestIndex = -1;
+            let minDistance = Infinity;
+  
+            // Find the closest letter within 30px
+            prevLetters.forEach((letterObj, index) => {
+              const dx = letterObj.x - playerPos.x;
+              const dy = letterObj.y - playerPos.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+  
+              if (distance < 30 && distance < minDistance) {
+                closestIndex = index;
+                minDistance = distance;
+              }
+            });
+  
+            if (closestIndex !== -1) {
+              const collectedLetter = prevLetters[closestIndex];
+              // Update player's collected letters
+              const updatedPlayers = [...prevPlayers];
+              updatedPlayers[0] = {
+                ...updatedPlayers[0],
+                collectedLetters: [
+                  ...(updatedPlayers[0].collectedLetters || []),
+                  collectedLetter.letter,
+                ],
+              };
+              setPlayers(updatedPlayers);
+  
+              // Remove collected letter from the letters array
+              return prevLetters.filter((_, index) => index !== closestIndex);
+            }
+  
+            return prevLetters;
+          });
+          break;
+  
+        case 'Backspace': // Drop the last collected letter
+          const updatedPlayers = [...prevPlayers];
+          if (
+            updatedPlayers[0].collectedLetters &&
+            updatedPlayers[0].collectedLetters.length > 0
+          ) {
+            const droppedLetter =
+              updatedPlayers[0].collectedLetters.slice(-1)[0];
+  
+            // Add dropped letter back to the letters array
+            setLetters((prevLetters) => [
+              ...prevLetters,
+              {
+                letter: droppedLetter,
+                x: newPosition.x, // Drop at current player position
+                y: newPosition.y,
+              },
+            ]);
+  
+            // Remove the letter from player's collected letters
+            updatedPlayers[0].collectedLetters = updatedPlayers[0].collectedLetters.slice(
+              0,
+              -1
+            );
+          }
+          setPlayers(updatedPlayers);
+          break; 
+          //여기까지
+  
         default:
           return prevPlayers;
       }
+  
       const updatedPlayers = [...prevPlayers];
       updatedPlayers[0] = { ...updatedPlayers[0], position: newPosition };
 
