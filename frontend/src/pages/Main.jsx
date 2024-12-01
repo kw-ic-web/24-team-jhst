@@ -42,16 +42,16 @@ function Main() {
     }
   }, [navigate]);
 
-   // 활성화된 캐릭터 정보 가져오기
-   useEffect(() => {
+  // 활성화된 캐릭터 정보 가져오기
+  useEffect(() => {
     const fetchActiveCharacter = async () => {
-      const token = localStorage.getItem('token'); 
+      const token = localStorage.getItem('token');
       const memberId = localStorage.getItem('memberId');
       if (!token || !memberId) {
         console.error('토큰 또는 memberId가 없습니다.');
         return;
       }
-  
+
       try {
         const response = await axios.get(`http://localhost:8000/characters/active?memberId=${memberId}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -61,7 +61,7 @@ function Main() {
         console.error('활성 캐릭터 로드 오류:', error);
       }
     };
-  
+
     fetchActiveCharacter();
   }, []);
 
@@ -151,7 +151,7 @@ function Main() {
 
         {/* 가운데 캐릭터와 게임 시작/매칭 취소 버튼 */}
         <div className="flex flex-col items-center mb-6">
-        {activeCharacter ? (
+          {activeCharacter ? (
             <img
               src={activeCharacter.image}
               alt={activeCharacter.name}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const PlayerScore = ({ name, timer }) => (
   <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
@@ -13,7 +14,7 @@ const GameSingle = () => {
   const INITIAL_TIMER = 30; // 초기 타이머 값
   const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
-  const [words, setWords] = useState([]); // 단어 리스트 상태 추가
+  const [words, setWords] = useState([]);
   const [player, setPlayer] = useState({
     name: localStorage.getItem('memberId'), // 현재 로그인한 사용자
     timer: INITIAL_TIMER,
@@ -23,7 +24,8 @@ const GameSingle = () => {
   const [letters, setLetters] = useState([]);
   const [gameStatus, setGameStatus] = useState('ongoing'); // 'ongoing', 'win', 'lose', 'complete'
   const [results, setResults] = useState([]);
-  
+  const navigate = useNavigate();
+
   const fetchWordsFromBackend = async () => {
     try {
       const memberId = localStorage.getItem('memberId');
@@ -31,31 +33,24 @@ const GameSingle = () => {
         params: { member_id: memberId },
       });
 
-      if (!Array.isArray(response.data)) {
+      if (response.data && response.data.words && Array.isArray(response.data.words)) {
+        const fetchedWords = response.data.words.map((item) => item.en_word).filter(Boolean);
+        if (fetchedWords.length === 0) {
+          throw new Error('No valid words found in the response');
+        }
+
+        setWords(fetchedWords.slice(0, TOTAL_ROUNDS));
+        setWord(fetchedWords[0]);
+
+        // 게임 ID 저장
+        localStorage.setItem('gameId', response.data.game_id);
+
+        console.log('Fetched Words:', fetchedWords);
+      } else {
         throw new Error('Invalid response data structure');
       }
-
-      // 단어 리스트 추출
-      const fetchedWords = response.data.map((item) => {
-        if (item.en_word) {
-          return item.en_word; // en_word만 추출
-        } else {
-          console.warn('Invalid item structure:', item);
-          return null;
-        }
-      }).filter(Boolean);
-
-      if (fetchedWords.length === 0) {
-        throw new Error('No valid words found in the response');
-      }
-
-      setWords(fetchedWords); 
-      setWord(fetchedWords[0]); 
-
-      // 단어 목록 콘솔 출력
-      console.log('Fetched Words:', fetchedWords);
     } catch (error) {
-      console.error('Failed to fetch words:', error);
+      console.error('Failed to fetch words:', error.message);
     }
   };
 
@@ -75,33 +70,9 @@ const GameSingle = () => {
     }));
   };
 
-  const startNextRound = () => {
-    if (round < TOTAL_ROUNDS) {
-      const nextRound = round + 1;
-
-      if (words[nextRound - 1]) {
-        setRound(nextRound);
-        setWord(words[nextRound - 1]); 
-        setPlayer((prevPlayer) => ({
-          ...prevPlayer,
-          timer: INITIAL_TIMER,
-          collectedLetters: [],
-          position: { x: 100, y: 100 },
-        }));
-        setLetters(generateRandomLetters(words[nextRound - 1])); 
-        setGameStatus('ongoing');
-      } else {
-        console.error('No word found for the next round');
-      }
-    } else {
-      setGameStatus('complete'); // 모든 라운드 완료
-    }
-  };
-
   const handleKeyPress = (event) => {
     const moveDistance = 20;
 
-    // 알파벳 획득 처리
     if (event.key === 'Enter') {
       setLetters((prevLetters) => {
         const playerPos = player.position;
@@ -128,10 +99,7 @@ const GameSingle = () => {
         }
         return prevLetters;
       });
-    }
-
-    // 알파벳 버리기
-    else if (event.key === 'Backspace') {
+    } else if (event.key === 'Backspace') {
       setPlayer((prevPlayer) => {
         if (prevPlayer.collectedLetters.length > 0) {
           const droppedLetter = prevPlayer.collectedLetters.slice(-1)[0];
@@ -150,10 +118,7 @@ const GameSingle = () => {
         }
         return prevPlayer;
       });
-    }
-
-    // 플레이어 이동 처리
-    else {
+    } else {
       setPlayer((prevPlayer) => {
         const newPosition = { ...prevPlayer.position };
         switch (event.key) {
@@ -177,48 +142,95 @@ const GameSingle = () => {
     }
   };
 
+  const startNextRound = async () => {
+    // 현재 라운드 결과를 계산하고 기록
+    const currentResult = gameStatus === 'win' ? 'success' : 'fail';
+    console.log(`Round ${round} Result: ${currentResult}`);
+
+    setResults((prevResults) => [
+      ...prevResults,
+      {
+        word_id: words[round - 1]?.id || null, // 단어 ID 추가
+        word,
+        status: currentResult,
+      },
+    ]);
+
+    const nextRound = round + 1;
+
+    if (nextRound <= TOTAL_ROUNDS) {
+      setRound(nextRound);
+      setWord(words[nextRound - 1]);
+      setPlayer((prevPlayer) => ({
+        ...prevPlayer,
+        timer: INITIAL_TIMER,
+        collectedLetters: [],
+        position: { x: 100, y: 100 },
+      }));
+      setLetters(generateRandomLetters(words[nextRound - 1]));
+      setGameStatus('ongoing');
+    } else {
+      try {
+        const memberId = localStorage.getItem('memberId');
+        const gameId = localStorage.getItem('gameId');
+        await axios.post('http://localhost:8000/game/roundplay/result', {
+          member_id: memberId,
+          results,
+          game_id: gameId,
+        });
+        console.log('Results successfully sent to the server');
+      } catch (error) {
+        console.error('Failed to send results:', error);
+      }
+      navigate('/result-single', { state: { results } });
+    }
+  };
+
   useEffect(() => {
-    fetchWordsFromBackend();
+    if (words.length === 0) {
+      fetchWordsFromBackend();
+    }
   }, []);
 
   useEffect(() => {
-    if (gameStatus !== 'ongoing') return; 
-  
-    const timerInterval = setInterval(() => {
-      setPlayer((prevPlayer) => {
-        if (prevPlayer.timer > 0) {
-          return { ...prevPlayer, timer: prevPlayer.timer - 1 };
-        } else {
-          clearInterval(timerInterval);
-          setGameStatus('lose'); 
-          return prevPlayer;
-        }
-      });
-    }, 1000);
-  
-    return () => clearInterval(timerInterval); 
+    if (gameStatus === 'ongoing') {
+      const timerInterval = setInterval(() => {
+        setPlayer((prevPlayer) => {
+          if (prevPlayer.timer > 0) {
+            return { ...prevPlayer, timer: prevPlayer.timer - 1 };
+          } else {
+            clearInterval(timerInterval);
+            setGameStatus('lose'); // 제한 시간 초과로 패배 처리
+            return prevPlayer;
+          }
+        });
+      }, 1000);
+      return () => clearInterval(timerInterval);
+    }
   }, [gameStatus]);
 
-  
   useEffect(() => {
     if (word) {
-      setLetters(generateRandomLetters(word)); 
+      setLetters(generateRandomLetters(word));
     }
   }, [word]);
 
   useEffect(() => {
-    // 플레이어가 만든 단어와 제시된 단어가 일치하는지 확인
     if (player.collectedLetters.length === 0 || !word) return;
 
     const collectedWord = player.collectedLetters.join('');
     if (collectedWord === word) {
-      setGameStatus('win'); 
+      setGameStatus('win');
     }
   }, [player.collectedLetters, word]);
 
   useEffect(() => {
     if (gameStatus === 'win') {
-      setTimeout(startNextRound, 2000); // 2초 후에 다음 라운드 시작
+      console.log(`Round ${round}: Player succeeded!`);
+      setTimeout(() => startNextRound(), 2000); // 다음 라운드로 이동
+    } else if (gameStatus === 'lose') {
+      console.log(`Round ${round}: Player failed.`);
+      setTimeout(() => startNextRound(), 2000); // 다음 라운드로 이동
     }
   }, [gameStatus]);
 
@@ -274,12 +286,6 @@ const GameSingle = () => {
       </div>
       {gameStatus === 'win' && (
         <div className="text-green-500 text-2xl mt-4">승리! 다음 라운드로 이동합니다.</div>
-      )}
-      {gameStatus === 'lose' && (
-        <div className="text-red-500 text-2xl mt-4">패배! 게임 종료</div>
-      )}
-      {gameStatus === 'complete' && (
-        <div className="text-blue-500 text-2xl mt-4">축하합니다! 모든 라운드를 완료했습니다.</div>
       )}
     </div>
   );

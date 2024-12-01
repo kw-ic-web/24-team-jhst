@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { Word } = require('../../../db/assets/word'); // Word 모델을 불러옵니다.
-const { WrongAns } = require('../../../db/gamedb');
+const { WrongAns ,Game} = require('../../../db/gamedb');
+
 const Sequelize = require('sequelize');
 
-// 게임 단어 가져오기
 router.get('/singleplay', async (req, res) => {
   try {
     const { member_id } = req.query;
@@ -51,17 +51,32 @@ router.get('/singleplay', async (req, res) => {
     const allWords = [...selectedWords, ...additionalWords];
     console.log('All Words (final result):', allWords);
 
-    return res.status(200).json(allWords);
+    // 새로운 game_id 생성
+    const newGame = await Game.create({
+      member_id: member_id, // 전달받은 member_id
+      game_mode: null, // null로 설정
+      easy_or_hard: null, // null로 설정
+      opposite_player: null, // null로 설정
+    });
+
+    console.log('New Game Created:', newGame);
+
+    // 프론트엔드에 game_id와 단어 반환
+    return res.status(200).json({
+      game_id: newGame.game_id,
+      words: allWords,
+    });
   } catch (error) {
     console.error('Error occurred:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
 
+
 // 게임 결과 처리
 router.post('/roundplay/result', async (req, res) => {
   try {
-    const { member_id, results, game_id } = req.body; // game_id도 요청에서 가져옴
+    const { member_id, results, game_id } = req.body;
 
     if (!member_id || !results || !Array.isArray(results)) {
       return res.status(400).json({ message: 'Invalid data. Please provide member_id, game_id, and results.' });
@@ -70,14 +85,19 @@ router.post('/roundplay/result', async (req, res) => {
     console.log(`member_id: ${member_id}`);
     console.log('Results:', results);
 
-    // 맞춘 단어와 못 맞춘 단어 분리
-    const correctWords = results.filter((result) => result.isCorrect).map((result) => result.word_id);
-    const wrongWords = results.filter((result) => !result.isCorrect).map((result) => result.word_id);
+    // 유효하지 않은 데이터 필터링
+    const validResults = results.filter((result) => result.word_id !== undefined && result.word_id !== null);
+    const correctWords = validResults
+      .filter((result) => result.status === 'success')
+      .map((result) => result.word_id);
+    const wrongWords = validResults
+      .filter((result) => result.status === 'fail')
+      .map((result) => result.word_id);
 
     console.log('Correct Words:', correctWords);
     console.log('Wrong Words:', wrongWords);
 
-    // 1. 맞춘 단어 삭제
+    // 맞춘 단어 삭제
     if (correctWords.length > 0) {
       await WrongAns.destroy({
         where: {
@@ -85,11 +105,10 @@ router.post('/roundplay/result', async (req, res) => {
           word_id: correctWords,
         },
       });
-
       console.log('Correct words removed from WrongAns:', correctWords);
     }
 
-    // 2. 못 맞춘 단어 저장
+    // 못 맞춘 단어 저장
     if (wrongWords.length > 0) {
       const existingWrongWords = await WrongAns.findAll({
         where: {
@@ -106,7 +125,7 @@ router.post('/roundplay/result', async (req, res) => {
         const newEntries = newWrongWords.map((word_id) => ({
           member_id,
           word_id,
-          game_id, // game_id 추가
+          game_id,
         }));
 
         await WrongAns.bulkCreate(newEntries);
