@@ -14,14 +14,12 @@ const PlayerScore = ({ name, score }) => (
 const GameMulti = () => {
   const socket = useSocket(); // 소켓 Context에서 소켓 가져오기
   const location = useLocation();
-  const { myPlayer, otherPlayer, roomName, rounds} = location.state || {}; // 전달된 상태 받기
+  const { myPlayer, otherPlayer, roomName, rounds, selectedMode} = location.state || {}; // 전달된 상태 받기
 
   const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
   const [roundWords, setRoundWords] = useState([]); // 5라운드 단어 저장
   const [players, setPlayers] = useState([]);
-
-
 
   // /multiplay API 호출
   // useEffect(() => {
@@ -43,12 +41,16 @@ const GameMulti = () => {
   //   fetchWords();
   // }, []);
 
-  //단어 받아오기
+  //단어정보 가져오기
   useEffect(() => {
     if (rounds && rounds[`round${round}`]) {
-        setWord(rounds[`round${round}`].en_word); // 현재 라운드 영어 단어 설정
+        if (selectedMode === 'english') {
+            setWord(rounds[`round${round}`].en_word); // 영어 단어 설정
+        } else if (selectedMode === 'korea') {
+            setWord(rounds[`round${round}`].ko_word); // 한국어 단어 설정
+        }
     }
-}, [rounds, round]);
+}, [rounds, round, selectedMode]);
 
   // 플레이어 정보 설정
   useEffect(() => {

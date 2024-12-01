@@ -88,7 +88,7 @@ function Main() {
       socket.off('msg');
       socket.off('opponentDisconnected');
     };
-  }, [navigate]);
+  }, [navigate, selectedMode]);
 
   const handleGameStartClick = () => {
     setShowSelection(true);
