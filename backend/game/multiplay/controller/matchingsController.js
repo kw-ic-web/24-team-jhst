@@ -34,12 +34,13 @@ async function matching(socket, mode, difficulty, token, io) {
         socket.roomName = roomName;
 
         try {
-            const newGame = await Game.create({
-                member_id: member_id,
-                opposite_player: matchedClient.member_id,
-                game_mode: mode,
-                easy_or_hard: difficulty,
+            await Game.create({
+             member_id: member_id,
+             opposite_player: matchedClient.member_id,
+             game_mode: mode,
+             easy_or_hard: difficulty
             });
+
 
             // Word 데이터 가져오기
             const words=await Word.findAll({
@@ -55,6 +56,9 @@ async function matching(socket, mode, difficulty, token, io) {
             socket.emit('matched', roomName, { myPlayer, otherPlayer, game_id: newGame.game_id, rounds});
 
             console.log("라운드 데이터 전송:", rounds);
+
+            console.log(`Game 데이터 저장 성공: ${member_id} vs ${matchedClient.member_id}`);
+
         } catch (error) {
             console.error('Game 데이터 저장 중 오류 발생:', error);
         }

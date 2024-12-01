@@ -57,7 +57,7 @@ const insertMemberTableData = async (req, res) => {
       pwd: hashedPwd, // 비밀번호 해시화
       name,
       email,
-      //point, // 기본 포인트 100
+      point: 100, // 기본 포인트 100
     });
 
     res.status(201).json({ message: '새로운 회원 등록 성공' });
