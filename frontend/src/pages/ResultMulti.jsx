@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from 'react-router-dom';
 import { FaStar } from "react-icons/fa";
+import axios from 'axios';
 import meow3 from '../assets/images/meow3.png'; // Ensure the path is correct
 
 const ResultMulti = () => {
@@ -9,16 +10,34 @@ const ResultMulti = () => {
   const loseScore = 30;
   const navigate = useNavigate();
   const location = useLocation();
-  const { players = [], rounds = {} } = location.state || {};
+  const { players = [], rounds = {}, game_id } = location.state || {};
   const wordList = Array.from({ length: 5 }, (_, i) => {
     const roundKey = `round${i + 1}`;
     return rounds[roundKey]?.en_word || rounds[roundKey]?.ko_word || "N/A";
   });
 
-  const winner = players.find((player) => player.score >= 3) || {};
-  const loser = players.find((player) => player.score < 3) || {};
+  const winner = players.find((player) => player.score >= 60) || {};
+  const loser = players.find((player) => player.score < 60) || {};
 
+  useEffect(() => {
+    const sendWinnerData = async () => {
+      console.log(`winner: ${winner.member_id} `);
+      console.log(`game_id: ${game_id}`);
+      try {
+        await axios.post('http://localhost:8000/multiplay/winner', {
+          game_id: game_id,
+          winner: winner.member_id,
+        });
+        console.log('Results successfully sent to the server');
+      } catch (error) {
+        console.error('Failed to send results:', error);
+      }
+    };
   
+    sendWinnerData(); // 비동기 함수 호출
+  }, [game_id, winner]);
+
+
   const handleBack = () => {
     navigate("/main");
   };

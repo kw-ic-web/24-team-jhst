@@ -15,14 +15,14 @@ const GameMulti = () => {
   const socket = useSocket();
   const location = useLocation();
   const navigate = useNavigate();
-  const { myPlayer, otherPlayer, roomName, rounds, selectedMode } = location.state || {};
+  const { myPlayer, otherPlayer, roomName, game_id, rounds, selectedMode } = location.state || {};
 
-  const [round, setRound] = useState(1);
+  const [round, setRound] = useState(5);
   const [word, setWord] = useState('');
   const [letters, setLetters] = useState([]);
   const [players, setPlayers] = useState([
-    { name: '', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [] },
-    { name: '', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [] },
+    { name: '',member_id:'', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [], wrong:[], },
+    { name: '',member_id:'', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [], wrong:[], },
   ]);
 
 
@@ -58,12 +58,14 @@ const GameMulti = () => {
       setPlayers([
         {
           name: `나: ${myPlayer.member_id}`,
+          member_id: myPlayer.member_id,
           socket_id: myPlayer.id,
           score: 0,
           position: { x: myPlayer.x, y: myPlayer.y },
         },
         {
           name: `상대방: ${otherPlayer.member_id}`,
+          member_id: otherPlayer.member_id,
           socket_id: otherPlayer.id,
           score: 0,
           position: { x: otherPlayer.x, y: otherPlayer.y },
@@ -278,7 +280,6 @@ useEffect(() => {
   // 다른 플레이어 단어 업데이트 수신
   useEffect(() => {
     const handleReceiveWord = ({  updateLetter = '', playerId }) => {
-      console.log(`소켓한테 받은거 "${updateLetter}" from Player ${playerId}`);
       setPlayers((prevPlayers) => {
         const updatedPlayers = [...prevPlayers];
         const playerIndex = updatedPlayers.findIndex(
@@ -307,6 +308,8 @@ useEffect(() => {
    //정답확인 승리처리
    useEffect(()=>{
     console.log(`내 collectedLetters ${players[0].collectedLetters?.join('')}`)
+
+    //정답확인
     if (players[0]?.collectedLetters?.length>0 && 
       players[0].collectedLetters.join('') === rounds[`round${round}`]?.en_word) {
       console.log("정답 맞춤!");
@@ -321,25 +324,32 @@ useEffect(() => {
       if (winner) {
         alert(`이긴사람 is ${winner}`);
 
-        // 이긴 사람의 점수 1점 증가
+        // 이긴 사람의 점수 20점 증가
         setPlayers((prevPlayers) =>{
-          const updatedPlayers = prevPlayers.map((player) =>
-            player.socket_id === winnerId
-              ? { ...player, score: player.score + 1 }
-              : player
-          );
-          // 라운드가 끝난 후 navigate 전에 상태를 로그로 확인
+        
+          const updatedPlayers = prevPlayers.map((player) => ({
+            ...player,
+            score: player.socket_id === winnerId ? player.score + 60 : player.score,
+            wrong: player.socket_id === winnerId
+              ? player.wrong // 이긴 사람은 변경 없음
+              : [...(player.wrong || []), round], // 지는 사람은 wrong 배열에 round 추가
+          }));
+          
+          console.log("Updated Players:", updatedPlayers);
+          console.log("Player 0 wrong list:", updatedPlayers[0]?.wrong);
+          console.log("Player 1 wrong list:", updatedPlayers[1]?.wrong);
+
+          
+          
+          // 5라운드가 끝난 후 navigate
           if (round >= 5) {
-            console.log("최종 플레이어 상태:", updatedPlayers);
             navigate("/result-multi", {
-              state: { players: updatedPlayers, rounds },
+              state: { players: updatedPlayers, rounds ,game_id,},
             });
           }
           return updatedPlayers;
         });
 
-
-        
       // 라운드 넘기기
       setTimeout(() => {
         if (round < 5) {

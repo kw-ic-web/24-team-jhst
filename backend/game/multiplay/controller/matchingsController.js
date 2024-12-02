@@ -57,7 +57,7 @@ async function matching(socket, mode, difficulty, token, io) {
 
             console.log("라운드 데이터 전송:", rounds);
 
-            console.log(`Game 데이터 저장 성공: ${member_id} vs ${matchedClient.member_id}`);
+            console.log(`Game 데이터 저장 성공: ${member_id} vs ${matchedClient.member_id} ${newGame.game_id}`);
 
         } catch (error) {
             console.error('Game 데이터 저장 중 오류 발생:', error);
