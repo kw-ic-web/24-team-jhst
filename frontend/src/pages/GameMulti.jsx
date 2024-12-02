@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSocket } from '../context/SocketContext';
 import { useCallback,useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const PlayerScore = ({ name, score }) => (
   <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
@@ -13,12 +14,17 @@ const PlayerScore = ({ name, score }) => (
 const GameMulti = () => {
   const socket = useSocket();
   const location = useLocation();
+  const navigate = useNavigate();
   const { myPlayer, otherPlayer, roomName, rounds, selectedMode } = location.state || {};
 
   const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
   const [letters, setLetters] = useState([]);
-  const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState([
+    { name: '', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [] },
+    { name: '', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [] },
+  ]);
+
 
   // 라운드 단어 설정
   useEffect(() => {
@@ -51,13 +57,13 @@ const GameMulti = () => {
     if (myPlayer && otherPlayer) {
       setPlayers([
         {
-          name: `플레이어 1: ${myPlayer.member_id}`,
+          name: `나: ${myPlayer.member_id}`,
           socket_id: myPlayer.id,
           score: 0,
           position: { x: myPlayer.x, y: myPlayer.y },
         },
         {
-          name: `플레이어 2: ${otherPlayer.member_id}`,
+          name: `상대방: ${otherPlayer.member_id}`,
           socket_id: otherPlayer.id,
           score: 0,
           position: { x: otherPlayer.x, y: otherPlayer.y },
@@ -297,6 +303,68 @@ useEffect(() => {
       socket.off('receiveWord', handleReceiveWord);
     };
   }, [socket]);
+
+   //정답확인 승리처리
+   useEffect(()=>{
+    console.log(`내 collectedLetters ${players[0].collectedLetters?.join('')}`)
+    if (players[0]?.collectedLetters?.length>0 && 
+      players[0].collectedLetters.join('') === rounds[`round${round}`]?.en_word) {
+      console.log("정답 맞춤!");
+      socket.emit("answer",{
+        roomName,
+        playerId: players[0].socket_id});
+    }
+
+    //winner수신
+    const handleAlertWinner = (winnerId) => {
+      const winner = players.find((player) => player.socket_id === winnerId)?.name;
+      if (winner) {
+        alert(`이긴사람 is ${winner}`);
+
+        // 이긴 사람의 점수 1점 증가
+        setPlayers((prevPlayers) =>{
+          const updatedPlayers = prevPlayers.map((player) =>
+            player.socket_id === winnerId
+              ? { ...player, score: player.score + 1 }
+              : player
+          );
+          // 라운드가 끝난 후 navigate 전에 상태를 로그로 확인
+          if (round >= 5) {
+            console.log("최종 플레이어 상태:", updatedPlayers);
+            navigate("/result-multi", {
+              state: { players: updatedPlayers, rounds },
+            });
+          }
+          return updatedPlayers;
+        });
+
+
+        
+      // 라운드 넘기기
+      setTimeout(() => {
+        if (round < 5) {
+          setRound((prevRound) => prevRound + 1);
+        }
+      }, 2000); 
+
+        //player의 단어 초기화
+        setPlayers((prevPlayers) => {
+          return prevPlayers.map((player) => ({
+            ...player,
+            collectedLetters: [], 
+          }));
+        });
+
+      }
+    };
+
+    socket.on('alertWinner', handleAlertWinner);
+
+    return () => {
+      socket.off("alertWinner"); 
+    };
+  },[players, rounds, round, socket, roomName,navigate]);
+
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">

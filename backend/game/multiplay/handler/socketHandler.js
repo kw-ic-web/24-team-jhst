@@ -81,6 +81,13 @@ const socketHandler=(server)=>{
             socket.to(roomName).emit('receiveUpdatedLetters', { updatedLetters });
         });
 
+        //answer맞음
+        socket.on("answer", (data)=>{
+          //playerid
+          const {roomName,playerId} = data;
+          io.to(roomName).emit("alertWinner",playerId); //방에 있는 사용자에게 winner알림
+        });
+
 
         // 클라이언트 접속 종료 시 처리
         socket.on("disconnect", () => {
