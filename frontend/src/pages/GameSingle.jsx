@@ -24,6 +24,7 @@ const GameSingle = () => {
   const [letters, setLetters] = useState([]);
   const [gameStatus, setGameStatus] = useState('ongoing'); // 'ongoing', 'win', 'lose', 'complete'
   const [results, setResults] = useState([]);
+  const [activeCharacter, setActiveCharacter] = useState(null); // 활성 캐릭터
   const navigate = useNavigate();
 
   const fetchWordsFromBackend = async () => {
@@ -51,6 +52,24 @@ const GameSingle = () => {
       }
     } catch (error) {
       console.error('Failed to fetch words:', error.message);
+    }
+  };
+
+  const fetchActiveCharacter = async () => {
+    try {
+      const memberId = localStorage.getItem('memberId');
+      const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
+
+      const response = await axios.get('http://localhost:8000/characters/active', {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { memberId },
+      });
+
+      if (response.data) {
+        setActiveCharacter(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch active character:', error.message);
     }
   };
 
@@ -143,14 +162,13 @@ const GameSingle = () => {
   };
 
   const startNextRound = async () => {
-    // 현재 라운드 결과를 계산하고 기록
     const currentResult = gameStatus === 'win' ? 'success' : 'fail';
     console.log(`Round ${round} Result: ${currentResult}`);
 
     setResults((prevResults) => [
       ...prevResults,
       {
-        word_id: words[round - 1]?.id || null, // 단어 ID 추가
+        word_id: words[round - 1]?.id || null,
         word,
         status: currentResult,
       },
@@ -187,10 +205,15 @@ const GameSingle = () => {
   };
 
   useEffect(() => {
-    if (words.length === 0) {
-      fetchWordsFromBackend();
-    }
+    fetchWordsFromBackend();
+    fetchActiveCharacter();
   }, []);
+
+  useEffect(() => {
+    if (word) {
+      setLetters(generateRandomLetters(word));
+    }
+  }, [word]);
 
   useEffect(() => {
     if (gameStatus === 'ongoing') {
@@ -200,7 +223,7 @@ const GameSingle = () => {
             return { ...prevPlayer, timer: prevPlayer.timer - 1 };
           } else {
             clearInterval(timerInterval);
-            setGameStatus('lose'); // 제한 시간 초과로 패배 처리
+            setGameStatus('lose');
             return prevPlayer;
           }
         });
@@ -208,12 +231,6 @@ const GameSingle = () => {
       return () => clearInterval(timerInterval);
     }
   }, [gameStatus]);
-
-  useEffect(() => {
-    if (word) {
-      setLetters(generateRandomLetters(word));
-    }
-  }, [word]);
 
   useEffect(() => {
     if (player.collectedLetters.length === 0 || !word) return;
@@ -227,10 +244,10 @@ const GameSingle = () => {
   useEffect(() => {
     if (gameStatus === 'win') {
       console.log(`Round ${round}: Player succeeded!`);
-      setTimeout(() => startNextRound(), 2000); // 다음 라운드로 이동
+      setTimeout(() => startNextRound(), 2000);
     } else if (gameStatus === 'lose') {
       console.log(`Round ${round}: Player failed.`);
-      setTimeout(() => startNextRound(), 2000); // 다음 라운드로 이동
+      setTimeout(() => startNextRound(), 2000);
     }
   }, [gameStatus]);
 
@@ -253,24 +270,34 @@ const GameSingle = () => {
         <p>{word}</p>
       </div>
       <div className="relative w-full max-w-4xl h-96 bg-white rounded-md">
-        <div
-          className="bg-blue-500 w-12 h-12 rounded-full absolute flex items-center justify-center"
+        {/* 플레이어 이미지 */}
+        <img
+          src={activeCharacter?.image || 'default-character.png'}
+          alt={activeCharacter?.name || 'Player'}
+          className="w-12 h-12 absolute"
           style={{
             left: `${player.position.x}px`,
             top: `${player.position.y}px`,
+            objectFit: 'contain',
           }}
-        >
-          <div className="absolute top-[-30px] left-0 flex gap-2">
-            {player.collectedLetters.map((letter, index) => (
-              <div
-                key={index}
-                className="bg-white text-black text-sm font-bold px-2 py-1 border rounded"
-              >
-                {letter}
-              </div>
-            ))}
+        />
+
+        {/* 획득한 단어 표시 - 가로로 배치 */}
+        {player.collectedLetters.map((letter, index) => (
+          <div
+            key={index}
+            className="absolute bg-white text-black text-sm font-bold px-2 py-1 border rounded"
+            style={{
+              left: `${player.position.x + index * 30}px`, 
+              top: `${player.position.y - 30}px`, 
+              transform: 'translateX(-50%)', 
+            }}
+          >
+            {letter}
           </div>
-        </div>
+        ))}
+
+        {/* 게임 필드에 흩어진 글자 */}
         {letters.map((letterObj, index) => (
           <div
             key={index}
@@ -284,6 +311,7 @@ const GameSingle = () => {
           </div>
         ))}
       </div>
+
       {gameStatus === 'win' && (
         <div className="text-green-500 text-2xl mt-4">승리! 다음 라운드로 이동합니다.</div>
       )}
