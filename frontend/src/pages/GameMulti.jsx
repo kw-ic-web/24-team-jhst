@@ -19,7 +19,6 @@ const GameMulti = () => {
   const [word, setWord] = useState('');
   const [letters, setLetters] = useState([]);
   const [players, setPlayers] = useState([]);
-  const [collectedLetters, setCollectedLetters] = useState([]);
 
   // 라운드 단어 설정
   useEffect(() => {
@@ -69,17 +68,17 @@ const GameMulti = () => {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isBackspaceProcessing, setIsBackspaceProcessing] = useState(false);
-  // 키 입력 처리
 
+  // 키 입력 처리
   const handleKeyPress = useCallback(
     (event) => {
       console.log('Key pressed:', event.key);
       const moveDistance = 20;
   
       if (event.key === 'Enter' && !isProcessing) {
-        setIsProcessing(true); // 처리 시작
+        setIsProcessing(true); // enter 
       } else if (event.key === 'Backspace' && !isBackspaceProcessing) {
-        setIsBackspaceProcessing(true); 
+        setIsBackspaceProcessing(true); //backspace
       } else {
         setPlayers((prevPlayers) => {
           const newPosition = { ...prevPlayers[0]?.position };
@@ -170,7 +169,7 @@ const GameMulti = () => {
     }
 }, [isProcessing, letters, players, roomName, socket]);
 
-// Backspace 이벤트 처리
+// Backspace
 useEffect(() => {
   
   if (isBackspaceProcessing) {
@@ -261,7 +260,6 @@ useEffect(() => {
   
     socket.on('receiveWord', handleReceiveWord);
   
-    // Cleanup
     return () => {
       socket.off('receiveWord', handleReceiveWord);
     };
