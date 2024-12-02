@@ -4,7 +4,7 @@ const { matching,removeFromQueue } = require("../controller/matchingsController"
 
 const generateRandomLetters = (currentWord) => {
     const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-    const wordLetters = [...currentWord].sort(() => Math.random() - 0.5);
+    const wordLetters = [...currentWord, ...currentWord].sort(() => Math.random() - 0.5);
     const randomLetters = Array.from({ length: 10 }, () =>
       alphabet[Math.floor(Math.random() * alphabet.length)]
     );
@@ -17,7 +17,7 @@ const generateRandomLetters = (currentWord) => {
       y: Math.random() * 300 + 50, // 랜덤 Y 위치
     }));
     
-  };
+};
 
 
 

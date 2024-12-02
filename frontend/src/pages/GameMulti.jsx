@@ -347,7 +347,6 @@ useEffect(() => {
     const handleAlertWinner = (winnerId) => {
       const winner = players.find((player) => player.socket_id === winnerId)?.name;
       if (winner) {
-        //alert(`이긴사람 is ${winner}`);
 
         // 이긴 사람의 점수 20점 증가
         setPlayers((prevPlayers) =>{
@@ -379,7 +378,7 @@ useEffect(() => {
               navigate("/result-multi", {
                 state: { players: updatedPlayers, rounds, game_id },
               });
-            }, 2000); // 3초 후 이동
+            }, 2000); 
           } else {
             setRound((prevRound) => prevRound + 1);
           }
