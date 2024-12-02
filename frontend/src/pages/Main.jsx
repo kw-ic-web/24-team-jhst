@@ -156,7 +156,7 @@ function Main() {
             <img
               src={activeCharacter.image}
               alt={activeCharacter.name}
-              className="w-48 h-48 mb-6"
+              className="w-48 h-48 mb-6 object-contain"
             />
           ) : (
             <p>선택된 캐릭터가 없습니다. 상점에서 선택해주세요.</p>
