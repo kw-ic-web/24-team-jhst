@@ -15,6 +15,8 @@ import ResultMulti from './pages/ResultMulti.jsx';
 import CharacterTest from './pages/character-test.jsx';
 import GameSingle from './pages/GameSingle.jsx';
 import Admin from './pages/AdminPage.jsx';
+import WrongNote from './pages/WrongNote.jsx';
+
 import { SocketProvider } from './context/SocketContext';
 function App() {
   return (
@@ -37,6 +39,7 @@ function App() {
           <Route path="/game-multi" element={<GameMulti />} />
           <Route path="/game-single" element={<GameSingle />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/wrong-note" element={<WrongNote />} />
         </Routes>
       </Router>
     </SocketProvider>
