@@ -76,6 +76,11 @@ const socketHandler=(server)=>{
             socket.to(roomName).emit("receiveWord", { updateLetter, playerId });
         });
 
+        socket.on('updateLetters', ({ roomName, updatedLetters }) => {
+            // 해당 방에 있는 모든 클라이언트에게 업데이트된 알파벳 리스트 브로드캐스트
+            socket.to(roomName).emit('receiveUpdatedLetters', { updatedLetters });
+        });
+
 
         // 클라이언트 접속 종료 시 처리
         socket.on("disconnect", () => {
