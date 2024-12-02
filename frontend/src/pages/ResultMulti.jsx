@@ -1,14 +1,24 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from 'react-router-dom';
 import { FaStar } from "react-icons/fa";
 import meow3 from '../assets/images/meow3.png'; // Ensure the path is correct
 
 const ResultMulti = () => {
-  const wordList = ["apple", "apple", "apple", "apple", "apple"];
-  const winScore = 505;
-  const loseScore = 105;
+  const winScore = 70;
+  const loseScore = 30;
   const navigate = useNavigate();
+  const location = useLocation();
+  const { players = [], rounds = {} } = location.state || {};
+  const wordList = Array.from({ length: 5 }, (_, i) => {
+    const roundKey = `round${i + 1}`;
+    return rounds[roundKey]?.en_word || rounds[roundKey]?.ko_word || "N/A";
+  });
 
+  const winner = players.find((player) => player.score >= 3) || {};
+  const loser = players.find((player) => player.score < 3) || {};
+
+  
   const handleBack = () => {
     navigate("/main");
   };
@@ -20,7 +30,7 @@ const ResultMulti = () => {
         {/* 상대방*/}
         <div className="w-1/3 flex flex-col items-center justify-center bg-blue-500 p-6 rounded-lg">
           <h1 className="text-4xl font-bold mb-4 text-white">WIN</h1>
-          <h2 className="text-xl font-bold mb-4 text-white">상대방</h2>
+          <h2 className="text-xl font-bold mb-4 text-white">{winner?.name}</h2>
           <img src={meow3} alt="Cat Icon" className="w-28 h-28 mb-6" />
           <div className="flex items-center bg-gray-200 py-2 px-4 rounded-md">
             <FaStar className="text-yellow-500 mr-2" />
@@ -51,7 +61,7 @@ const ResultMulti = () => {
         {/* 나*/}
         <div className="w-1/3 flex flex-col items-center justify-center bg-red-500 p-6 rounded-lg">
           <h1 className="text-4xl font-bold mb-4 text-white">LOSE</h1>
-          <h2 className="text-xl font-bold mb-4 text-white">나</h2>
+          <h2 className="text-xl font-bold mb-4 text-white">{loser?.name}</h2>
           <img src={meow3} alt="Cat Icon" className="w-28 h-28 mb-6" />
           <div className="flex items-center bg-gray-200 py-2 px-4 rounded-md">
             <FaStar className="text-yellow-500 mr-2" />

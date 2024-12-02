@@ -17,7 +17,7 @@ const GameMulti = () => {
   const navigate = useNavigate();
   const { myPlayer, otherPlayer, roomName, rounds, selectedMode } = location.state || {};
 
-  const [round, setRound] = useState(5);
+  const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
   const [letters, setLetters] = useState([]);
   const [players, setPlayers] = useState([
@@ -57,13 +57,13 @@ const GameMulti = () => {
     if (myPlayer && otherPlayer) {
       setPlayers([
         {
-          name: `플레이어 1: ${myPlayer.member_id}`,
+          name: `나: ${myPlayer.member_id}`,
           socket_id: myPlayer.id,
           score: 0,
           position: { x: myPlayer.x, y: myPlayer.y },
         },
         {
-          name: `플레이어 2: ${otherPlayer.member_id}`,
+          name: `상대방: ${otherPlayer.member_id}`,
           socket_id: otherPlayer.id,
           score: 0,
           position: { x: otherPlayer.x, y: otherPlayer.y },
@@ -322,27 +322,30 @@ useEffect(() => {
         alert(`이긴사람 is ${winner}`);
 
         // 이긴 사람의 점수 1점 증가
-        setPlayers((prevPlayers) =>
-          prevPlayers.map((player) =>
+        setPlayers((prevPlayers) =>{
+          const updatedPlayers = prevPlayers.map((player) =>
             player.socket_id === winnerId
-            ? { ...player, score: player.score + 1 } // 점수 증가
+              ? { ...player, score: player.score + 1 }
               : player
-          )
-        );
-
-
-        //round넘어감
-        setTimeout(() => {
-          if (round < 5) {
-            setRound((prevRound) => prevRound + 1);
-          } else {
-            console.log('Navigating to ResultMulti:', players, rounds);
-            // 5라운드 이후 결과 페이지로 이동
-            navigate('/result-multi', {
-              state: { players,rounds },
+          );
+          // 라운드가 끝난 후 navigate 전에 상태를 로그로 확인
+          if (round >= 5) {
+            console.log("최종 플레이어 상태:", updatedPlayers);
+            navigate("/result-multi", {
+              state: { players: updatedPlayers, rounds },
             });
           }
-        }, 2000);
+          return updatedPlayers;
+        });
+
+
+        
+      // 라운드 넘기기
+      setTimeout(() => {
+        if (round < 5) {
+          setRound((prevRound) => prevRound + 1);
+        }
+      }, 2000); 
 
         //player의 단어 초기화
         setPlayers((prevPlayers) => {
