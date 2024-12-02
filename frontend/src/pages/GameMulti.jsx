@@ -15,14 +15,14 @@ const GameMulti = () => {
   const socket = useSocket();
   const location = useLocation();
   const navigate = useNavigate();
-  const { myPlayer, otherPlayer, roomName, rounds, selectedMode } = location.state || {};
+  const { myPlayer, otherPlayer, roomName, game_id, rounds, selectedMode } = location.state || {};
 
   const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
   const [letters, setLetters] = useState([]);
   const [players, setPlayers] = useState([
-    { name: '', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [] },
-    { name: '', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [] },
+    { name: '',member_id:'', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [], wrong:[], },
+    { name: '',member_id:'', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [], wrong:[], },
   ]);
 
 
@@ -58,12 +58,14 @@ const GameMulti = () => {
       setPlayers([
         {
           name: `나: ${myPlayer.member_id}`,
+          member_id: myPlayer.member_id,
           socket_id: myPlayer.id,
           score: 0,
           position: { x: myPlayer.x, y: myPlayer.y },
         },
         {
           name: `상대방: ${otherPlayer.member_id}`,
+          member_id: otherPlayer.member_id,
           socket_id: otherPlayer.id,
           score: 0,
           position: { x: otherPlayer.x, y: otherPlayer.y },
@@ -78,7 +80,6 @@ const GameMulti = () => {
   // 키 입력 처리
   const handleKeyPress = useCallback(
     (event) => {
-      console.log('Key pressed:', event.key);
       const moveDistance = 20;
   
       if (event.key === 'Enter' && !isProcessing) {
@@ -151,7 +152,7 @@ const GameMulti = () => {
             setLetters(updatedLetters); // 알파벳 리스트 업데이트
 
 
-    // 소켓을 통해 업데이트된 알파벳 리스트 전송
+            // 소켓을 통해 업데이트된 알파벳 리스트 전송
             socket.emit('updateLetters', {
               roomName,
               updatedLetters,
@@ -186,7 +187,6 @@ const GameMulti = () => {
 // Backspace
 useEffect(() => {
   if (isBackspaceProcessing) {
-    console.log("backspace 호출");
     setPlayers((prevPlayers) => {
       if (prevPlayers[0]?.collectedLetters.length > 0) {
         const droppedLetter = prevPlayers[0].collectedLetters.slice(-1)[0];
@@ -236,8 +236,8 @@ useEffect(() => {
   // 키 이벤트 리스너 관리
   useEffect(() => {
     const keyPressHandler = (event) => handleKeyPress(event);
-  window.addEventListener('keydown', keyPressHandler);
-  return () => window.removeEventListener('keydown', keyPressHandler);
+    window.addEventListener('keydown', keyPressHandler);
+    return () => window.removeEventListener('keydown', keyPressHandler);
 }, [handleKeyPress]);
 
   // 다른 플레이어 위치 업데이트 수신
@@ -278,7 +278,6 @@ useEffect(() => {
   // 다른 플레이어 단어 업데이트 수신
   useEffect(() => {
     const handleReceiveWord = ({  updateLetter = '', playerId }) => {
-      console.log(`소켓한테 받은거 "${updateLetter}" from Player ${playerId}`);
       setPlayers((prevPlayers) => {
         const updatedPlayers = [...prevPlayers];
         const playerIndex = updatedPlayers.findIndex(
@@ -307,6 +306,8 @@ useEffect(() => {
    //정답확인 승리처리
    useEffect(()=>{
     console.log(`내 collectedLetters ${players[0].collectedLetters?.join('')}`)
+
+    //정답확인
     if (players[0]?.collectedLetters?.length>0 && 
       players[0].collectedLetters.join('') === rounds[`round${round}`]?.en_word) {
       console.log("정답 맞춤!");
@@ -321,31 +322,44 @@ useEffect(() => {
       if (winner) {
         alert(`이긴사람 is ${winner}`);
 
-        // 이긴 사람의 점수 1점 증가
+        // 이긴 사람의 점수 20점 증가
         setPlayers((prevPlayers) =>{
-          const updatedPlayers = prevPlayers.map((player) =>
-            player.socket_id === winnerId
-              ? { ...player, score: player.score + 1 }
-              : player
-          );
-          // 라운드가 끝난 후 navigate 전에 상태를 로그로 확인
+        
+          const updatedPlayers = prevPlayers.map((player) => {
+            if (player.socket_id === winnerId) {
+              // 이긴 사람 처리
+              return { ...player, score: player.score + 20 };
+            } else {
+              // 진 사람 처리 - 중복 값 방지
+              const updatedWrong =  (player.wrong || []).includes(round)
+                ? player.wrong // 이미 있으면 그대로 유지
+                :[...(player.wrong || []), round]; // 없으면 추가
+              return { ...player, wrong: updatedWrong };
+            }
+          });
+          
+          console.log("Updated Players:", updatedPlayers);
+          console.log("Player 0 wrong list:", updatedPlayers[0]?.wrong);
+          console.log("Player 1 wrong list:", updatedPlayers[1]?.wrong);
+
+          
+          
+          // 5라운드가 끝난 후 navigate
           if (round >= 5) {
-            console.log("최종 플레이어 상태:", updatedPlayers);
             navigate("/result-multi", {
-              state: { players: updatedPlayers, rounds },
+              state: { players: updatedPlayers, rounds ,game_id,},
             });
           }
           return updatedPlayers;
         });
 
-
-        
       // 라운드 넘기기
       setTimeout(() => {
         if (round < 5) {
           setRound((prevRound) => prevRound + 1);
         }
       }, 2000); 
+
 
         //player의 단어 초기화
         setPlayers((prevPlayers) => {
