@@ -79,6 +79,7 @@ router.post('/winner', async (req, res, next) => {
       return res.status(404).json({ message: "해당 winner를 member_game 테이블에서 찾을 수 없습니다." });
     }
     win_member.point += winPoint;
+    win_member.win+=1;
     await win_member.save();
 
     const lose_member = await MemberGame.findOne({ where: { member_id: loser } });
@@ -86,6 +87,7 @@ router.post('/winner', async (req, res, next) => {
       return res.status(404).json({ message: "해당 loser를 member_game 테이블에서 찾을 수 없습니다." });
     }
     lose_member.point += losePoint;
+    lose_member.lose +=1;
     await lose_member.save();
     console.log(`losePoint${losePoint}`)
 
