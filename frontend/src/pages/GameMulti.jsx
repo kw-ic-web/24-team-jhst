@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSocket } from '../context/SocketContext';
-import { useCallback } from 'react';
+import { useCallback,useRef } from 'react';
 
 const PlayerScore = ({ name, score }) => (
   <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
@@ -67,110 +67,128 @@ const GameMulti = () => {
     }
   }, [myPlayer, otherPlayer]);
 
+  const [isProcessing, setIsProcessing] = useState(false);
   // 키 입력 처리
-  const handleKeyPress  = useCallback((event) => {
-    console.log('Key pressed:', event.key); 
-    const moveDistance = 20;
 
-    if (event.key === 'Enter') {
-      setLetters((prevLetters) => {
-        const playerPos = players[0].position;
-        let closestIndex = -1;
-        let minDistance = Infinity;
-    
-        prevLetters.forEach((letterObj, index) => {
-          const dx = letterObj.x - playerPos.x;
-          const dy = letterObj.y - playerPos.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance < 30 && distance < minDistance) {
-            closestIndex = index;
-            minDistance = distance;
-          }
-        });
-    
-        if (closestIndex !== -1) {
-          const collectedLetter = prevLetters[closestIndex];
-          setCollectedLetters((prevCollected) => {
-            const updatedCollected = [...prevCollected, collectedLetter.letter];
-            console.log(`Enter로 얻은 글자: ${collectedLetter.letter}`);
-            console.log(`현재 보유 알파벳: ${updatedCollected.join(', ')}`);
-    
+  const handleKeyPress = useCallback(
+    (event) => {
+      console.log('Key pressed:', event.key);
+      const moveDistance = 20;
+  
+      if (event.key === 'Enter' && !isProcessing) {
+        setIsProcessing(true); // 처리 시작
+      } else if (event.key === 'Backspace') {
+        // Backspace 로직
+        setPlayers((prevPlayers) => {
+          const updatedPlayers = [...prevPlayers];
+          if (updatedPlayers[0]?.collectedLetters.length > 0) {
+            const droppedLetter = updatedPlayers[0].collectedLetters.slice(-1)[0];
+            updatedPlayers[0].collectedLetters = updatedPlayers[0].collectedLetters.slice(0, -1);
+            setLetters((prevLetters) => [
+              ...prevLetters,
+              {
+                letter: droppedLetter,
+                x: updatedPlayers[0].position.x,
+                y: updatedPlayers[0].position.y,
+              },
+            ]);
+  
             socket.emit('updateWord', {
               roomName,
-              letter: updatedCollected.join(''),
-              playerId: players[0]?.socket_id,
+              letter: updatedPlayers[0].collectedLetters.join(''),
+              playerId: updatedPlayers[0].socket_id,
             });
-    
-            return updatedCollected;
-          });
-    
-          return prevLetters.filter((_, index) => index !== closestIndex);
-        }
-        return prevLetters;
-      });
-    } else if (event.key === 'Backspace') {
-      setCollectedLetters((prevCollectedLetters) => {
-        if (prevCollectedLetters.length > 0) {
-          const droppedLetter = prevCollectedLetters.slice(-1)[0];
-          setLetters((prevLetters) => [
-            ...prevLetters,
-            {
-              letter: droppedLetter,
-              x: players[0].position.x,
-              y: players[0].position.y,
-            },
-          ]);
-          const updatedCollected = prevCollectedLetters.slice(0, -1);
-          console.log(`Backspace로 뱉은 글자: ${droppedLetter}`);
-          console.log(`현재 보유 알파벳: ${updatedCollected.join(', ')}`);
-
-          // 백엔드로 전송
-          socket.emit('updateWord', {
+          }
+  
+          return updatedPlayers;
+        });
+      } else {
+        setPlayers((prevPlayers) => {
+          const newPosition = { ...prevPlayers[0]?.position };
+          switch (event.key) {
+            case 'w':
+              newPosition.y = Math.max(newPosition.y - moveDistance, 0);
+              break;
+            case 's':
+              newPosition.y = Math.min(newPosition.y + moveDistance, 350);
+              break;
+            case 'a':
+              newPosition.x = Math.max(newPosition.x - moveDistance, 0);
+              break;
+            case 'd':
+              newPosition.x = Math.min(newPosition.x + moveDistance, 750);
+              break;
+            default:
+              return prevPlayers;
+          }
+          const updatedPlayers = [...prevPlayers];
+          updatedPlayers[0] = { ...updatedPlayers[0], position: newPosition };
+  
+          socket.emit('updatePosition', {
             roomName,
-            letter: updatedCollected.join(''), // 문자열로 변환하여 전송
-            playerId: players[0]?.socket_id,
+            player: {
+              id: socket.id,
+              position: newPosition,
+            },
           });
-          return updatedCollected;
+  
+          return updatedPlayers;
+        });
+      }
+    },
+    [players, socket, roomName]
+  );
+  
+  useEffect(() => {
+    if (isProcessing) {
+        const playerPos = players[0]?.position;
+        if (!playerPos) {
+            setIsProcessing(false);
+            return;
         }
 
-        console.log('Backspace를 눌렀으나 뱉을 글자가 없습니다.');
-        return prevCollectedLetters;
-      });
-    } else {
-      setPlayers((prevPlayers) => {
-        const newPosition = { ...prevPlayers[0].position };
-        switch (event.key) {
-          case 'w':
-            newPosition.y = Math.max(newPosition.y - moveDistance, 0);
-            break;
-          case 's':
-            newPosition.y = Math.min(newPosition.y + moveDistance, 350);
-            break;
-          case 'a':
-            newPosition.x = Math.max(newPosition.x - moveDistance, 0);
-            break;
-          case 'd':
-            newPosition.x = Math.min(newPosition.x + moveDistance, 750);
-            break;
-          default:
-            return prevPlayers;
-        }
-        const updatedPlayers = [...prevPlayers];
-        updatedPlayers[0] = { ...updatedPlayers[0], position: newPosition };
+        let closestIndex = -1;
+        let minDistance = Infinity;
 
-        // 위치 정보를 서버에 전송
-        socket.emit('updatePosition', {
-          roomName,
-          player: {
-            id: socket.id,
-            position: newPosition,
-          },
+        letters.forEach((letterObj, index) => {
+            const dx = letterObj.x - playerPos.x;
+            const dy = letterObj.y - playerPos.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 30 && distance < minDistance) {
+                closestIndex = index;
+                minDistance = distance;
+            }
         });
 
-        return updatedPlayers;
-      });
+        if (closestIndex !== -1) {
+            const collectedLetter = letters[closestIndex];
+            const updatedLetters = letters.filter((_, index) => index !== closestIndex);
+            setLetters(updatedLetters); // 알파벳 리스트 업데이트
+
+            setPlayers((prevPlayers) => {
+                const updatedPlayers = [...prevPlayers];
+                updatedPlayers[0] = {
+                    ...updatedPlayers[0],
+                    collectedLetters: [
+                        ...(updatedPlayers[0]?.collectedLetters || []),
+                        collectedLetter.letter,
+                    ],
+                };
+
+                // 소켓으로 업데이트된 데이터 전송
+                socket.emit('updateWord', {
+                    roomName,
+                    letter: updatedPlayers[0].collectedLetters.join(''),
+                    playerId: updatedPlayers[0].socket_id,
+                });
+
+                return updatedPlayers;
+            });
+        }
+
+        setIsProcessing(false); // 상태 업데이트 완료 후 처리 해제
     }
-  }, [players, socket, roomName]);
+}, [isProcessing, letters, players, roomName, socket]);
 
   
 
@@ -207,7 +225,7 @@ const GameMulti = () => {
   // 다른 플레이어 단어 업데이트 수신
   useEffect(() => {
     const handleReceiveWord = ({  updateLetter = '', playerId }) => {
-      console.log(`소켓한테  "${updateLetter}" from Player ${playerId}`);
+      console.log(`소켓한테 받은거 "${updateLetter}" from Player ${playerId}`);
       setPlayers((prevPlayers) => {
         const updatedPlayers = [...prevPlayers];
         const playerIndex = updatedPlayers.findIndex(
@@ -266,7 +284,7 @@ const GameMulti = () => {
             className="absolute top-[-30px] left-0 flex gap-1"
             style={{ whiteSpace: 'nowrap' }}
           >
-            {collectedLetters.map((letter, index) => (
+            {players[0]?.collectedLetters?.map((letter, index) => (
               <span
                 key={index}
                 className="text-white bg-black text-sm px-2 py-1 rounded"
