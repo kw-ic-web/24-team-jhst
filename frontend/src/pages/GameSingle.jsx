@@ -58,7 +58,7 @@ const GameSingle = () => {
   const fetchActiveCharacter = async () => {
     try {
       const memberId = localStorage.getItem('memberId');
-      const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
+      const token = localStorage.getItem('token');
 
       const response = await axios.get('http://localhost:8000/characters/active', {
         headers: { Authorization: `Bearer ${token}` },
@@ -161,18 +161,24 @@ const GameSingle = () => {
     }
   };
 
+  const calculateScore = (results) => {
+    return results.reduce((score, result) => {
+      return score + (result.status === 'success' ? 20 : 0);
+    }, 0);
+  };
+
   const startNextRound = async () => {
     const currentResult = gameStatus === 'win' ? 'success' : 'fail';
-    console.log(`Round ${round} Result: ${currentResult}`);
-
-    setResults((prevResults) => [
-      ...prevResults,
+    const updatedResults = [
+      ...results,
       {
         word_id: words[round - 1]?.id || null,
         word,
         status: currentResult,
       },
-    ]);
+    ];
+
+    setResults(updatedResults);
 
     const nextRound = round + 1;
 
@@ -193,14 +199,16 @@ const GameSingle = () => {
         const gameId = localStorage.getItem('gameId');
         await axios.post('http://localhost:8000/game/roundplay/result', {
           member_id: memberId,
-          results,
+          results: updatedResults,
           game_id: gameId,
         });
         console.log('Results successfully sent to the server');
       } catch (error) {
         console.error('Failed to send results:', error);
       }
-      navigate('/result-single', { state: { results } });
+      navigate('/result-single', {
+        state: { results: updatedResults, character: activeCharacter, score: calculateScore(updatedResults) },
+      });
     }
   };
 
@@ -270,19 +278,15 @@ const GameSingle = () => {
         <p>{word}</p>
       </div>
       <div className="relative w-full max-w-4xl h-96 bg-white rounded-md">
-        {/* 플레이어 이미지 */}
         <img
           src={activeCharacter?.image || 'default-character.png'}
           alt={activeCharacter?.name || 'Player'}
-          className="w-12 h-12 absolute"
+          className="w-14 h-14 absolute object-contain"
           style={{
             left: `${player.position.x}px`,
             top: `${player.position.y}px`,
-            objectFit: 'contain',
           }}
         />
-
-        {/* 획득한 단어 표시 - 가로로 배치 */}
         {player.collectedLetters.map((letter, index) => (
           <div
             key={index}
@@ -296,8 +300,6 @@ const GameSingle = () => {
             {letter}
           </div>
         ))}
-
-        {/* 게임 필드에 흩어진 글자 */}
         {letters.map((letterObj, index) => (
           <div
             key={index}
@@ -311,7 +313,6 @@ const GameSingle = () => {
           </div>
         ))}
       </div>
-
       {gameStatus === 'win' && (
         <div className="text-green-500 text-2xl mt-4">승리! 다음 라운드로 이동합니다.</div>
       )}
