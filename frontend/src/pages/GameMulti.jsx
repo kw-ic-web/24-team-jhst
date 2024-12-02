@@ -80,7 +80,6 @@ const GameMulti = () => {
   // 키 입력 처리
   const handleKeyPress = useCallback(
     (event) => {
-      console.log('Key pressed:', event.key);
       const moveDistance = 20;
   
       if (event.key === 'Enter' && !isProcessing) {
@@ -153,7 +152,7 @@ const GameMulti = () => {
             setLetters(updatedLetters); // 알파벳 리스트 업데이트
 
 
-    // 소켓을 통해 업데이트된 알파벳 리스트 전송
+            // 소켓을 통해 업데이트된 알파벳 리스트 전송
             socket.emit('updateLetters', {
               roomName,
               updatedLetters,
@@ -188,7 +187,6 @@ const GameMulti = () => {
 // Backspace
 useEffect(() => {
   if (isBackspaceProcessing) {
-    console.log("backspace 호출");
     setPlayers((prevPlayers) => {
       if (prevPlayers[0]?.collectedLetters.length > 0) {
         const droppedLetter = prevPlayers[0].collectedLetters.slice(-1)[0];
@@ -238,8 +236,8 @@ useEffect(() => {
   // 키 이벤트 리스너 관리
   useEffect(() => {
     const keyPressHandler = (event) => handleKeyPress(event);
-  window.addEventListener('keydown', keyPressHandler);
-  return () => window.removeEventListener('keydown', keyPressHandler);
+    window.addEventListener('keydown', keyPressHandler);
+    return () => window.removeEventListener('keydown', keyPressHandler);
 }, [handleKeyPress]);
 
   // 다른 플레이어 위치 업데이트 수신
@@ -327,13 +325,18 @@ useEffect(() => {
         // 이긴 사람의 점수 20점 증가
         setPlayers((prevPlayers) =>{
         
-          const updatedPlayers = prevPlayers.map((player) => ({
-            ...player,
-            score: player.socket_id === winnerId ? player.score + 60 : player.score,
-            wrong: player.socket_id === winnerId
-              ? player.wrong // 이긴 사람은 변경 없음
-              : [...(player.wrong || []), round], // 지는 사람은 wrong 배열에 round 추가
-          }));
+          const updatedPlayers = prevPlayers.map((player) => {
+            if (player.socket_id === winnerId) {
+              // 이긴 사람 처리
+              return { ...player, score: player.score + 20 };
+            } else {
+              // 진 사람 처리 - 중복 값 방지
+              const updatedWrong =  (player.wrong || []).includes(round)
+                ? player.wrong // 이미 있으면 그대로 유지
+                :[...(player.wrong || []), round]; // 없으면 추가
+              return { ...player, wrong: updatedWrong };
+            }
+          });
           
           console.log("Updated Players:", updatedPlayers);
           console.log("Player 0 wrong list:", updatedPlayers[0]?.wrong);
@@ -356,6 +359,7 @@ useEffect(() => {
           setRound((prevRound) => prevRound + 1);
         }
       }, 2000); 
+
 
         //player의 단어 초기화
         setPlayers((prevPlayers) => {
