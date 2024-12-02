@@ -23,10 +23,16 @@ const ResultMulti = () => {
     const sendWinnerData = async () => {
       console.log(`winner: ${winner.member_id} `);
       console.log(`game_id: ${game_id}`);
+      console.log(`loser: ${loser.member_id}`);
+      console.log(`winnPoint: ${winner.score}`);
+      console.log(`losePoint: ${loser.score}`)
       try {
         await axios.post('http://localhost:8000/multiplay/winner', {
           game_id: game_id,
           winner: winner.member_id,
+          loser: loser.member_id,
+          winPoint: winner.score,
+          losePoint:loser.score,
         });
         console.log('Results successfully sent to the server');
       } catch (error) {
@@ -53,7 +59,7 @@ const ResultMulti = () => {
           <img src={meow3} alt="Cat Icon" className="w-28 h-28 mb-6" />
           <div className="flex items-center bg-gray-200 py-2 px-4 rounded-md">
             <FaStar className="text-yellow-500 mr-2" />
-            <span className="text-xl font-bold">+{winScore}</span>
+            <span className="text-xl font-bold">+{winner.score}</span>
           </div>
         </div>
 
@@ -84,7 +90,7 @@ const ResultMulti = () => {
           <img src={meow3} alt="Cat Icon" className="w-28 h-28 mb-6" />
           <div className="flex items-center bg-gray-200 py-2 px-4 rounded-md">
             <FaStar className="text-yellow-500 mr-2" />
-            <span className="text-xl font-bold">+{loseScore}</span>
+            <span className="text-xl font-bold">+{loser.score}</span>
           </div>
         </div>
 

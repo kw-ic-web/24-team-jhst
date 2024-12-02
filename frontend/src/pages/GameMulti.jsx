@@ -17,7 +17,7 @@ const GameMulti = () => {
   const navigate = useNavigate();
   const { myPlayer, otherPlayer, roomName, game_id, rounds, selectedMode } = location.state || {};
 
-  const [round, setRound] = useState(5);
+  const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
   const [letters, setLetters] = useState([]);
   const [players, setPlayers] = useState([
