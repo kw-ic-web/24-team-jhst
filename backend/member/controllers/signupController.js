@@ -4,9 +4,7 @@ require('dotenv').config(); // .env 파일 로드
 
 const bcrypt = require('bcrypt'); //비밀번호 암호화
 
-const member_game = require('../../db/memberdb');
-
-const MemberGame = member_game.MemberGame; // membergame으로 변경
+const { MemberCharacters, MemberGame } = require('../../db/memberdb');
 
 // checkid 함수: 아이디 중복 확인
 const checkid = async (req, res) => {
@@ -58,6 +56,12 @@ const insertMemberTableData = async (req, res) => {
       name,
       email,
       point: 100, // 기본 포인트 100
+    });
+
+    await MemberCharacters.create({
+      member_id: id,
+      character_id: 91, // 로컬db의 character_id 에 맞게 바꿔야 함.
+      is_active: true,
     });
 
     res.status(201).json({ message: '새로운 회원 등록 성공' });
