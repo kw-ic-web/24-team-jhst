@@ -20,6 +20,7 @@ const GameMulti = () => {
   const [isGameOverModal, setIsGameOverModal] = useState(false); // 게임 종료 모달
   const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
+  const [mode, setMode] = useState('');
   const [letters, setLetters] = useState([]);
   const [players, setPlayers] = useState([
     { name: '',member_id:'', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [], wrong:[], },
@@ -40,19 +41,16 @@ const GameMulti = () => {
     };
   }, []);
 
-
- 
-
   // 라운드 단어 설정
   useEffect(() => {
     if (rounds && rounds[`round${round}`]) {
       // 모달 표시
       setShowRoundModal(true);
-
+      setWord(rounds[`round${round}`].en_word);
       if (selectedMode === 'english') {
-        setWord(rounds[`round${round}`].en_word);
+        setMode(rounds[`round${round}`].en_word)
       } else if (selectedMode === 'korea') {
-        setWord(rounds[`round${round}`].ko_word);
+        setMode(rounds[`round${round}`].ko_word);
       }
       // 3초 후 모달 닫기
       const timer = setTimeout(() => {
@@ -458,7 +456,7 @@ useEffect(() => {
         <PlayerScore name={players[1]?.name} score={players[1]?.score || 0} />
       </div>
       <div className="text-center bg-gray-300 p-4 rounded-md text-2xl mb-8 max-w-2xl w-full">
-        {word || '로딩 중...'}
+        {mode || '로딩 중...'}
       </div>
       <div className="relative w-full max-w-4xl h-96 bg-white rounded-md">
         <div
