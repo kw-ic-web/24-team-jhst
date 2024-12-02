@@ -16,24 +16,49 @@ const GameMulti = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { myPlayer, otherPlayer, roomName, game_id, rounds, selectedMode } = location.state || {};
-
+  const [showRoundModal, setShowRoundModal] = useState(false); //라운드 모달창
+  const [isGameOverModal, setIsGameOverModal] = useState(false); // 게임 종료 모달
   const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
+  const [mode, setMode] = useState('');
   const [letters, setLetters] = useState([]);
   const [players, setPlayers] = useState([
     { name: '',member_id:'', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [], wrong:[], },
     { name: '',member_id:'', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [], wrong:[], },
   ]);
 
+  // 새로고침 및 페이지 이동 차단
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = ''; // 경고 메시지 표시
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   // 라운드 단어 설정
   useEffect(() => {
     if (rounds && rounds[`round${round}`]) {
+      // 모달 표시
+      setShowRoundModal(true);
+      setWord(rounds[`round${round}`].en_word);
       if (selectedMode === 'english') {
-        setWord(rounds[`round${round}`].en_word);
+        setMode(rounds[`round${round}`].en_word)
       } else if (selectedMode === 'korea') {
-        setWord(rounds[`round${round}`].ko_word);
+        setMode(rounds[`round${round}`].ko_word);
       }
+      // 3초 후 모달 닫기
+      const timer = setTimeout(() => {
+        setShowRoundModal(false);
+      }, 2000);
+
+      // 타이머 정리
+      return () => clearTimeout(timer);
     }
   }, [rounds, round, selectedMode]);
 
@@ -314,13 +339,14 @@ useEffect(() => {
       socket.emit("answer",{
         roomName,
         playerId: players[0].socket_id});
+
+      
     }
 
     //winner수신
     const handleAlertWinner = (winnerId) => {
       const winner = players.find((player) => player.socket_id === winnerId)?.name;
       if (winner) {
-        alert(`이긴사람 is ${winner}`);
 
         // 이긴 사람의 점수 20점 증가
         setPlayers((prevPlayers) =>{
@@ -344,28 +370,24 @@ useEffect(() => {
 
           
           
-          // 5라운드가 끝난 후 navigate
+          // 라운드 넘기기
           if (round >= 5) {
-            navigate("/result-multi", {
-              state: { players: updatedPlayers, rounds ,game_id,},
-            });
+            setIsGameOverModal(true);
+            setTimeout(()=>{
+              setIsGameOverModal(false);
+              navigate("/result-multi", {
+                state: { players: updatedPlayers, rounds, game_id },
+              });
+            }, 2000); 
+          } else {
+            setRound((prevRound) => prevRound + 1);
           }
-          return updatedPlayers;
-        });
-
-      // 라운드 넘기기
-      setTimeout(() => {
-        if (round < 5) {
-          setRound((prevRound) => prevRound + 1);
-        }
-      }, 2000); 
 
 
-        //player의 단어 초기화
-        setPlayers((prevPlayers) => {
-          return prevPlayers.map((player) => ({
+          // player의 단어 초기화
+          return updatedPlayers.map((player) => ({
             ...player,
-            collectedLetters: [], 
+            collectedLetters: [],
           }));
         });
 
@@ -379,9 +401,45 @@ useEffect(() => {
     };
   },[players, rounds, round, socket, roomName,navigate]);
 
+  //상대가 접속을 종료했을때
+  useEffect(() => {
+    const handleOpponentDisconnected = () => {
+      alert('상대방이 접속을 종료하였습니다.');
+      navigate('/main');
+    };
+  
+    socket.on('opponentDisconnected', handleOpponentDisconnected);
+  
+    return () => {
+      socket.off('opponentDisconnected', handleOpponentDisconnected);
+    };
+  }, [socket, navigate]);
+
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+      
+      {/* 라운드 모달 */}
+      {showRoundModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div className="bg-white w-3/4 max-w-4xl p-8 rounded-lg shadow-lg text-center text-black h-96">
+          <h2 className="text-6xl font-bold mb-6">
+            {`Round ${round}`}
+          </h2>
+          <p className="text-2xl">준비하세요!</p>
+        </div>
+      </div>
+      )}
+      {/* 게임 종료 모달 */}
+      {isGameOverModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white w-3/4 max-w-4xl p-8 rounded-lg shadow-lg text-center text-black h-96">
+            <h2 className="text-6xl font-bold mb-6">게임 종료!</h2>
+            <p className="text-2xl">결과를 확인하세요!</p>
+          </div>
+        </div>
+      )}
+      {/* 게임 화면 */}
       <div>
         <h1>게임 멀티플레이 화면</h1>
         <p>방 이름: {roomName}</p>
@@ -397,7 +455,7 @@ useEffect(() => {
         <PlayerScore name={players[1]?.name} score={players[1]?.score || 0} />
       </div>
       <div className="text-center bg-gray-300 p-4 rounded-md text-2xl mb-8 max-w-2xl w-full">
-        {word || '로딩 중...'}
+        {mode || '로딩 중...'}
       </div>
       <div className="relative w-full max-w-4xl h-96 bg-white rounded-md">
         <div
