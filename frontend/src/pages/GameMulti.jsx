@@ -68,6 +68,7 @@ const GameMulti = () => {
   }, [myPlayer, otherPlayer]);
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isBackspaceProcessing, setIsBackspaceProcessing] = useState(false);
   // 키 입력 처리
 
   const handleKeyPress = useCallback(
@@ -77,31 +78,8 @@ const GameMulti = () => {
   
       if (event.key === 'Enter' && !isProcessing) {
         setIsProcessing(true); // 처리 시작
-      } else if (event.key === 'Backspace') {
-        // Backspace 로직
-        setPlayers((prevPlayers) => {
-          const updatedPlayers = [...prevPlayers];
-          if (updatedPlayers[0]?.collectedLetters.length > 0) {
-            const droppedLetter = updatedPlayers[0].collectedLetters.slice(-1)[0];
-            updatedPlayers[0].collectedLetters = updatedPlayers[0].collectedLetters.slice(0, -1);
-            setLetters((prevLetters) => [
-              ...prevLetters,
-              {
-                letter: droppedLetter,
-                x: updatedPlayers[0].position.x,
-                y: updatedPlayers[0].position.y,
-              },
-            ]);
-  
-            socket.emit('updateWord', {
-              roomName,
-              letter: updatedPlayers[0].collectedLetters.join(''),
-              playerId: updatedPlayers[0].socket_id,
-            });
-          }
-  
-          return updatedPlayers;
-        });
+      } else if (event.key === 'Backspace' && !isBackspaceProcessing) {
+        setIsBackspaceProcessing(true); 
       } else {
         setPlayers((prevPlayers) => {
           const newPosition = { ...prevPlayers[0]?.position };
@@ -136,11 +114,13 @@ const GameMulti = () => {
         });
       }
     },
-    [players, socket, roomName]
+    [isProcessing, isBackspaceProcessing, players, socket, roomName]
   );
   
+  //enter
   useEffect(() => {
     if (isProcessing) {
+      
         const playerPos = players[0]?.position;
         if (!playerPos) {
             setIsProcessing(false);
@@ -174,7 +154,7 @@ const GameMulti = () => {
                         collectedLetter.letter,
                     ],
                 };
-
+                console.log("보유단어",updatedPlayers[0]?.collectedLetters);
                 // 소켓으로 업데이트된 데이터 전송
                 socket.emit('updateWord', {
                     roomName,
@@ -190,6 +170,41 @@ const GameMulti = () => {
     }
 }, [isProcessing, letters, players, roomName, socket]);
 
+// Backspace 이벤트 처리
+useEffect(() => {
+  
+  if (isBackspaceProcessing) {
+    console.log("backspace 호출");
+    setPlayers((prevPlayers) => {
+      
+      if(prevPlayers[0]?.collectedLetters.length>0){
+        const droppedLetter=prevPlayers[0].collectedLetters.slice(-1)[0];
+        setLetters((prevLetters)=>[
+          ...prevLetters,
+          {
+            letter: droppedLetter,
+            x: prevPlayers[0].position.x,
+            y: prevPlayers[0].position.y,
+          },
+        ]);
+        const updatedPlayers = [...prevPlayers];
+        updatedPlayers[0] = {
+          ...updatedPlayers[0],
+          collectedLetters: updatedPlayers[0].collectedLetters.slice(0, -1),
+        };
+        socket.emit('updateWord', {
+          roomName,
+          letter: updatedPlayers[0].collectedLetters.join(''),
+          playerId: updatedPlayers[0].socket_id,
+        });
+        return updatedPlayers;
+      } 
+      
+      return prevPlayers;
+    });
+    setIsBackspaceProcessing(false);
+  }
+}, [isBackspaceProcessing, players, roomName, socket]);
   
 
   // 키 이벤트 리스너 관리
