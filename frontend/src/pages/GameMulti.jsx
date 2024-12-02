@@ -144,6 +144,14 @@ const GameMulti = () => {
             const updatedLetters = letters.filter((_, index) => index !== closestIndex);
             setLetters(updatedLetters); // 알파벳 리스트 업데이트
 
+
+    // 소켓을 통해 업데이트된 알파벳 리스트 전송
+            socket.emit('updateLetters', {
+              roomName,
+              updatedLetters,
+          });
+      
+
             setPlayers((prevPlayers) => {
                 const updatedPlayers = [...prevPlayers];
                 updatedPlayers[0] = {
@@ -171,39 +179,52 @@ const GameMulti = () => {
 
 // Backspace
 useEffect(() => {
-  
   if (isBackspaceProcessing) {
     console.log("backspace 호출");
     setPlayers((prevPlayers) => {
-      
-      if(prevPlayers[0]?.collectedLetters.length>0){
-        const droppedLetter=prevPlayers[0].collectedLetters.slice(-1)[0];
-        setLetters((prevLetters)=>[
-          ...prevLetters,
+      if (prevPlayers[0]?.collectedLetters.length > 0) {
+        const droppedLetter = prevPlayers[0].collectedLetters.slice(-1)[0];
+
+        // 새로운 알파벳 추가 후 업데이트
+        const updatedLetters = [
+          ...letters,
           {
             letter: droppedLetter,
             x: prevPlayers[0].position.x,
             y: prevPlayers[0].position.y,
           },
-        ]);
+        ];
+
+        setLetters(updatedLetters); // 알파벳 리스트 업데이트
+
+        // 소켓을 통해 알파벳 리스트 전송
+        socket.emit('updateLetters', {
+          roomName,
+          updatedLetters,
+        });
+
         const updatedPlayers = [...prevPlayers];
         updatedPlayers[0] = {
           ...updatedPlayers[0],
           collectedLetters: updatedPlayers[0].collectedLetters.slice(0, -1),
         };
+
+        // 소켓을 통해 업데이트된 단어 전송
         socket.emit('updateWord', {
           roomName,
           letter: updatedPlayers[0].collectedLetters.join(''),
           playerId: updatedPlayers[0].socket_id,
         });
+
         return updatedPlayers;
-      } 
-      
+      }
+
       return prevPlayers;
     });
     setIsBackspaceProcessing(false);
   }
-}, [isBackspaceProcessing, players, roomName, socket]);
+}, [isBackspaceProcessing, letters, players, roomName, socket]);
+
   
 
   // 키 이벤트 리스너 관리
@@ -235,6 +256,18 @@ useEffect(() => {
       socket.off('updatePlayers');
     };
   }, [socket]);
+
+  useEffect(() => {
+    // 서버로부터 업데이트된 알파벳 리스트 수신
+    socket.on('receiveUpdatedLetters', ({ updatedLetters }) => {
+        setLetters(updatedLetters); // 상대방의 화면에서 알파벳 리스트 업데이트
+    });
+
+    return () => {
+        socket.off('receiveUpdatedLetters'); // 이벤트 정리
+    };
+}, [socket]);
+
 
   // 다른 플레이어 단어 업데이트 수신
   useEffect(() => {
