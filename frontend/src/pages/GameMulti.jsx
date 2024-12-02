@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
 import { useSocket } from '../context/SocketContext';
+import { useCallback,useRef } from 'react';
 
 const PlayerScore = ({ name, score }) => (
   <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
@@ -13,193 +13,207 @@ const PlayerScore = ({ name, score }) => (
 const GameMulti = () => {
   const socket = useSocket();
   const location = useLocation();
-  const { myPlayer, otherPlayer, roomName, rounds, selectedMode} = location.state || {}; // 전달된 상태 받기
+  const { myPlayer, otherPlayer, roomName, rounds, selectedMode } = location.state || {};
 
   const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
-  const [roundWords, setRoundWords] = useState([]);
-  const [letters, setLetters] = useState([]); // 추가된 상태
+  const [letters, setLetters] = useState([]);
   const [players, setPlayers] = useState([]);
-  const [collectedLetters, setCollectedLetters] = useState([]);
 
-  // const generateRandomLetters = (currentWord) => {
-  //   const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-  //   const wordLetters = [...curredlntWord].sort(() => Math.random() - 0.5);
-  //   const randomLetters = Array.from({ length: 10 }, () =>
-  //     alphabet[Math.floor(Math.random() * alphabet.length)]
-  //   );
-  //   const allLetters = [...wordLetters, ...randomLetters].sort(
-  //     () => Math.random() - 0.5
-  //   );
-  //   return allLetters.map((letter) => ({
-  //     letter,
-  //     x: Math.random() * 700 + 50, // 랜덤 X 위치
-  //     y: Math.random() * 300 + 50, // 랜덤 Y 위치
-  //   }));
-    
-  // };
-
-
-
-
-
-
-  // /multiplay API 호출
-  // useEffect(() => {
-  //   const fetchWords = async () => {
-  //     try {
-  //       const response = await axios.get('http://localhost:8000/multiplay');
-
-  //       const words = response.data;
-  //       console.log('5라운드 단어:', words); // 단어 콘솔 출력
-  //       setRoundWords(Object.values(words)); // 라운드 단어 설정
-  //       setWord(Object.values(words)[0]?.en_word || ''); // 첫 라운드 단어 설정
-
-  //       console.log('socket으로 가져온거',rounds);
-  //     } catch (error) {
-  //       console.error('단어를 가져오는 중 오류 발생:', error);
-  //     }
-  //   };
-
-  //   fetchWords();
-  // }, []);
-
-  //단어 받아오기
-
-
+  // 라운드 단어 설정
   useEffect(() => {
     if (rounds && rounds[`round${round}`]) {
-        if (selectedMode === 'english') {
-            setWord(rounds[`round${round}`].en_word); // 영어 단어 설정
-        } else if (selectedMode === 'korea') {
-            setWord(rounds[`round${round}`].ko_word); // 한국어 단어 설정
-        }
+      if (selectedMode === 'english') {
+        setWord(rounds[`round${round}`].en_word);
+      } else if (selectedMode === 'korea') {
+        setWord(rounds[`round${round}`].ko_word);
+      }
     }
-}, [rounds, round, selectedMode]);
+  }, [rounds, round, selectedMode]);
 
-useEffect(() => {
-  if (word) {
-    // 서버에 랜덤 알파벳 요청
-    socket.emit('requestLetters', { word, roomName });
+  // 서버로부터 알파벳 요청 및 수신
+  useEffect(() => {
+    if (word) {
+      socket.emit('requestLetters', { word, roomName });
 
-    // 서버로부터 랜덤 알파벳 수신
-    socket.on('updateLetters', (sharedLetters) => {
-      setLetters(sharedLetters); // 수신한 알파벳으로 상태 업데이트
-    });
+      socket.on('updateLetters', (sharedLetters) => {
+        setLetters(sharedLetters);
+      });
 
-    return () => {
-      socket.off('updateLetters'); // 이벤트 클린업
-    };
-  }
-}, [word, socket, roomName]);
+      return () => {
+        socket.off('updateLetters');
+      };
+    }
+  }, [word, socket, roomName]);
 
-
+  // 플레이어 초기화
   useEffect(() => {
     if (myPlayer && otherPlayer) {
       setPlayers([
-        { name: `플레이어 1: ${myPlayer.member_id}`, socket_id: myPlayer.id, score: 0, position: { x: myPlayer.x, y: myPlayer.y },},
-        { name: `플레이어 2: ${otherPlayer.member_id}`, socket_id: otherPlayer.id, score: 0, position: { x: otherPlayer.x, y: otherPlayer.y },},
+        {
+          name: `플레이어 1: ${myPlayer.member_id}`,
+          socket_id: myPlayer.id,
+          score: 0,
+          position: { x: myPlayer.x, y: myPlayer.y },
+        },
+        {
+          name: `플레이어 2: ${otherPlayer.member_id}`,
+          socket_id: otherPlayer.id,
+          score: 0,
+          position: { x: otherPlayer.x, y: otherPlayer.y },
+        },
       ]);
     }
   }, [myPlayer, otherPlayer]);
 
-  // useEffect(() => {
-  //   if (word) {
-  //     setLetters(generateRandomLetters(word)); // 알파벳 무작위 배치
-  //   }
-  // }, [word]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isBackspaceProcessing, setIsBackspaceProcessing] = useState(false);
 
-  const handleKeyPress = (event) => {
-    const moveDistance = 20;
-    setPlayers((prevPlayers) => {
-      const newPosition = { ...prevPlayers[0].position };
-      switch (event.key) {
-        case 'w':
-          newPosition.y -= moveDistance;
-          break;
-        case 's':
-          newPosition.y += moveDistance;
-          break;
-        case 'a':
-          newPosition.x -= moveDistance;
-          break;
-        case 'd':
-          newPosition.x += moveDistance;
-          break;
-        case 'Enter':{
-          setLetters((prevLetters)=>{
-            const playerPos = newPosition;
-            let closestIndex =-1;
-            let minDistance = Infinity;
+  // 키 입력 처리
+  const handleKeyPress = useCallback(
+    (event) => {
+      console.log('Key pressed:', event.key);
+      const moveDistance = 20;
+  
+      if (event.key === 'Enter' && !isProcessing) {
+        setIsProcessing(true); // enter 
+      } else if (event.key === 'Backspace' && !isBackspaceProcessing) {
+        setIsBackspaceProcessing(true); //backspace
+      } else {
+        setPlayers((prevPlayers) => {
+          const newPosition = { ...prevPlayers[0]?.position };
+          switch (event.key) {
+            case 'w':
+              newPosition.y = Math.max(newPosition.y - moveDistance, 0);
+              break;
+            case 's':
+              newPosition.y = Math.min(newPosition.y + moveDistance, 350);
+              break;
+            case 'a':
+              newPosition.x = Math.max(newPosition.x - moveDistance, 0);
+              break;
+            case 'd':
+              newPosition.x = Math.min(newPosition.x + moveDistance, 750);
+              break;
+            default:
+              return prevPlayers;
+          }
+          const updatedPlayers = [...prevPlayers];
+          updatedPlayers[0] = { ...updatedPlayers[0], position: newPosition };
+  
+          socket.emit('updatePosition', {
+            roomName,
+            player: {
+              id: socket.id,
+              position: newPosition,
+            },
+          });
+  
+          return updatedPlayers;
+        });
+      }
+    },
+    [isProcessing, isBackspaceProcessing, players, socket, roomName]
+  );
+  
+  //enter
+  useEffect(() => {
+    if (isProcessing) {
+      
+        const playerPos = players[0]?.position;
+        if (!playerPos) {
+            setIsProcessing(false);
+            return;
+        }
 
-            //가장 가까운 알파벳
-            prevLetters.forEach((letterObj,index)=>{
-              const dx = letterObj.x - playerPos.x;
-              const dy = letterObj.y - playerPos.y;
-              const distance = Math.sqrt(dx * dx + dy * dy);
-              if (distance < 30 && distance < minDistance) {
+        let closestIndex = -1;
+        let minDistance = Infinity;
+
+        letters.forEach((letterObj, index) => {
+            const dx = letterObj.x - playerPos.x;
+            const dy = letterObj.y - playerPos.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 30 && distance < minDistance) {
                 closestIndex = index;
                 minDistance = distance;
-              }
+            }
+        });
+
+        if (closestIndex !== -1) {
+            const collectedLetter = letters[closestIndex];
+            const updatedLetters = letters.filter((_, index) => index !== closestIndex);
+            setLetters(updatedLetters); // 알파벳 리스트 업데이트
+
+            setPlayers((prevPlayers) => {
+                const updatedPlayers = [...prevPlayers];
+                updatedPlayers[0] = {
+                    ...updatedPlayers[0],
+                    collectedLetters: [
+                        ...(updatedPlayers[0]?.collectedLetters || []),
+                        collectedLetter.letter,
+                    ],
+                };
+                console.log("보유단어",updatedPlayers[0]?.collectedLetters);
+                // 소켓으로 업데이트된 데이터 전송
+                socket.emit('updateWord', {
+                    roomName,
+                    letter: updatedPlayers[0].collectedLetters.join(''),
+                    playerId: updatedPlayers[0].socket_id,
+                });
+
+                return updatedPlayers;
             });
+        }
 
-            if (closestIndex !== -1) {
-              const collectedLetter = prevLetters[closestIndex].letter;
-        
-              setCollectedLetters((prevCollected) => {
-                const updatedCollected = [...prevCollected, collectedLetter];
-                console.log('Enter로 추가된 알파벳:', updatedCollected);
-                return updatedCollected;
-              });
-        
-              return prevLetters.filter((_, index) => index !== closestIndex);
-            }
-            return prevLetters;
-          });
-          break;
-        }
-        case 'Backspace':{
-          setCollectedLetters((prevCollectedLetters) => {
-            if (prevCollectedLetters.length > 0) {
-              const droppedLetter = prevCollectedLetters[prevCollectedLetters.length - 1];
-              console.log('Backspace로 제거된 알파벳:', droppedLetter);
-        
-              setLetters((prevLetters) => [
-                ...prevLetters,
-                { letter: droppedLetter, x: newPosition.x, y: newPosition.y },
-              ]);
-        
-              return prevCollectedLetters.slice(0, -1);
-            }
-            console.log('Backspace를 눌렀지만 수집된 알파벳이 없습니다.');
-            return prevCollectedLetters;
-          });
-          break;
-        }
-        default:
-          return prevPlayers;
-      }
+        setIsProcessing(false); // 상태 업데이트 완료 후 처리 해제
+    }
+}, [isProcessing, letters, players, roomName, socket]);
+
+// Backspace
+useEffect(() => {
   
-      const updatedPlayers = [...prevPlayers];
-      updatedPlayers[0] = { ...updatedPlayers[0], position: newPosition };
-
-      socket.emit('updatePosition', {
-        roomName,
-        player: {
-          id: socket.id,
-          position: newPosition,
-        },
-      });
-
-      return updatedPlayers;
+  if (isBackspaceProcessing) {
+    console.log("backspace 호출");
+    setPlayers((prevPlayers) => {
+      
+      if(prevPlayers[0]?.collectedLetters.length>0){
+        const droppedLetter=prevPlayers[0].collectedLetters.slice(-1)[0];
+        setLetters((prevLetters)=>[
+          ...prevLetters,
+          {
+            letter: droppedLetter,
+            x: prevPlayers[0].position.x,
+            y: prevPlayers[0].position.y,
+          },
+        ]);
+        const updatedPlayers = [...prevPlayers];
+        updatedPlayers[0] = {
+          ...updatedPlayers[0],
+          collectedLetters: updatedPlayers[0].collectedLetters.slice(0, -1),
+        };
+        socket.emit('updateWord', {
+          roomName,
+          letter: updatedPlayers[0].collectedLetters.join(''),
+          playerId: updatedPlayers[0].socket_id,
+        });
+        return updatedPlayers;
+      } 
+      
+      return prevPlayers;
     });
-  };
+    setIsBackspaceProcessing(false);
+  }
+}, [isBackspaceProcessing, players, roomName, socket]);
+  
 
+  // 키 이벤트 리스너 관리
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, []);
+    const keyPressHandler = (event) => handleKeyPress(event);
+  window.addEventListener('keydown', keyPressHandler);
+  return () => window.removeEventListener('keydown', keyPressHandler);
+}, [handleKeyPress]);
 
+  // 다른 플레이어 위치 업데이트 수신
   useEffect(() => {
     socket.on('updatePlayers', ({ id, x, y }) => {
       setPlayers((prevPlayers) => {
@@ -220,7 +234,36 @@ useEffect(() => {
     return () => {
       socket.off('updatePlayers');
     };
-  }, []);
+  }, [socket]);
+
+  // 다른 플레이어 단어 업데이트 수신
+  useEffect(() => {
+    const handleReceiveWord = ({  updateLetter = '', playerId }) => {
+      console.log(`소켓한테 받은거 "${updateLetter}" from Player ${playerId}`);
+      setPlayers((prevPlayers) => {
+        const updatedPlayers = [...prevPlayers];
+        const playerIndex = updatedPlayers.findIndex(
+          (player) => player.socket_id === playerId
+        );
+  
+        if (playerIndex !== -1) {
+          updatedPlayers[playerIndex].collectedLetters = updateLetter.split(''); // 문자열을 배열로 변환
+          console.log(
+            `분리한거${playerId}:`,
+            updatedPlayers[playerIndex].collectedLetters
+          );
+        }
+  
+        return updatedPlayers;
+      });
+    };
+  
+    socket.on('receiveWord', handleReceiveWord);
+  
+    return () => {
+      socket.off('receiveWord', handleReceiveWord);
+    };
+  }, [socket]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
@@ -248,14 +291,44 @@ useEffect(() => {
             left: `${players[0]?.position.x || 0}px`,
             top: `${players[0]?.position.y || 0}px`,
           }}
-        ></div>
+        >
+          {/* 나의 단어 표시 */}
+          <div
+            className="absolute top-[-30px] left-0 flex gap-1"
+            style={{ whiteSpace: 'nowrap' }}
+          >
+            {players[0]?.collectedLetters?.map((letter, index) => (
+              <span
+                key={index}
+                className="text-white bg-black text-sm px-2 py-1 rounded"
+              >
+                {letter}
+              </span>
+            ))}
+          </div>
+        </div>
         <div
           className="bg-red-500 w-12 h-12 rounded-full absolute"
           style={{
             left: `${players[1]?.position.x || 0}px`,
             top: `${players[1]?.position.y || 0}px`,
           }}
-        ></div>
+        >
+          {/* 상대방의 단어 표시 */}
+          <div
+            className="absolute top-[-30px] left-0 flex gap-1"
+            style={{ whiteSpace: 'nowrap' }}
+          >
+            {players[1]?.collectedLetters?.map((letter, index) => (
+              <span
+                key={index}
+                className="text-white bg-black text-sm px-2 py-1 rounded"
+              >
+                {letter}
+              </span>
+            ))}
+          </div>
+        </div>
         {letters.map((letterObj, index) => (
           <div
             key={index}
