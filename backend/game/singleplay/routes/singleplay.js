@@ -140,4 +140,43 @@ router.post('/roundplay/result', async (req, res) => {
   }
 });
 
+
+// 오답노트 단어 불러오기
+router.get('/wrong-words', async (req, res) => {
+  try {
+    const { member_id } = req.query;
+
+    if (!member_id) {
+      return res.status(400).json({ message: 'member_id is required' });
+    }
+
+    // WrongAns 테이블에서 특정 member_id가 틀린 단어 ID를 가져옵니다.
+    const wrongAnswers = await WrongAns.findAll({
+      where: { member_id },
+      attributes: ['word_id'],
+    });
+
+    // 틀린 단어 ID 추출
+    const wordIds = wrongAnswers.map((item) => item.word_id);
+
+    if (wordIds.length === 0) {
+      return res.status(404).json({ message: 'No wrong words found for this user.' });
+    }
+
+    // Word 테이블에서 해당 word_id들의 정보를 가져옵니다.
+    const wrongWords = await Word.findAll({
+      where: { word_id: wordIds },
+      attributes: ['word_id', 'en_word', 'ko_word', 'easy_or_hard'],
+    });
+
+    return res.status(200).json({
+      message: 'Wrong words fetched successfully.',
+      data: wrongWords,
+    });
+  } catch (error) {
+    console.error('Error fetching wrong words:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 module.exports = router;
