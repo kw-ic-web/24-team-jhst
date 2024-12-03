@@ -4,7 +4,7 @@ const { matching,removeFromQueue } = require("../controller/matchingsController"
 
 const generateRandomLetters = (currentWord) => {
     const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-    const wordLetters = [...currentWord].sort(() => Math.random() - 0.5);
+    const wordLetters = [...currentWord, ...currentWord].sort(() => Math.random() - 0.5);
     const randomLetters = Array.from({ length: 10 }, () =>
       alphabet[Math.floor(Math.random() * alphabet.length)]
     );
@@ -17,7 +17,7 @@ const generateRandomLetters = (currentWord) => {
       y: Math.random() * 300 + 50, // 랜덤 Y 위치
     }));
     
-  };
+};
 
 
 
@@ -79,6 +79,13 @@ const socketHandler=(server)=>{
         socket.on('updateLetters', ({ roomName, updatedLetters }) => {
             // 해당 방에 있는 모든 클라이언트에게 업데이트된 알파벳 리스트 브로드캐스트
             socket.to(roomName).emit('receiveUpdatedLetters', { updatedLetters });
+        });
+
+        //answer맞음
+        socket.on("answer", (data)=>{
+          //playerid
+          const {roomName,playerId} = data;
+          io.to(roomName).emit("alertWinner",playerId); //방에 있는 사용자에게 winner알림
         });
 
 

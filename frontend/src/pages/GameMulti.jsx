@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSocket } from '../context/SocketContext';
 import { useCallback,useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const PlayerScore = ({ name, score }) => (
   <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
@@ -13,21 +14,51 @@ const PlayerScore = ({ name, score }) => (
 const GameMulti = () => {
   const socket = useSocket();
   const location = useLocation();
-  const { myPlayer, otherPlayer, roomName, rounds, selectedMode } = location.state || {};
-
+  const navigate = useNavigate();
+  const { myPlayer, otherPlayer, roomName, game_id, rounds, selectedMode } = location.state || {};
+  const [showRoundModal, setShowRoundModal] = useState(false); //라운드 모달창
+  const [isGameOverModal, setIsGameOverModal] = useState(false); // 게임 종료 모달
   const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
+  const [mode, setMode] = useState('');
   const [letters, setLetters] = useState([]);
-  const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState([
+    { name: '',member_id:'', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [], wrong:[], },
+    { name: '',member_id:'', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [], wrong:[], },
+  ]);
+
+  // 새로고침 및 페이지 이동 차단
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = ''; // 경고 메시지 표시
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   // 라운드 단어 설정
   useEffect(() => {
     if (rounds && rounds[`round${round}`]) {
+      // 모달 표시
+      setShowRoundModal(true);
+      setWord(rounds[`round${round}`].en_word);
       if (selectedMode === 'english') {
-        setWord(rounds[`round${round}`].en_word);
+        setMode(rounds[`round${round}`].en_word)
       } else if (selectedMode === 'korea') {
-        setWord(rounds[`round${round}`].ko_word);
+        setMode(rounds[`round${round}`].ko_word);
       }
+      // 3초 후 모달 닫기
+      const timer = setTimeout(() => {
+        setShowRoundModal(false);
+      }, 2000);
+
+      // 타이머 정리
+      return () => clearTimeout(timer);
     }
   }, [rounds, round, selectedMode]);
 
@@ -51,13 +82,15 @@ const GameMulti = () => {
     if (myPlayer && otherPlayer) {
       setPlayers([
         {
-          name: `플레이어 1: ${myPlayer.member_id}`,
+          name: `나: ${myPlayer.member_id}`,
+          member_id: myPlayer.member_id,
           socket_id: myPlayer.id,
           score: 0,
           position: { x: myPlayer.x, y: myPlayer.y },
         },
         {
-          name: `플레이어 2: ${otherPlayer.member_id}`,
+          name: `상대방: ${otherPlayer.member_id}`,
+          member_id: otherPlayer.member_id,
           socket_id: otherPlayer.id,
           score: 0,
           position: { x: otherPlayer.x, y: otherPlayer.y },
@@ -72,7 +105,6 @@ const GameMulti = () => {
   // 키 입력 처리
   const handleKeyPress = useCallback(
     (event) => {
-      console.log('Key pressed:', event.key);
       const moveDistance = 20;
   
       if (event.key === 'Enter' && !isProcessing) {
@@ -145,7 +177,7 @@ const GameMulti = () => {
             setLetters(updatedLetters); // 알파벳 리스트 업데이트
 
 
-    // 소켓을 통해 업데이트된 알파벳 리스트 전송
+            // 소켓을 통해 업데이트된 알파벳 리스트 전송
             socket.emit('updateLetters', {
               roomName,
               updatedLetters,
@@ -180,7 +212,6 @@ const GameMulti = () => {
 // Backspace
 useEffect(() => {
   if (isBackspaceProcessing) {
-    console.log("backspace 호출");
     setPlayers((prevPlayers) => {
       if (prevPlayers[0]?.collectedLetters.length > 0) {
         const droppedLetter = prevPlayers[0].collectedLetters.slice(-1)[0];
@@ -230,8 +261,8 @@ useEffect(() => {
   // 키 이벤트 리스너 관리
   useEffect(() => {
     const keyPressHandler = (event) => handleKeyPress(event);
-  window.addEventListener('keydown', keyPressHandler);
-  return () => window.removeEventListener('keydown', keyPressHandler);
+    window.addEventListener('keydown', keyPressHandler);
+    return () => window.removeEventListener('keydown', keyPressHandler);
 }, [handleKeyPress]);
 
   // 다른 플레이어 위치 업데이트 수신
@@ -272,7 +303,6 @@ useEffect(() => {
   // 다른 플레이어 단어 업데이트 수신
   useEffect(() => {
     const handleReceiveWord = ({  updateLetter = '', playerId }) => {
-      console.log(`소켓한테 받은거 "${updateLetter}" from Player ${playerId}`);
       setPlayers((prevPlayers) => {
         const updatedPlayers = [...prevPlayers];
         const playerIndex = updatedPlayers.findIndex(
@@ -298,8 +328,118 @@ useEffect(() => {
     };
   }, [socket]);
 
+   //정답확인 승리처리
+   useEffect(()=>{
+    console.log(`내 collectedLetters ${players[0].collectedLetters?.join('')}`)
+
+    //정답확인
+    if (players[0]?.collectedLetters?.length>0 && 
+      players[0].collectedLetters.join('') === rounds[`round${round}`]?.en_word) {
+      console.log("정답 맞춤!");
+      socket.emit("answer",{
+        roomName,
+        playerId: players[0].socket_id});
+
+      
+    }
+
+    //winner수신
+    const handleAlertWinner = (winnerId) => {
+      const winner = players.find((player) => player.socket_id === winnerId)?.name;
+      if (winner) {
+
+        // 이긴 사람의 점수 20점 증가
+        setPlayers((prevPlayers) =>{
+        
+          const updatedPlayers = prevPlayers.map((player) => {
+            if (player.socket_id === winnerId) {
+              // 이긴 사람 처리
+              return { ...player, score: player.score + 20 };
+            } else {
+              // 진 사람 처리 - 중복 값 방지
+              const updatedWrong =  (player.wrong || []).includes(round)
+                ? player.wrong // 이미 있으면 그대로 유지
+                :[...(player.wrong || []), round]; // 없으면 추가
+              return { ...player, wrong: updatedWrong };
+            }
+          });
+          
+          console.log("Updated Players:", updatedPlayers);
+          console.log("Player 0 wrong list:", updatedPlayers[0]?.wrong);
+          console.log("Player 1 wrong list:", updatedPlayers[1]?.wrong);
+
+          
+          
+          // 라운드 넘기기
+          if (round >= 5) {
+            setIsGameOverModal(true);
+            setTimeout(()=>{
+              setIsGameOverModal(false);
+              navigate("/result-multi", {
+                state: { players: updatedPlayers, rounds, game_id },
+              });
+            }, 2000); 
+          } else {
+            setRound((prevRound) => prevRound + 1);
+          }
+
+
+          // player의 단어 초기화
+          return updatedPlayers.map((player) => ({
+            ...player,
+            collectedLetters: [],
+          }));
+        });
+
+      }
+    };
+
+    socket.on('alertWinner', handleAlertWinner);
+
+    return () => {
+      socket.off("alertWinner"); 
+    };
+  },[players, rounds, round, socket, roomName,navigate]);
+
+  //상대가 접속을 종료했을때
+  useEffect(() => {
+    const handleOpponentDisconnected = () => {
+      alert('상대방이 접속을 종료하였습니다.');
+      navigate('/main');
+    };
+  
+    socket.on('opponentDisconnected', handleOpponentDisconnected);
+  
+    return () => {
+      socket.off('opponentDisconnected', handleOpponentDisconnected);
+    };
+  }, [socket, navigate]);
+
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+      
+      {/* 라운드 모달 */}
+      {showRoundModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div className="bg-white w-3/4 max-w-4xl p-8 rounded-lg shadow-lg text-center text-black h-96">
+          <h2 className="text-6xl font-bold mb-6">
+            {`Round ${round}`}
+          </h2>
+          <p className="text-2xl">준비하세요!</p>
+        </div>
+      </div>
+      )}
+      {/* 게임 종료 모달 */}
+      {isGameOverModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white w-3/4 max-w-4xl p-8 rounded-lg shadow-lg text-center text-black h-96">
+            <h2 className="text-6xl font-bold mb-6">게임 종료!</h2>
+            <p className="text-2xl">결과를 확인하세요!</p>
+          </div>
+        </div>
+      )}
+      {/* 게임 화면 */}
       <div>
         <h1>게임 멀티플레이 화면</h1>
         <p>방 이름: {roomName}</p>
@@ -315,7 +455,7 @@ useEffect(() => {
         <PlayerScore name={players[1]?.name} score={players[1]?.score || 0} />
       </div>
       <div className="text-center bg-gray-300 p-4 rounded-md text-2xl mb-8 max-w-2xl w-full">
-        {word || '로딩 중...'}
+        {mode || '로딩 중...'}
       </div>
       <div className="relative w-full max-w-4xl h-96 bg-white rounded-md">
         <div

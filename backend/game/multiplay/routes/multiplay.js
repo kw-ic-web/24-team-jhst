@@ -6,7 +6,7 @@ const Sequelize = require('sequelize');
 const { MemberGame } = require('../../../db/memberdb');
 
 
-// GET /multiplay - 게임 ID를 받고 Word 테이블에서 랜덤 단어 5개 선택
+// GET /multiplay - 게임 ID를 받고 Word 테이블에서 랜덤 단어 5개 선택 <이거 안씀>
 router.get('/', async (req, res) => {
   try {
     const gameId = parseInt(req.query.gameId, 10); // gameId를 정수로 변환
@@ -48,7 +48,7 @@ module.exports = router;
 
 // POST /winner - 게임 승자 업데이트
 router.post('/winner', async (req, res, next) => {
-  const { game_id, winner } = req.body;
+  const { game_id, winner,winPoint,loser,losePoint } = req.body;
 
   try {
     // 요청 데이터 유효성 검사
@@ -62,19 +62,34 @@ router.post('/winner', async (req, res, next) => {
     if (!game) {
       return res.status(404).json({ message: "해당 game_id를 찾을 수 없습니다." });
     }
+    // 이미 처리된 게임인지 확인
+    if (game.winner) {
+      console.log(`이미 처리된 game_id=${game_id}, winner=${game.winner}`);
+      return res.status(200).json({ message: "이미 처리된 게임입니다.", data: game });
+    }
 
     // winner 값을 업데이트
     game.winner = winner;
     await game.save();
 
     //member_game테이블에 포인트 업데이트
-    const member = await MemberGame.findOne({ where: { member_id: winner } });
+    const win_member = await MemberGame.findOne({ where: { member_id: winner } });
 
-    if (!member) {
+    if (!win_member) {
       return res.status(404).json({ message: "해당 winner를 member_game 테이블에서 찾을 수 없습니다." });
     }
-    member.point += 70;
-    await member.save();
+    win_member.point += winPoint;
+    win_member.win+=1;
+    await win_member.save();
+
+    const lose_member = await MemberGame.findOne({ where: { member_id: loser } });
+    if (!lose_member) {
+      return res.status(404).json({ message: "해당 loser를 member_game 테이블에서 찾을 수 없습니다." });
+    }
+    lose_member.point += losePoint;
+    lose_member.lose +=1;
+    await lose_member.save();
+    console.log(`losePoint${losePoint}`)
 
     console.log(`Game 데이터 업데이트 성공: game_id=${game_id}, winner=${winner}`);
     res.status(200).json({ message: "Game 데이터 업데이트 성공", data: game });
