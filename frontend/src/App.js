@@ -16,6 +16,7 @@ import CharacterTest from './pages/character-test.jsx';
 import GameSingle from './pages/GameSingle.jsx';
 import Admin from './pages/AdminPage.jsx';
 import WrongNote from './pages/WrongNote.jsx';
+import HowToPlay from './pages/HowToPlay.jsx';
 
 import { SocketProvider } from './context/SocketContext';
 function App() {
@@ -39,6 +40,7 @@ function App() {
           <Route path="/game-multi" element={<GameMulti />} />
           <Route path="/game-single" element={<GameSingle />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/how-to-play" element={<HowToPlay />} />
           <Route path="/wrong-note" element={<WrongNote />} />
         </Routes>
       </Router>

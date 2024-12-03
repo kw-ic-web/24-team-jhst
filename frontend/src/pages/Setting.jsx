@@ -79,6 +79,10 @@ function Setting({ audioRef }) {
     }
   };
 
+  const handleHowToPlay = () => {
+    navigate('/how-to-play');
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="bg-white p-8 w-full max-w-md">
@@ -137,9 +141,16 @@ function Setting({ audioRef }) {
 
         <button
           onClick={handleDeleteAccount}
-          className="w-full bg-red-500 text-white py-3 rounded hover:bg-red-600 transition duration-200"
+          className="w-full bg-red-500 text-white py-3 rounded hover:bg-red-600 transition duration-200 mb-4"
         >
           회원 탈퇴
+        </button>
+
+        <button
+          onClick={handleHowToPlay}
+          className="w-full bg-gray-500 text-white py-3 rounded hover:bg-gray-600 transition duration-200"
+        >
+          게임 방법
         </button>
       </div>
     </div>

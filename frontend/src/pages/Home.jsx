@@ -9,6 +9,10 @@ function Home() {
     navigate('/login');
   };
 
+  const handleHowToPlay = () => {
+    navigate('/how-to-play'); // How to Play 페이지로 이동
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-white">
       {/* 메인 */}
@@ -18,6 +22,10 @@ function Home() {
           글자를 모아 단어를 완성하고 친구들과 대결을 펼치세요</p>
         <button onClick={handlePlay} className="w-full bg-green-700 text-white py-3 rounded hover:bg-green-800 transition duration-200">
           플레이 하기
+        </button>
+        {/* 플레이 방법 버튼 추가 */}
+        <button onClick={handleHowToPlay} className="mt-4 w-full bg-blue-500 text-white py-3 rounded hover:bg-blue-600 transition duration-200">
+          게임 방법
         </button>
       </div>
 

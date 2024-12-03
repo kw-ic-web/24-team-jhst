@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSocket } from '../context/SocketContext';
-import { useCallback,useRef } from 'react';
+import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const PlayerScore = ({ name, score }) => (
   <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
@@ -26,6 +27,52 @@ const GameMulti = () => {
     { name: '',member_id:'', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [], wrong:[], },
     { name: '',member_id:'', socket_id: '', score: 0, position: { x: 0, y: 0 }, collectedLetters: [], wrong:[], },
   ]);
+
+  const [activeCharacter, setActiveCharacter] = useState(null);
+   // 내 캐릭터 데이터
+   const fetchActiveCharacter = async () => {
+    try {
+      const memberId = localStorage.getItem('memberId');
+      const token = localStorage.getItem('token');
+
+      const response = await axios.get('http://localhost:8000/characters/active', {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { memberId },
+      });
+
+      if (response.data) {
+        setActiveCharacter(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch active character:', error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchActiveCharacter();
+  }, []);
+
+  // 플레이어 초기화
+  useEffect(() => {
+    if (myPlayer && otherPlayer) {
+      setPlayers([
+        {
+          name: `나: ${myPlayer.member_id}`,
+          member_id: myPlayer.member_id,
+          socket_id: myPlayer.id,
+          score: 0,
+          position: { x: myPlayer.x, y: myPlayer.y },
+        },
+        {
+          name: `상대방: ${otherPlayer.member_id}`,
+          member_id: otherPlayer.member_id,
+          socket_id: otherPlayer.id,
+          score: 0,
+          position: { x: otherPlayer.x, y: otherPlayer.y },
+        },
+      ]);
+    }
+  }, [myPlayer, otherPlayer]);
 
   // 새로고침 및 페이지 이동 차단
   useEffect(() => {
@@ -458,28 +505,38 @@ useEffect(() => {
         {mode || '로딩 중...'}
       </div>
       <div className="relative w-full max-w-4xl h-96 bg-white rounded-md">
-        <div
-          className="bg-blue-500 w-12 h-12 rounded-full absolute"
-          style={{
-            left: `${players[0]?.position.x || 0}px`,
-            top: `${players[0]?.position.y || 0}px`,
-          }}
-        >
-          {/* 나의 단어 표시 */}
+        {activeCharacter && (
           <div
-            className="absolute top-[-30px] left-0 flex gap-1"
-            style={{ whiteSpace: 'nowrap' }}
+            className="absolute"
+            style={{
+              left: `${players[0]?.position.x || 0}px`,
+              top: `${players[0]?.position.y || 0}px`,
+            }}
           >
-            {players[0]?.collectedLetters?.map((letter, index) => (
-              <span
-                key={index}
-                className="text-white bg-black text-sm px-2 py-1 rounded"
-              >
-                {letter}
-              </span>
-            ))}
+            {/* 내 캐릭터 */}
+            <img
+              src={activeCharacter.image || 'default-character.png'}
+              alt={activeCharacter.name || 'Player'}
+              className="w-14 h-14 object-contain"
+            />
+
+            {/* 내 알파벳 표시 */}
+            <div
+              className="absolute top-[-30px] left-0 flex gap-1"
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              {players[0]?.collectedLetters?.map((letter, index) => (
+                <span
+                  key={index}
+                  className="text-white bg-black text-sm px-2 py-1 rounded"
+                >
+                  {letter}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+        {/* 상대방 캐릭터 */}
         <div
           className="bg-red-500 w-12 h-12 rounded-full absolute"
           style={{
