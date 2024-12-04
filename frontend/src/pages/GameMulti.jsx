@@ -375,6 +375,49 @@ useEffect(() => {
     };
   }, [socket]);
 
+
+  // 캐릭터 소켓
+  useEffect(() => {
+    // 내 캐릭터 데이터 가져오기 및 소켓 전송
+    const fetchAndShareCharacter = async () => {
+      try {
+        const memberId = localStorage.getItem('memberId');
+        const token = localStorage.getItem('token');
+  
+        const response = await axios.get('http://localhost:8000/characters/active', {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { memberId },
+        });
+  
+        if (response.data) {
+          setActiveCharacter(response.data);
+          // 캐릭터 데이터를 소켓으로 상대방에게 전송
+          socket.emit('shareCharacter', {
+            roomName,
+            character: response.data,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch and share character:', error.message);
+      }
+    };
+  
+    fetchAndShareCharacter();
+  
+    // 상대방의 캐릭터 데이터 수신
+    socket.on('receiveCharacter', ({ playerId, character }) => {
+      setPlayers((prevPlayers) =>
+        prevPlayers.map((player) =>
+          player.socket_id === playerId ? { ...player, character } : player
+        )
+      );
+    });
+  
+    return () => {
+      socket.off('receiveCharacter');
+    };
+  }, [socket, roomName]);
+
    //정답확인 승리처리
    useEffect(()=>{
     console.log(`내 collectedLetters ${players[0].collectedLetters?.join('')}`)
@@ -506,6 +549,7 @@ useEffect(() => {
       </div>
       <div className="relative w-full max-w-4xl h-96 bg-white rounded-md">
         {activeCharacter && (
+          // 내캐릭터
           <div
             className="absolute"
             style={{
@@ -513,7 +557,6 @@ useEffect(() => {
               top: `${players[0]?.position.y || 0}px`,
             }}
           >
-            {/* 내 캐릭터 */}
             <img
               src={activeCharacter.image || 'default-character.png'}
               alt={activeCharacter.name || 'Player'}
@@ -538,13 +581,20 @@ useEffect(() => {
         )}
         {/* 상대방 캐릭터 */}
         <div
-          className="bg-red-500 w-12 h-12 rounded-full absolute"
+          className="absolute"
           style={{
             left: `${players[1]?.position.x || 0}px`,
             top: `${players[1]?.position.y || 0}px`,
           }}
         >
-          {/* 상대방의 단어 표시 */}
+          {players[1]?.character && (
+            <img
+              src={players[1].character.image || 'default-character.png'}
+              alt={players[1].character.name || 'Opponent'}
+              className="w-14 h-14 object-contain"
+            />
+          )}
+          {/* 상대방의 알파벳 표시 */}
           <div
             className="absolute top-[-30px] left-0 flex gap-1"
             style={{ whiteSpace: 'nowrap' }}

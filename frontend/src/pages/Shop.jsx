@@ -49,19 +49,19 @@ function Shop() {
   const handleModalConfirm = () => {
     const token = localStorage.getItem('token');
     const memberId = localStorage.getItem('memberId'); // memberId 가져오기
-  
+
     if (!memberId) {
-      alert("회원 정보가 유효하지 않습니다. 다시 로그인해주세요.");
+      alert('회원 정보가 유효하지 않습니다. 다시 로그인해주세요.');
       navigate('/login');
       return;
     }
-  
+
     if (token && selectedCharacter) {
-      console.log("전송 데이터:", {
+      console.log('전송 데이터:', {
         memberId: memberId,
         characterId: selectedCharacter.characterId,
       });
-  
+
       axios
         .post(
           'http://localhost:8000/characters/select',
@@ -89,7 +89,7 @@ function Shop() {
           alert('캐릭터 변경에 실패했습니다.');
         });
     }
-  };  
+  };
 
   const handleModalCancel = () => {
     setShowModal(false);
@@ -105,16 +105,16 @@ function Shop() {
       <h1 className="text-2xl font-bold mb-8">내 캐릭터</h1>
 
       <div className="absolute top-32 right-8 bg-yellow-300 text-black py-2 px-4 rounded-lg">
-        코인: {balance}
+        보유 포인트: {balance}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 mb-4 w-full max-w-md">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 mb-4 w-full max-w-5xl">
         {characters.map((character, index) => (
           <div
             key={index}
             onClick={() => handleCharacterClick(character)}
-            className={`w-40 h-40 bg-gray-200 flex items-center justify-center rounded-lg p-4 cursor-pointer ${
-              character.isActive ? 'border-4 border-blue-500' : ''
+            className={`flex flex-col items-center justify-between w-full h-56 bg-white shadow-md rounded-lg p-4 cursor-pointer transition-transform transform hover:scale-105 ${
+              character.isActive ? 'border-4 border-blue-500' : 'border border-gray-300'
             }`}
           >
             {character.image ? (
@@ -123,11 +123,16 @@ function Shop() {
                   String.fromCharCode(...new Uint8Array(character.image.data))
                 )}`}
                 alt={character.name}
-                className="w-24 h-24"
+                className="w-32 h-32 object-contain"
               />
             ) : (
-              <div>{character.name}</div>
+              <div className="w-32 h-32 bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-500 text-lg">{character.name}</span>
+              </div>
             )}
+            <div className="text-center">
+              <p className="text-lg font-medium text-gray-700">{character.name}</p>
+            </div>
           </div>
         ))}
       </div>

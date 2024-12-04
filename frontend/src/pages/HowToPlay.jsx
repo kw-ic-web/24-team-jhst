@@ -58,7 +58,7 @@ const HowToPlay = () => {
             onClick={() => window.history.back()}
             className="mt-6 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
           >
-            메인 화면으로 돌아가기
+            뒤로가기
           </button>
         </div>
       </div>

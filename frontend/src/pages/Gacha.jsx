@@ -36,7 +36,7 @@ function Gacha() {
     fetchUserPoints();
   }, [navigate]);
 
-  // 🎁 뽑기 상자 클릭 클릭 시초기 모달 열기
+  // 🎁 뽑기 상자 클릭 클릭 시 초기 모달 열기
   const handleBoxClick = () => {
     setShowInitialModal(true);
   };
@@ -66,10 +66,16 @@ function Gacha() {
         setErrorMessage('포인트가 부족합니다.');
       }
     } catch (err) {
-      console.error('캐릭터 뽑기 실패:', err);
-      setErrorMessage('캐릭터 뽑기 중 문제가 발생했습니다.');
+      if (err.response?.status === 404) {
+        setErrorMessage('뽑을 캐릭터가 없습니다.');
+      } else {
+        console.error('캐릭터 뽑기 실패:', err);
+        setErrorMessage('캐릭터 뽑기 중 문제가 발생했습니다.');
+      }
+      setShowResultModal(true); // 결과 모달 열기
     }
   };
+
   const handleCloseInitialModal = () => {
     setShowInitialModal(false);
   };
@@ -121,33 +127,32 @@ function Gacha() {
 
       {/* 결과 모달 */}
       {showResultModal && (
-      <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
-        <div className="bg-white p-8 rounded shadow-lg w-80 text-center">
-          {character ? (
-            <>
-              <h2 className="text-2xl mb-4">축하합니다!</h2>
-              <img
-                src={character.image} 
-                alt={character.name}
-                className="w-32 h-32 object-contain mx-auto mb-4"
-              />
-              <p className="text-xl mb-4">{character.name}</p>
-            </>
-          ) : (
-            <p className="text-red-500 mb-4">{errorMessage}</p>
-          )}
-          <div className="flex justify-around mt-4">
-            <button
-              className="bg-gray-500 text-white py-2 px-4 rounded"
-              onClick={handleCloseResultModal}
-            >
-              닫기
-            </button>
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-8 rounded shadow-lg w-80 text-center">
+            {character ? (
+              <>
+                <h2 className="text-2xl mb-4">축하합니다!</h2>
+                <img
+                  src={character.image} 
+                  alt={character.name}
+                  className="w-32 h-32 object-contain mx-auto mb-4"
+                />
+                <p className="text-xl mb-4">{character.name}</p>
+              </>
+            ) : (
+              <p className="text-red-500 mb-4">{errorMessage}</p>
+            )}
+            <div className="flex justify-around mt-4">
+              <button
+                className="bg-gray-500 text-white py-2 px-4 rounded"
+                onClick={handleCloseResultModal}
+              >
+                닫기
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
-
+      )}
 
       {/* 보유 캐릭터 확인하기 버튼 */}
       <button
