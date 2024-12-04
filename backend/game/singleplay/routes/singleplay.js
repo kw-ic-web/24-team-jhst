@@ -28,6 +28,7 @@ router.get('/singleplay', async (req, res) => {
     // word 테이블에서 해당 word_id의 단어 조회
     const selectedWords = await Word.findAll({
       where: { word_id: wordIds },
+      attributes: ['word_id', 'en_word','ko_word'], // word_id 포함
     });
 
     console.log('Selected Words:', selectedWords);
@@ -41,6 +42,7 @@ router.get('/singleplay', async (req, res) => {
       // 부족한 단어를 랜덤으로 추가
       additionalWords = await Word.findAll({
         where: { word_id: { [Sequelize.Op.notIn]: wordIds } },
+        attributes: ['word_id', 'en_word','ko_word'], 
         order: Sequelize.literal('RAND()'),
         limit: remainingCount,
       });

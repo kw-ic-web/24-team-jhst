@@ -11,7 +11,7 @@ const PlayerScore = ({ name, timer }) => (
 
 const GameSingle = () => {
   const TOTAL_ROUNDS = 5; // 총 라운드 수
-  const INITIAL_TIMER = 30; // 초기 타이머 값
+  const INITIAL_TIMER = 10; // 초기 타이머 값
   const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
   const [words, setWords] = useState([]);
@@ -25,6 +25,7 @@ const GameSingle = () => {
   const [gameStatus, setGameStatus] = useState('ongoing'); // 'ongoing', 'win', 'lose', 'complete'
   const [results, setResults] = useState([]);
   const [activeCharacter, setActiveCharacter] = useState(null); // 활성 캐릭터
+  const [popupMessage, setPopupMessage] = useState(null); // 팝업 메시지 상태
   const navigate = useNavigate();
 
   const fetchWordsFromBackend = async () => {
@@ -35,13 +36,16 @@ const GameSingle = () => {
       });
 
       if (response.data && response.data.words && Array.isArray(response.data.words)) {
-        const fetchedWords = response.data.words.map((item) => item.en_word).filter(Boolean);
+        const fetchedWords = response.data.words.map((item) => ({
+          id: item.word_id, // word_id 포함
+          word: item.en_word,
+        }));
         if (fetchedWords.length === 0) {
           throw new Error('No valid words found in the response');
         }
 
         setWords(fetchedWords.slice(0, TOTAL_ROUNDS));
-        setWord(fetchedWords[0]);
+        setWord(fetchedWords[0].word);
 
         // 게임 ID 저장
         localStorage.setItem('gameId', response.data.game_id);
@@ -84,8 +88,8 @@ const GameSingle = () => {
     );
     return allLetters.map((letter) => ({
       letter,
-      x: Math.random() * 700 + 50, // 랜덤 X 위치
-      y: Math.random() * 300 + 50, // 랜덤 Y 위치
+      x: Math.random() * 700 + 50,
+      y: Math.random() * 300 + 50,
     }));
   };
 
@@ -121,7 +125,7 @@ const GameSingle = () => {
     } else if (event.key === 'Backspace') {
       setPlayer((prevPlayer) => {
         if (prevPlayer.collectedLetters.length > 0) {
-          const droppedLetter = prevPlayer.collectedLetters.pop(); 
+          const droppedLetter = prevPlayer.collectedLetters.pop();
           setLetters((prevLetters) => [
             ...prevLetters,
             {
@@ -151,7 +155,7 @@ const GameSingle = () => {
             newPosition.x = Math.max(newPosition.x - moveDistance, 0);
             break;
           case 'd':
-            newPosition.x = Math.min(newPosition.x + moveDistance, 750);
+            newPosition.x = Math.min(newPosition.x+ moveDistance, 750);
             break;
           default:
             return prevPlayer;
@@ -184,14 +188,14 @@ const GameSingle = () => {
 
     if (nextRound <= TOTAL_ROUNDS) {
       setRound(nextRound);
-      setWord(words[nextRound - 1]);
+      setWord(words[nextRound - 1].word);
       setPlayer((prevPlayer) => ({
         ...prevPlayer,
         timer: INITIAL_TIMER,
         collectedLetters: [],
         position: { x: 100, y: 100 },
       }));
-      setLetters(generateRandomLetters(words[nextRound - 1]));
+      setLetters(generateRandomLetters(words[nextRound - 1].word));
       setGameStatus('ongoing');
     } else {
       try {
@@ -251,11 +255,17 @@ const GameSingle = () => {
 
   useEffect(() => {
     if (gameStatus === 'win') {
-      console.log(`Round ${round}: Player succeeded!`);
-      setTimeout(() => startNextRound(), 2000);
+      setPopupMessage('승리! 곧 다음 라운드가 시작됩니다.');
+      setTimeout(() => {
+        setPopupMessage(null);
+        startNextRound();
+      }, 2000);
     } else if (gameStatus === 'lose') {
-      console.log(`Round ${round}: Player failed.`);
-      setTimeout(() => startNextRound(), 2000);
+      setPopupMessage('실패! 곧 다음 라운드가 시작됩니다.');
+      setTimeout(() => {
+        setPopupMessage(null);
+        startNextRound();
+      }, 2000);
     }
   }, [gameStatus]);
 
@@ -266,6 +276,13 @@ const GameSingle = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+      {popupMessage && (
+        <div
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white text-black p-6 rounded-lg shadow-lg text-center z-50"
+        >
+          <p className="text-xl font-bold">{popupMessage}</p>
+        </div>
+      )}
       <div className="flex justify-between items-center w-full max-w-4xl mb-8 space-x-4">
         <PlayerScore name={player.name} timer={player.timer} />
         <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
@@ -292,9 +309,9 @@ const GameSingle = () => {
             key={index}
             className="absolute bg-white text-black text-sm font-bold px-2 py-1 border rounded"
             style={{
-              left: `${player.position.x + index * 30}px`, 
-              top: `${player.position.y - 30}px`, 
-              transform: 'translateX(-50%)', 
+              left: `${player.position.x + index * 30}px`,
+              top: `${player.position.y - 30}px`,
+              transform: 'translateX(-50%)',
             }}
           >
             {letter}
@@ -313,9 +330,6 @@ const GameSingle = () => {
           </div>
         ))}
       </div>
-      {gameStatus === 'win' && (
-        <div className="text-green-500 text-2xl mt-4">승리! 다음 라운드로 이동합니다.</div>
-      )}
     </div>
   );
 };
