@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Word } = require('../../../db/assets/word'); // Word 모델을 불러옵니다.
 const { WrongAns ,Game} = require('../../../db/gamedb');
-
+const { MemberGame } = require('../../../db/memberdb');
 const Sequelize = require('sequelize');
 
 router.get('/singleplay', async (req, res) => {
@@ -135,12 +135,28 @@ router.post('/roundplay/result', async (req, res) => {
       }
     }
 
-    return res.status(200).json({ message: 'Game results processed successfully.' });
+    // 포인트 계산 (정답 1개당 20점 추가)
+    const pointsEarned = correctWords.length * 20;
+
+    if (pointsEarned > 0) {
+      const member = await MemberGame.findOne({ where: { member_id } });
+
+      if (member) {
+        member.point += pointsEarned;
+        await member.save();
+        console.log(`Updated points for member ${member_id}: ${member.point}`);
+      } else {
+        console.error(`Member with ID ${member_id} not found`);
+      }
+    }
+
+    return res.status(200).json({ message: 'Game results processed successfully.', pointsEarned });
   } catch (error) {
     console.error('Error processing game results:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 
 // 오답노트 단어 불러오기
