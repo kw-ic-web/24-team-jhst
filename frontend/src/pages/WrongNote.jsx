@@ -55,7 +55,7 @@ const WrongNote = () => {
               <img
                 src={activeCharacter.image || 'default-character.png'}
                 alt="Character"
-                className="w-32 h-32 mx-auto mb-4"
+                className="w-32 h-32 mx-auto mb-4 object-contain"
               />
               <p>플레이어 : {playerName || '플레이어 이름'}</p>
               {/* 싱글플레이 버튼 */}

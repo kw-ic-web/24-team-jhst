@@ -184,7 +184,7 @@ function Main() {
         {/* 오른쪽 상단 코인 및 상점 버튼 */}
         <div className="flex flex-col items-end space-y-4">
           <div className="w-full bg-yellow-300 text-black py-3 px-4 rounded-lg text-center mb-4">
-            보유 금액: {point}
+            보유 포인트: {point}
           </div>
           <button
             className="w-full bg-gray-200 text-black py-3 rounded hover:bg-gray-300 transition duration-200"

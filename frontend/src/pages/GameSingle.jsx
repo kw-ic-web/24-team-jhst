@@ -121,7 +121,7 @@ const GameSingle = () => {
     } else if (event.key === 'Backspace') {
       setPlayer((prevPlayer) => {
         if (prevPlayer.collectedLetters.length > 0) {
-          const droppedLetter = prevPlayer.collectedLetters.slice(-1)[0];
+          const droppedLetter = prevPlayer.collectedLetters.pop(); 
           setLetters((prevLetters) => [
             ...prevLetters,
             {
@@ -132,7 +132,7 @@ const GameSingle = () => {
           ]);
           return {
             ...prevPlayer,
-            collectedLetters: prevPlayer.collectedLetters.slice(0, -1),
+            collectedLetters: [...prevPlayer.collectedLetters],
           };
         }
         return prevPlayer;
