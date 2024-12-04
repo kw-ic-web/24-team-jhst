@@ -11,7 +11,7 @@ const PlayerScore = ({ name, timer }) => (
 
 const GameSingle = () => {
   const TOTAL_ROUNDS = 5; // 총 라운드 수
-  const INITIAL_TIMER = 10; // 초기 타이머 값
+  const INITIAL_TIMER = 30; // 초기 타이머 값
   const [round, setRound] = useState(1);
   const [word, setWord] = useState('');
   const [words, setWords] = useState([]);
