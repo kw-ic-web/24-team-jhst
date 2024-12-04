@@ -255,13 +255,13 @@ const GameSingle = () => {
 
   useEffect(() => {
     if (gameStatus === 'win') {
-      setPopupMessage('승리! 곧 다음 라운드가 시작됩니다.');
+      setPopupMessage('승리!');
       setTimeout(() => {
         setPopupMessage(null);
         startNextRound();
       }, 2000);
     } else if (gameStatus === 'lose') {
-      setPopupMessage('실패! 곧 다음 라운드가 시작됩니다.');
+      setPopupMessage('실패!');
       setTimeout(() => {
         setPopupMessage(null);
         startNextRound();
