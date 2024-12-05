@@ -87,6 +87,26 @@ const socketHandler=(server)=>{
           const {roomName,playerId} = data;
           io.to(roomName).emit("alertWinner",playerId); //방에 있는 사용자에게 winner알림
         });
+// 캐릭터 부분 소켓
+        socket.on('shareCharacter', ({ roomName, character, playerId }) => {
+          if (!roomName || !character || !playerId) {
+            console.error('Invalid data for shareCharacter:', { roomName, character, playerId });
+            return;
+          }
+      
+          console.log(`Character shared in room ${roomName} by player ${playerId}:`, character);
+      
+          // 소켓이 방에 들어가 있는지 확인
+          const rooms = Array.from(socket.rooms);
+          if (!rooms.includes(roomName)) {
+            console.warn(`Socket ${socket.id} is not in room ${roomName}. Joining room...`);
+            socket.join(roomName); // 방에 참가
+          }
+      
+          // 방 내의 다른 사용자들에게 캐릭터 데이터 브로드캐스트
+          socket.to(roomName).emit('receiveCharacter', { playerId, character });
+        });
+
 
 
         // 클라이언트 접속 종료 시 처리
