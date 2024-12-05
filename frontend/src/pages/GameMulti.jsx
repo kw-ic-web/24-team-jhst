@@ -42,6 +42,12 @@ const GameMulti = () => {
 
       if (response.data) {
         setActiveCharacter(response.data);
+
+        socket.emit('shareCharacter', {
+          roomName,
+          character: response.data,
+          playerId: socket.id, // 내 소켓 ID
+        });
       }
     } catch (error) {
       console.error('Failed to fetch active character:', error.message);
@@ -53,7 +59,7 @@ const GameMulti = () => {
   }, []);
 
   // 플레이어 초기화
-  useEffect(() => {
+ /* useEffect(() => {
     if (myPlayer && otherPlayer) {
       setPlayers([
         {
@@ -72,7 +78,7 @@ const GameMulti = () => {
         },
       ]);
     }
-  }, [myPlayer, otherPlayer]);
+  }, [myPlayer, otherPlayer]); */ //코드 중복
 
   // 새로고침 및 페이지 이동 차단
   useEffect(() => {
@@ -194,6 +200,8 @@ const GameMulti = () => {
     },
     [isProcessing, isBackspaceProcessing, players, socket, roomName]
   );
+
+
   
   //enter
   useEffect(() => {
@@ -376,8 +384,30 @@ useEffect(() => {
   }, [socket]);
 
 
-  // 캐릭터 소켓
+//캐릭터 소켓
   useEffect(() => {
+    const handleReceiveCharacter = ({ playerId, character }) => {
+      console.log('Received character data:', playerId, character); // 디버그 로그 추가
+  
+      setPlayers((prevPlayers) =>
+        prevPlayers.map((player) =>
+          player.socket_id === playerId ? { ...player, character } : player
+        )
+      );
+    };
+  
+    socket.on('receiveCharacter', handleReceiveCharacter);
+  
+    return () => {
+      socket.off('receiveCharacter', handleReceiveCharacter);
+    };
+  }, [socket]);
+  
+  
+
+
+  // 캐릭터 소켓
+ /* useEffect(() => {
     // 내 캐릭터 데이터 가져오기 및 소켓 전송
     const fetchAndShareCharacter = async () => {
       try {
@@ -416,7 +446,7 @@ useEffect(() => {
     return () => {
       socket.off('receiveCharacter');
     };
-  }, [socket, roomName]);
+  }, [socket, roomName]); */
 
    //정답확인 승리처리
    useEffect(()=>{
