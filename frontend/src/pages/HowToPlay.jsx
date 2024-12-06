@@ -3,8 +3,8 @@ import React from 'react';
 const HowToPlay = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-8 flex flex-col items-center">
-      <div className="max-w-4xl w-full bg-white p-6 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">게임 설명</h1>
+      <div className="mt-10 max-w-4xl w-full bg-white p-6 rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold mb-6 text-center text-main01">게임 설명</h1>
 
         {/* 게임 플레이 방법 */}
         <section className="mb-8">
@@ -56,7 +56,7 @@ const HowToPlay = () => {
         <div className="text-center">
           <button
             onClick={() => window.history.back()}
-            className="mt-6 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+            className="mt-4 bg-main01 text-white px-10 py-3 rounded-lg hover:bg-green-700"
           >
             뒤로가기
           </button>

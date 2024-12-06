@@ -74,13 +74,13 @@ function SignUp() {
             value={formData.username}
             onChange={handleChange}
             placeholder="아이디"
-            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-customGreen"
+            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-main01"
             required
           />
           <button
             type="button"
             onClick={checkUsernameAvailability}
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition duration-200 mt-2"
+            className="w-full py-3 bg-main02 text-white rounded hover:bg-blue-600 transition duration-200 mt-2"
           >
             아이디 중복 확인
           </button>
@@ -99,7 +99,7 @@ function SignUp() {
             value={formData.password}
             onChange={handleChange}
             placeholder="비밀번호"
-            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-customGreen"
+            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-main01"
             required
           />
         </div>
@@ -111,7 +111,7 @@ function SignUp() {
             value={formData.confirmPassword}
             onChange={handleChange}
             placeholder="비밀번호 확인"
-            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-customGreen"
+            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-main01"
             required
           />
         </div>
@@ -123,7 +123,7 @@ function SignUp() {
             value={formData.name}
             onChange={handleChange}
             placeholder="이름"
-            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-customGreen"
+            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-main01"
             required
           />
         </div>
@@ -135,14 +135,14 @@ function SignUp() {
             value={formData.email}
             onChange={handleChange}
             placeholder="이메일"
-            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-customGreen"
+            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-main01"
             required
           />
         </div>
 
         <button
           type="submit"
-          className="w-full bg-green-700 text-white py-3 rounded hover:bg-green-800 transition duration-200"
+          className="w-full bg-main01 text-white py-3 rounded hover:bg-green-800 transition duration-200"
         >
           회원가입
         </button>
