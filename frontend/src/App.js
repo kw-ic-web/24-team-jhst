@@ -12,7 +12,6 @@ import Header from './components/Header.jsx';
 import GameMulti from './pages/GameMulti.jsx';
 import ResultSingle from './pages/ResultSingle.jsx';
 import ResultMulti from './pages/ResultMulti.jsx';
-import CharacterTest from './pages/character-test.jsx';
 import GameSingle from './pages/GameSingle.jsx';
 import Admin from './pages/AdminPage.jsx';
 import WrongNote from './pages/WrongNote.jsx';
@@ -26,7 +25,6 @@ function App() {
         <div className="pt-4"></div>
         <Header />
         <Routes>
-          <Route path="/character-test" element={<CharacterTest />} />
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />

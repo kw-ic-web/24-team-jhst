@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 
 const PlayerScore = ({ name, timer }) => (
   <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
-    <p>{name}</p>
-    <p>{timer}초</p>
+    <p className="text-md">플레이어 : {name}</p>
+    <p className="text-lg font-semibold">{timer} 초</p>
   </div>
 );
 
@@ -284,15 +284,15 @@ const GameSingle = () => {
         </div>
       )}
       <div className="flex justify-between items-center w-full max-w-4xl mb-8 space-x-4">
-        <PlayerScore name={player.name} timer={player.timer} />
+        <PlayerScore  name={player.name} timer={player.timer} />
         <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
           <p className="text-sm">라운드</p>
-          <p>{round} / {TOTAL_ROUNDS}</p>
+          <p  className="text-lg font-semibold" >{round} / {TOTAL_ROUNDS}</p>
         </div>
       </div>
-      <div className="text-center bg-gray-300 p-4 rounded-md text-2xl mb-8 max-w-2xl w-full">
-        <p>제시 단어</p>
-        <p>{word}</p>
+      <div className="text-center bg-main01 text-white p-4 rounded-md mb-8 max-w-2xl w-full">
+        <p className='text-xl'>제시 단어</p>
+        <p className='text-2xl font-bold'>{word}</p>
       </div>
       <div className="relative w-full max-w-4xl h-96 bg-white rounded-md">
         <img

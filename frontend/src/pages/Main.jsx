@@ -159,12 +159,12 @@ function Main() {
               className="w-48 h-48 mb-6 object-contain"
             />
           ) : (
-            <p>선택된 캐릭터가 없습니다. 상점에서 선택해주세요.</p>
+            <p className='font-medium mb-5 text-md text-red-500'>선택된 캐릭터가 없습니다. 상점에서 선택해주세요.</p>
           )}
           {!isMatching ? (
             <button
               onClick={handleGameStartClick}
-              className="w-full bg-customGreen text-white py-3 rounded hover:bg-customBlue transition duration-200"
+              className="w-full bg-main01 text-white py-3 rounded hover:bg-green-700 transition duration-200"
             >
               게임 시작
             </button>
@@ -184,7 +184,7 @@ function Main() {
         {/* 오른쪽 상단 코인 및 상점 버튼 */}
         <div className="flex flex-col items-end space-y-4">
           <div className="w-full bg-yellow-300 text-black py-3 px-4 rounded-lg text-center mb-4">
-            보유 포인트: {point}
+            보유 포인트 : {point}
           </div>
           <button
             className="w-full bg-gray-200 text-black py-3 rounded hover:bg-gray-300 transition duration-200"

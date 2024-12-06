@@ -48,7 +48,7 @@ function Login() {
             value={id}
             onChange={(e) => setId(e.target.value)}
             placeholder="아이디"
-            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-customGreen"
+            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-main01"
           />
         </div>
 
@@ -58,21 +58,21 @@ function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="비밀번호"
-            className="block w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-customGreen"
+            className="block w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-main01"
           />
         </div>
 
         <button
           onClick={handleLogin}
-          className="w-full bg-customGreen text-white py-3 rounded hover:bg-customBlue transition duration-200"
+          className="w-full bg-main01 text-white py-3 rounded hover:bg-green-700 transition duration-200"
         >
           로그인
         </button>
 
         <div className="mt-6 text-center text-sm">
-          <a href="/signup" className="text-gray-600 hover:text-gray-800">회원가입</a>
+          <span> 아직 회원이 아니신가요?</span>
           <span className="mx-2">|</span>
-          <a href="/forgot-password" className="text-gray-600 hover:text-gray-800">비밀번호 찾기</a>
+          <a href="/signup" className="text-black-600 hover:text-main01">회원가입 하러가기</a>
         </div>
       </div>
     </div>

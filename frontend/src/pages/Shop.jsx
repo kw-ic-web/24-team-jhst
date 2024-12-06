@@ -105,7 +105,7 @@ function Shop() {
       <h1 className="text-2xl font-bold mb-8">내 캐릭터</h1>
 
       <div className="absolute top-32 right-8 bg-yellow-300 text-black py-2 px-4 rounded-lg">
-        보유 포인트: {balance}
+        보유 포인트 : {balance}
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 mb-4 w-full max-w-5xl">
@@ -114,7 +114,7 @@ function Shop() {
             key={index}
             onClick={() => handleCharacterClick(character)}
             className={`flex flex-col items-center justify-between w-full h-56 bg-white shadow-md rounded-lg p-4 cursor-pointer transition-transform transform hover:scale-105 ${
-              character.isActive ? 'border-4 border-blue-500' : 'border border-gray-300'
+              character.isActive ? 'border-4 border-main02' : 'border border-gray-300'
             }`}
           >
             {character.image ? (
@@ -140,7 +140,7 @@ function Shop() {
       <div className="w-full max-w-md">
         <button
           onClick={handleGachaClick}
-          className="w-full bg-green-500 text-white py-3 rounded-lg transition duration-200 hover:bg-green-600 mt-6"
+          className="w-full bg-main01 text-white py-3 rounded-lg transition duration-200 hover:bg-green-600 mt-6"
         >
           캐릭터 뽑기
         </button>
@@ -149,18 +149,18 @@ function Shop() {
       {/* 모달 */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <h2 className="text-xl font-bold mb-4">캐릭터를 변경하시겠습니까?</h2>
-            <div className="flex justify-center gap-4">
+          <div className="bg-white p-6 roundedshadow-lg text-center">
+            <h2 className="text-xl font-bold mb-4">이 캐릭터로 선택하시겠습니까?</h2>
+            <div className="flex justify-center gap-10">
               <button
                 onClick={handleModalConfirm}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                className="bg-main01 text-white px-8 py-2 rounded hover:bg-main-600"
               >
                 예
               </button>
               <button
                 onClick={handleModalCancel}
-                className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
+                className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400"
               >
                 아니오
               </button>

@@ -562,9 +562,9 @@ useEffect(() => {
       {/* 게임 화면 */}
       <div>
         <h1>게임 멀티플레이 화면</h1>
-        <p>방 이름: {roomName}</p>
-        <p>플레이어1: {myPlayer?.member_id}</p>
-        <p>플레이어2: {otherPlayer?.member_id}</p>
+        <p>방 이름 : {roomName}</p>
+        <p>플레이어1 : {myPlayer?.member_id}</p>
+        <p>플레이어2 : {otherPlayer?.member_id}</p>
       </div>
       <div className="flex justify-between items-center w-full max-w-4xl mb-8 space-x-4">
         <PlayerScore name={players[0]?.name} score={players[0]?.score || 0} />

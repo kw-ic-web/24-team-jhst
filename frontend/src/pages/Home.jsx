@@ -20,11 +20,11 @@ function Home() {
         <h2 className="text-2xl font-bold mb-4">SpellMeow</h2>
         <p className="mb-8">재미있게 영어 단어 철자를 배우고 실력을 키워보세요! <br />
           글자를 모아 단어를 완성하고 친구들과 대결을 펼치세요</p>
-        <button onClick={handlePlay} className="w-full bg-green-700 text-white py-3 rounded hover:bg-green-800 transition duration-200">
+        <button onClick={handlePlay} className="w-full font-semibold bg-main01 text-white py-3 rounded hover:bg-green-800 transition duration-200">
           플레이 하기
         </button>
         {/* 플레이 방법 버튼 추가 */}
-        <button onClick={handleHowToPlay} className="mt-4 w-full bg-blue-500 text-white py-3 rounded hover:bg-blue-600 transition duration-200">
+        <button onClick={handleHowToPlay} className="mt-4 w-full font-semibold bg-main02 text-white py-3 rounded hover:bg-blue-800 transition duration-200">
           게임 방법
         </button>
       </div>

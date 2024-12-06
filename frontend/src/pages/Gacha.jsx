@@ -106,16 +106,16 @@ function Gacha() {
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-8 rounded shadow-lg w-80 text-center">
             <h2 className="text-lg mb-6">내 보유 포인트: {userPoints}</h2>
-            <h2 className="text-xl mb-8">100포인트 차감됩니다</h2>
+            <h2 className="text-xl mb-8">100 포인트 차감됩니다</h2>
             <div className="flex justify-around mt-4">
               <button
-                className="bg-blue-500 text-white py-2 px-4 rounded"
+                className="bg-main02 text-white py-2 px-6 rounded"
                 onClick={handleDrawCharacter}
               >
                 뽑기
               </button>
               <button
-                className="bg-gray-500 text-white py-2 px-4 rounded"
+                className="bg-gray-500 text-white py-2 px-6 rounded"
                 onClick={handleCloseInitialModal}
               >
                 닫기
@@ -144,7 +144,7 @@ function Gacha() {
             )}
             <div className="flex justify-around mt-4">
               <button
-                className="bg-gray-500 text-white py-2 px-4 rounded"
+                className="bg-gray-500 text-white py-2 w-full rounded"
                 onClick={handleCloseResultModal}
               >
                 닫기
@@ -157,7 +157,7 @@ function Gacha() {
       {/* 보유 캐릭터 확인하기 버튼 */}
       <button
         onClick={handleGoToShop}
-        className="mt-8 bg-green-500 text-white py-2 px-16 rounded-lg"
+        className="mt-8 bg-main01 text-white py-3 px-16 rounded-lg"
       >
         보유 캐릭터 확인하기
       </button>

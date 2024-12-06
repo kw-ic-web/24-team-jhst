@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 
-function Setting({ audioRef }) {
+function Setting() {
   const navigate = useNavigate(); 
   const [userInfo, setUserInfo] = useState({
     name: '',
@@ -95,7 +95,7 @@ function Setting({ audioRef }) {
             value={userInfo.name}
             onChange={handleChange}
             placeholder="이름"
-            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-customGreen"
+            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-main01"
           />
         </div>
 
@@ -106,7 +106,7 @@ function Setting({ audioRef }) {
             value={userInfo.email}
             onChange={handleChange}
             placeholder="이메일"
-            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-customGreen"
+            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-main01"
           />
         </div>
 
@@ -117,7 +117,7 @@ function Setting({ audioRef }) {
             value={userInfo.password}
             onChange={handleChange}
             placeholder="새 비밀번호"
-            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-customGreen"
+            className="block w-full px-4 py-3 border border-gray-300 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-main01"
           />
         </div>
 
@@ -134,7 +134,7 @@ function Setting({ audioRef }) {
 
         <button
           onClick={handleUpdate}
-          className="w-full bg-green-700 text-white py-3 rounded mb-4 hover:bg-green-800 transition duration-200"
+          className="w-full bg-main01 text-white py-3 rounded mb-4 hover:bg-green-800 transition duration-200"
         >
           수정 완료
         </button>
@@ -145,10 +145,9 @@ function Setting({ audioRef }) {
         >
           회원 탈퇴
         </button>
-
         <button
           onClick={handleHowToPlay}
-          className="w-full bg-gray-500 text-white py-3 rounded hover:bg-gray-600 transition duration-200"
+          className="w-full bg-main02 text-white py-3 rounded hover:bg--600 transition duration-200"
         >
           게임 방법
         </button>

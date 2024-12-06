@@ -47,7 +47,7 @@ const WrongNote = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-8">
-      <div className="flex justify-between w-full max-w-4xl mb-8">
+      <div className="flex justify-between w-full max-w-4xl mb-8 gap-3">
         {/* 플레이어 정보 */}
         <div className="bg-white p-4 rounded-lg shadow-md w-1/3 text-center">
           {activeCharacter ? (
@@ -61,13 +61,13 @@ const WrongNote = () => {
               {/* 싱글플레이 버튼 */}
               <button
                 onClick={() => navigate('/game-single')}
-                className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                className="mt-4 bg-blue-500 text-white w-full py-3 rounded-lg hover:bg-blue-700"
               >
-                싱글플레이 하러 가기
+                싱글플레이 시작
               </button>
             </>
           ) : (
-            <p>플레이어 정보를 불러오는 중입니다...</p>
+            <p>상점에 가서 게임 캐릭터를 선택해주세요!</p>
           )}
         </div>
 
@@ -78,8 +78,8 @@ const WrongNote = () => {
             {wrongWords.length > 0 ? (
               wrongWords.map((word) => (
                 <div key={word.word_id} className="p-2 bg-gray-100 rounded-md shadow-sm">
-                  <p><strong>단어:</strong> {word.en_word}</p>
-                  <p><strong>뜻:</strong> {word.ko_word}</p>
+                  <p><strong>단어 :</strong> {word.en_word}</p>
+                  <p><strong>뜻 :</strong> {word.ko_word}</p>
                 </div>
               ))
             ) : (
