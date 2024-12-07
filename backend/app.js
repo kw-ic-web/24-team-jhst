@@ -41,7 +41,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'https://team10-front.kwweb.duckdns.org'], // 프론트엔드 URL
+    origin: 'https://team10-front.kwweb.duckdns.org', // 프론트엔드 URL
   })
 );
 

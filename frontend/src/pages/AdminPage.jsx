@@ -1,43 +1,43 @@
-import React, { useState, useRef } from "react";
-import axios from "axios";
+import React, { useState, useRef } from 'react';
+import axios from 'axios';
 
 const AdminPage = () => {
-  const [deleteMemberId, setDeleteMemberId] = useState("");
-  const [pointMemberId, setPointMemberId] = useState("");
-  const [pointValue, setPointValue] = useState("");
+  const [deleteMemberId, setDeleteMemberId] = useState('');
+  const [pointMemberId, setPointMemberId] = useState('');
+  const [pointValue, setPointValue] = useState('');
   const [pointResult, setPointResult] = useState(null);
-  const [characterNameToDelete, setCharacterNameToDelete] = useState("");
-  const [characterName, setCharacterName] = useState("");
+  const [characterNameToDelete, setCharacterNameToDelete] = useState('');
+  const [characterName, setCharacterName] = useState('');
   const [characterImage, setCharacterImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [englishWord, setEnglishWord] = useState("");
-  const [koreanWord, setKoreanWord] = useState("");
-  const [difficulty, setDifficulty] = useState("easy");
-  const [wordId, setWordId] = useState("");
-  const [wordResult, setWordResult] = useState({ en_word: "", ko_word: "" });
-  const [updatedEnglishWord, setUpdatedEnglishWord] = useState("");
-  const [updatedKoreanWord, setUpdatedKoreanWord] = useState("");
+  const [englishWord, setEnglishWord] = useState('');
+  const [koreanWord, setKoreanWord] = useState('');
+  const [difficulty, setDifficulty] = useState('easy');
+  const [wordId, setWordId] = useState('');
+  const [wordResult, setWordResult] = useState({ en_word: '', ko_word: '' });
+  const [updatedEnglishWord, setUpdatedEnglishWord] = useState('');
+  const [updatedKoreanWord, setUpdatedKoreanWord] = useState('');
 
-  // 섹션 
+  // 섹션
   const memberSection = useRef(null);
   const characterSection = useRef(null);
   const wordSection = useRef(null);
 
   const scrollToSection = (section) => {
-    section.current.scrollIntoView({ behavior: "smooth" });
+    section.current.scrollIntoView({ behavior: 'smooth' });
   };
 
   // 회원 삭제
   const handleDeleteMember = async () => {
     try {
-      const response = await axios.post("https://team10.kwweb.duckdns.org/admin/deleteMember", {
+      const response = await axios.post('https://team10.kwweb.duckdns.org/admin/deleteMember', {
         member_id: deleteMemberId,
       });
       alert(response.data.message);
-      setDeleteMemberId("");
+      setDeleteMemberId('');
     } catch (error) {
-      console.error("회원 삭제 오류:", error);
-      alert("회원 삭제 실패");
+      console.error('회원 삭제 오류:', error);
+      alert('회원 삭제 실패');
     }
   };
 
@@ -47,24 +47,24 @@ const AdminPage = () => {
       const response = await axios.get(`https://team10.kwweb.duckdns.org/admin/getMemberPoint/${pointMemberId}`);
       setPointResult(response.data.point);
     } catch (error) {
-      console.error("포인트 조회 오류:", error);
-      alert("포인트 조회 실패");
+      console.error('포인트 조회 오류:', error);
+      alert('포인트 조회 실패');
     }
   };
 
   // 회원 포인트 수정
   const handleUpdatePoint = async () => {
     try {
-      const response = await axios.post("https://team10.kwweb.duckdns.org/admin/updateMemberPoint", {
+      const response = await axios.post('https://team10.kwweb.duckdns.org/admin/updateMemberPoint', {
         member_id: pointMemberId,
         point: pointValue,
       });
       alert(response.data.message);
-      setPointMemberId("");
-      setPointValue("");
+      setPointMemberId('');
+      setPointValue('');
     } catch (error) {
-      console.error("포인트 수정 오류:", error);
-      alert("포인트 수정 실패");
+      console.error('포인트 수정 오류:', error);
+      alert('포인트 수정 실패');
     }
   };
 
@@ -73,26 +73,26 @@ const AdminPage = () => {
     try {
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const imageBase64 = reader.result.split(",")[1];
-        const response = await axios.post("https://team10.kwweb.duckdns.org/admin/addCharacter", {
+        const imageBase64 = reader.result.split(',')[1];
+        const response = await axios.post('https://team10.kwweb.duckdns.org/admin/addCharacter', {
           name: characterName,
           imageFile: imageBase64,
         });
         alert(response.data.message);
-        setCharacterName("");
+        setCharacterName('');
         setCharacterImage(null);
-        setImagePreview(null); 
+        setImagePreview(null);
       };
       if (characterImage) {
         reader.readAsDataURL(characterImage);
       }
     } catch (error) {
-      console.error("캐릭터 추가 오류:", error);
-      alert("캐릭터 추가 실패");
+      console.error('캐릭터 추가 오류:', error);
+      alert('캐릭터 추가 실패');
     }
   };
 
-  // 이미지 선택 
+  // 이미지 선택
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setCharacterImage(file);
@@ -104,32 +104,32 @@ const AdminPage = () => {
   // 캐릭터 삭제
   const handleDeleteCharacter = async () => {
     try {
-      const response = await axios.post("https://team10.kwweb.duckdns.org/admin/deleteCharacterByName", {
+      const response = await axios.post('https://team10.kwweb.duckdns.org/admin/deleteCharacterByName', {
         name: characterNameToDelete,
       });
       alert(response.data.message);
-      setCharacterNameToDelete("");
+      setCharacterNameToDelete('');
     } catch (error) {
-      console.error("캐릭터 삭제 오류:", error);
-      alert("캐릭터 삭제 실패");
+      console.error('캐릭터 삭제 오류:', error);
+      alert('캐릭터 삭제 실패');
     }
   };
 
   // 단어 추가
   const handleAddWord = async () => {
     try {
-      const response = await axios.post("https://team10.kwweb.duckdns.org/admin/addWord", {
+      const response = await axios.post('https://team10.kwweb.duckdns.org/admin/addWord', {
         en_word: englishWord,
         ko_word: koreanWord,
         difficulty: difficulty,
       });
       alert(response.data.message);
-      setEnglishWord("");
-      setKoreanWord("");
-      setDifficulty("easy");
+      setEnglishWord('');
+      setKoreanWord('');
+      setDifficulty('easy');
     } catch (error) {
-      console.error("단어 추가 오류:", error);
-      alert("단어 추가 실패");
+      console.error('단어 추가 오류:', error);
+      alert('단어 추가 실패');
     }
   };
 
@@ -139,26 +139,26 @@ const AdminPage = () => {
       const response = await axios.get(`https://team10.kwweb.duckdns.org/admin/getWord/${wordId}`);
       setWordResult(response.data);
     } catch (error) {
-      console.error("단어 조회 오류:", error);
-      alert("단어 조회 실패");
+      console.error('단어 조회 오류:', error);
+      alert('단어 조회 실패');
     }
   };
 
   // 단어 수정
   const handleUpdateWord = async () => {
     try {
-      const response = await axios.post("https://team10.kwweb.duckdns.org/admin/updateWord", {
+      const response = await axios.post('https://team10.kwweb.duckdns.org/admin/updateWord', {
         word_id: wordId,
         en_word: updatedEnglishWord,
         ko_word: updatedKoreanWord,
       });
       alert(response.data.message);
-      setWordId("");
-      setUpdatedEnglishWord("");
-      setUpdatedKoreanWord("");
+      setWordId('');
+      setUpdatedEnglishWord('');
+      setUpdatedKoreanWord('');
     } catch (error) {
-      console.error("단어 수정 오류:", error);
-      alert("단어 수정 실패");
+      console.error('단어 수정 오류:', error);
+      alert('단어 수정 실패');
     }
   };
 
@@ -225,9 +225,7 @@ const AdminPage = () => {
           <button onClick={handleFetchPoint} className="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-300">
             조회
           </button>
-          {pointResult !== null && (
-            <div className="text-gray-700 mt-4">조회된 포인트: {pointResult}</div>
-          )}
+          {pointResult !== null && <div className="text-gray-700 mt-4">조회된 포인트: {pointResult}</div>}
 
           {/* 포인트 수정 */}
           <h3 className="text-lg font-medium mt-6">포인트 수정</h3>
@@ -254,18 +252,10 @@ const AdminPage = () => {
             onChange={(e) => setCharacterName(e.target.value)}
             className="w-full px-3 py-2 border rounded mb-4"
           />
-          <input
-            type="file"
-            onChange={handleImageChange}
-            className="w-full px-3 py-2 border rounded mb-4"
-          />
+          <input type="file" onChange={handleImageChange} className="w-full px-3 py-2 border rounded mb-4" />
           {imagePreview && (
             <div className="flex justify-center mb-4">
-              <img
-                src={imagePreview}
-                alt="캐릭터 미리보기"
-                className="w-32 h-32 object-cover rounded"
-              />
+              <img src={imagePreview} alt="캐릭터 미리보기" className="w-32 h-32 object-cover rounded" />
             </div>
           )}
           <button onClick={handleAddCharacter} className="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-300">
@@ -281,7 +271,10 @@ const AdminPage = () => {
             onChange={(e) => setCharacterNameToDelete(e.target.value)}
             className="w-full px-3 py-2 border rounded mb-4"
           />
-          <button onClick={handleDeleteCharacter} className="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-300">
+          <button
+            onClick={handleDeleteCharacter}
+            className="bg-gray-200 text-black px-4 py-2 rounded hover:bg-gray-300"
+          >
             삭제
           </button>
         </div>

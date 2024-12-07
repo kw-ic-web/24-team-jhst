@@ -16,7 +16,7 @@ const generateRandomLetters = (currentWord) => {
 const socketHandler = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: ['http://localhost:3000', 'https://team10-front.kwweb.duckdns.org'],
+      origin: 'https://team10-front.kwweb.duckdns.org',
       methods: ['GET', 'POST'],
       allowedHeaders: ['Content-Type', 'Authorization'],
       credentials: true,
