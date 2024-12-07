@@ -571,37 +571,44 @@ useEffect(() => {
         {mode || '로딩 중...'}
       </div>
       <div className="relative w-full max-w-4xl h-96 bg-white rounded-md">
-        {activeCharacter && (
-          // 내캐릭터
-          <div
-            className="absolute"
-            style={{
-              left: `${players[0]?.position.x || 0}px`,
-              top: `${players[0]?.position.y || 0}px`,
-            }}
-          >
+         {/* 내 캐릭터 */}
+         <div
+          className="absolute"
+          style={{
+            left: `${players[0]?.position.x || 0}px`,
+            top: `${players[0]?.position.y || 0}px`,
+          }}
+        >
+          {activeCharacter ? (
             <img
               src={activeCharacter.image || 'default-character.png'}
               alt={activeCharacter.name || 'Player'}
               className="w-14 h-14 object-contain"
             />
+          ) : (
+            <div 
+              className="w-14 h-14 bg-red-500 rounded-full" 
+              style={{ width: '56px', height: '56px' }} 
+            />
+          )}
 
             {/* 내 알파벳 표시 */}
             <div
-              className="absolute top-[-30px] left-0 flex gap-1"
-              style={{ whiteSpace: 'nowrap' }}
-            >
-              {players[0]?.collectedLetters?.map((letter, index) => (
-                <span
-                  key={index}
-                  className="text-white bg-black text-sm px-2 py-1 rounded"
-                >
-                  {letter}
-                </span>
-              ))}
-            </div>
+            className="absolute top-[-30px] left-0 flex gap-1"
+            style={{ whiteSpace: 'nowrap' }}
+          >
+            {players[0]?.collectedLetters?.map((letter, index) => (
+              <span
+                key={index}
+                className="text-white bg-black text-sm px-2 py-1 rounded"
+              >
+                {letter}
+              </span>
+            ))}
           </div>
-        )}
+        </div>
+
+
         {/* 상대방 캐릭터 */}
         <div
           className="absolute"
@@ -610,11 +617,16 @@ useEffect(() => {
             top: `${players[1]?.position.y || 0}px`,
           }}
         >
-          {players[1]?.character && (
+            {players[1]?.character ? (
             <img
               src={players[1].character.image || 'default-character.png'}
               alt={players[1].character.name || 'Opponent'}
               className="w-14 h-14 object-contain"
+            />
+          ) : (
+            <div 
+              className="w-14 h-14 bg-blue-500 rounded-full" 
+              style={{ width: '56px', height: '56px' }} 
             />
           )}
           {/* 상대방의 알파벳 표시 */}

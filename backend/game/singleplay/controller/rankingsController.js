@@ -3,6 +3,8 @@ const { MemberGame } = require('../../../db/memberdb');
 
 const getRankings = async (req, res) => {
   try {
+    const { member_id } = req.query; 
+
     const rankings = await MemberGame.findAll({
       attributes: [
         'member_id',
@@ -21,10 +23,20 @@ const getRankings = async (req, res) => {
           'ranking'
         ]
       ],
-      order: [Sequelize.literal('ranking')],
+      order: [['ranking', 'ASC']],
       raw: true
     });
-    res.json(rankings);
+    
+    let myRanking = null;
+    if (member_id) {
+      myRanking = rankings.find(player => player.member_id === member_id) || null;
+    }
+    
+    res.json({
+      myRanking,
+      globalRanking: rankings
+    });
+    
   } catch (error) {
     console.error('Error fetching rankings:', error);
     res.status(500).send('랭킹 정보를 가져오는 중 오류 발생');
