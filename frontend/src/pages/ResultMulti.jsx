@@ -6,8 +6,6 @@ import axios from 'axios';
 import meow3 from '../assets/images/meow3.png'; // Ensure the path is correct
 
 const ResultMulti = () => {
-  const winScore = 70;
-  const loseScore = 30;
   const navigate = useNavigate();
   const location = useLocation();
   const { players = [], rounds = {}, game_id } = location.state || {};
@@ -31,7 +29,6 @@ const ResultMulti = () => {
         // WrongAns 데이터 전송
         await sendWrongAnsData();
 
-        console.log("모든 데이터 전송 완료");
         setDataSent(true); // 전송 상태 업데이트
       } catch (error) {
         console.error("데이터 전송 중 오류 발생:", error);
@@ -53,7 +50,6 @@ const sendWinnerData = async () => {
       winPoint: winner.score,
       losePoint: loser.score,
     });
-    console.log("승리 데이터 전송 완료");
   } catch (error) {
     console.error("승리 데이터 전송 실패:", error);
   }
@@ -80,6 +76,7 @@ const sendWrongAnsData = async () => {
 };
 
 
+
   const handleBack = () => {
     navigate("/main");
   };
@@ -88,11 +85,20 @@ const sendWrongAnsData = async () => {
     <div className="min-h-screen flex items-center justify-center p-8 bg-white">
       <div className="flex items-center w-full max-w-6xl space-x-8">
 
-        {/* 상대방*/}
+        {/* winner */}
         <div className="w-1/3 flex flex-col items-center justify-center bg-blue-500 p-6 rounded-lg">
           <h1 className="text-4xl font-bold mb-4 text-white">WIN</h1>
           <h2 className="text-xl font-bold mb-4 text-white">{winner?.name}</h2>
-          <img src={meow3} alt="Cat Icon" className="w-28 h-28 mb-6" />
+          {winner?.character?.image ? (
+            <img
+              src={winner.character.image}
+              alt={winner.character.name || 'Character'}
+              className="w-28 h-28 mb-6"
+            />
+          ) : (
+            <img src={meow3} alt="Default Icon" className="w-28 h-28 mb-6" />
+          )}
+          
           <div className="flex items-center bg-gray-200 py-2 px-4 rounded-md">
             <FaStar className="text-yellow-500 mr-2" />
             <span className="text-xl font-bold">+{winner.score}</span>
@@ -119,11 +125,19 @@ const sendWrongAnsData = async () => {
           </div>
         </div>
 
-        {/* 나*/}
+        {/* loser*/}
         <div className="w-1/3 flex flex-col items-center justify-center bg-red-500 p-6 rounded-lg">
           <h1 className="text-4xl font-bold mb-4 text-white">LOSE</h1>
           <h2 className="text-xl font-bold mb-4 text-white">{loser?.name}</h2>
-          <img src={meow3} alt="Cat Icon" className="w-28 h-28 mb-6" />
+          {loser?.character?.image ? (
+            <img
+              src={loser.character.image}
+              alt={loser.character.name || 'Character'}
+              className="w-28 h-28 mb-6"
+            />
+          ) : (
+            <img src={meow3} alt="Default Icon" className="w-28 h-28 mb-6" />
+          )}
           <div className="flex items-center bg-gray-200 py-2 px-4 rounded-md">
             <FaStar className="text-yellow-500 mr-2" />
             <span className="text-xl font-bold">+{loser.score}</span>
