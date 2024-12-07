@@ -180,7 +180,7 @@ function Main() {
 
         {/* 오른쪽 상단 코인 및 상점 버튼 */}
         <div className="flex flex-col items-end space-y-4">
-          <div className="w-full bg-yellow-300 text-black py-3 px-4 rounded-lg text-center mb-4">
+          <div className="w-full bg-yellow-300 text-black py-3 px-4 rounded text-center mb-4">
             보유 포인트 : {point}
           </div>
           <button
@@ -210,7 +210,7 @@ function Main() {
                   <button
                     onClick={() => setSelectedMode('english')}
                     className={`py-2 px-4 w-1/2 rounded-md mr-2 ${
-                      selectedMode === 'english' ? 'bg-green-500 text-white' : 'bg-gray-200'
+                      selectedMode === 'english' ? 'bg-main01 text-white' : 'bg-gray-200'
                     }`}
                   >
                     영어
@@ -218,7 +218,7 @@ function Main() {
                   <button
                     onClick={() => setSelectedMode('korea')}
                     className={`py-2 px-4 w-1/2 rounded-md ${
-                      selectedMode === 'korea' ? 'bg-green-500 text-white' : 'bg-gray-200'
+                      selectedMode === 'korea' ? 'bg-main01 text-white' : 'bg-gray-200'
                     }`}
                   >
                     한글
@@ -232,7 +232,7 @@ function Main() {
                   <button
                     onClick={() => setSelectedDifficulty('easy')}
                     className={`py-2 px-4 w-1/2 rounded-md mr-2 ${
-                      selectedDifficulty === 'easy' ? 'bg-green-500 text-white' : 'bg-gray-200'
+                      selectedDifficulty === 'easy' ? 'bg-main01 text-white' : 'bg-gray-200'
                     }`}
                   >
                     EASY
@@ -240,7 +240,7 @@ function Main() {
                   <button
                     onClick={() => setSelectedDifficulty('hard')}
                     className={`py-2 px-4 w-1/2 rounded-md ${
-                      selectedDifficulty === 'hard' ? 'bg-green-500 text-white' : 'bg-gray-200'
+                      selectedDifficulty === 'hard' ? 'bg-main01 text-white' : 'bg-gray-200'
                     }`}
                   >
                     HARD
@@ -250,7 +250,7 @@ function Main() {
 
               <button
                 onClick={handleGameStart}
-                className="w-full bg-blue-500 text-white py-2 px-4 rounded-md mt-4"
+                className="w-full bg-main02 text-white py-2 px-4 rounded-md mt-4"
               >
                 게임 시작
               </button>
