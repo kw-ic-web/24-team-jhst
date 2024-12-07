@@ -85,7 +85,6 @@ const createMemberCharactersTableAndInsertData = async () => {
     await MemberCharacters.bulkCreate([
       { member_id: 'user1', character_id: 1, is_active: true },
       { member_id: 'user2', character_id: 2, is_active: false },
-      { member_id: 'user3', character_id: 3, is_active: true },
     ]);
     console.log('MemberCharacters 테이블 초기화 및 데이터 삽입 성공');
   } catch (err) {
@@ -123,43 +122,6 @@ const createTableAndInsertData = async () => {
           point: 150,
           win: 15,
           lose: 7,
-        },
-        {
-          member_id: 'user3',
-          pwd: 'password789',
-          name: 'Alice Johnson',
-          email: 'alice@example.com',
-          point: 120,
-          win: 12,
-          lose: 6,
-        },
-        {
-          member_id: 'user4',
-          pwd: 'password321',
-          name: 'Bob Brown',
-          email: 'bob@example.com',
-          point: 80,
-          win: 8,
-          lose: 9,
-        },
-        {
-          member_id: 'user5',
-          pwd: 'password654',
-          name: 'Charlie Black',
-          email: 'charlie@example.com',
-          point: 60,
-          win: 6,
-          lose: 3,
-        },
-
-        {
-          member_id: 'user6',
-          pwd: 'password654',
-          name: 'Charlie Black',
-          email: 'charlie@example.com',
-          point: 60,
-          win: 6,
-          lose: 3,
         },
       ],
       {

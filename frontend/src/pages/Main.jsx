@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import meow3 from '../assets/images/meow3.png';
 import axios from 'axios';
 import { useSocket } from '../context/SocketContext';
-
-
 
 function Main() {
   const socket = useSocket();
@@ -97,7 +94,7 @@ function Main() {
   const handleGameStart = () => {
     if (selectedMode && selectedDifficulty) {
       const token = localStorage.getItem('token');
-      const member_id = token; // 사용자 ID (토큰 활용)
+      const member_id = token; 
 
       alert(`모드: ${selectedMode}, 난이도: ${selectedDifficulty}`);
       setShowSelection(false);
