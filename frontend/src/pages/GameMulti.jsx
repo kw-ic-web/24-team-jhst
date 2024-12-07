@@ -43,6 +43,16 @@ const GameMulti = () => {
       if (response.data) {
         setActiveCharacter(response.data);
 
+        // 내 캐릭터 데이터를 players[0]에 추가
+        setPlayers((prevPlayers) => {
+          const updatedPlayers = [...prevPlayers];
+          updatedPlayers[0] = {
+            ...updatedPlayers[0],
+            character: response.data,
+          };
+          return updatedPlayers;
+        });
+
         socket.emit('shareCharacter', {
           roomName,
           character: response.data,
@@ -248,7 +258,6 @@ const GameMulti = () => {
                         collectedLetter.letter,
                     ],
                 };
-                console.log("보유단어",updatedPlayers[0]?.collectedLetters);
                 // 소켓으로 업데이트된 데이터 전송
                 socket.emit('updateWord', {
                     roomName,
@@ -366,10 +375,6 @@ useEffect(() => {
   
         if (playerIndex !== -1) {
           updatedPlayers[playerIndex].collectedLetters = updateLetter.split(''); // 문자열을 배열로 변환
-          console.log(
-            `분리한거${playerId}:`,
-            updatedPlayers[playerIndex].collectedLetters
-          );
         }
   
         return updatedPlayers;
@@ -387,7 +392,6 @@ useEffect(() => {
 //캐릭터 소켓
   useEffect(() => {
     const handleReceiveCharacter = ({ playerId, character }) => {
-      console.log('Received character data:', playerId, character); // 디버그 로그 추가
   
       setPlayers((prevPlayers) =>
         prevPlayers.map((player) =>
@@ -450,12 +454,10 @@ useEffect(() => {
 
    //정답확인 승리처리
    useEffect(()=>{
-    console.log(`내 collectedLetters ${players[0].collectedLetters?.join('')}`)
 
     //정답확인
     if (players[0]?.collectedLetters?.length>0 && 
       players[0].collectedLetters.join('') === rounds[`round${round}`]?.en_word) {
-      console.log("정답 맞춤!");
       socket.emit("answer",{
         roomName,
         playerId: players[0].socket_id});
@@ -484,9 +486,6 @@ useEffect(() => {
             }
           });
           
-          console.log("Updated Players:", updatedPlayers);
-          console.log("Player 0 wrong list:", updatedPlayers[0]?.wrong);
-          console.log("Player 1 wrong list:", updatedPlayers[1]?.wrong);
 
           
           
@@ -560,12 +559,6 @@ useEffect(() => {
         </div>
       )}
       {/* 게임 화면 */}
-      <div>
-        <h1>게임 멀티플레이 화면</h1>
-        <p>방 이름 : {roomName}</p>
-        <p>플레이어1 : {myPlayer?.member_id}</p>
-        <p>플레이어2 : {otherPlayer?.member_id}</p>
-      </div>
       <div className="flex justify-between items-center w-full max-w-4xl mb-8 space-x-4">
         <PlayerScore name={players[0]?.name} score={players[0]?.score || 0} />
         <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
