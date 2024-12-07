@@ -133,10 +133,6 @@ const createGameTableAndInsertData = async () => {
     await sequelize.sync();
     await Game.bulkCreate([
       { member_id: 'user1', opposite_player: 'user2', game_mode: 'english', easy_or_hard: 'easy', winner: 'user1' },
-      { member_id: 'user3', opposite_player: 'user4', game_mode: 'english', easy_or_hard: 'hard', winner: 'user3' },
-      { member_id: 'user5', opposite_player: 'user1', game_mode: 'korean', easy_or_hard: 'easy', winner: 'user5' },
-      { member_id: 'user2', opposite_player: 'user3', game_mode: 'korean', easy_or_hard: 'hard', winner: 'user3' },
-      { member_id: 'user4', opposite_player: 'user5', game_mode: 'korean', easy_or_hard: 'easy', winner: 'user4' },
     ]);
     console.log('Game 테이블 초기화 및 데이터 삽입 성공');
   } catch (err) {
@@ -160,9 +156,6 @@ const createRoundTableAndInsertData = async () => {
       await Round.bulkCreate([
         { game_id: gameIds[0].game_id, word_id: 1, round_num: 1},
         { game_id: gameIds[0].game_id, word_id: 2, round_num: 2},
-        { game_id: gameIds[1].game_id, word_id: 3, round_num: 1},
-        { game_id: gameIds[1].game_id, word_id: 4, round_num: 2},
-        { game_id: gameIds[2].game_id, word_id: 5, round_num: 1},
       ]);
     }
     console.log('Round 테이블 생성 및 데이터 삽입 성공');
@@ -183,9 +176,6 @@ const insertExampleData = async () => {
     await WrongAns.bulkCreate([
       { word_id: 1, game_id: 1, member_id: 'user1' },
       { word_id: 2, game_id: 1, member_id: 'user2' },
-      { word_id: 3, game_id: 2, member_id: 'user3' },
-      { word_id: 4, game_id: 3, member_id: 'user1' },
-      { word_id: 5, game_id: 2, member_id: 'user4' },
     ]);
     console.log('WrongAns 테이블에 예시 데이터 삽입 완료');
   } catch (error) {

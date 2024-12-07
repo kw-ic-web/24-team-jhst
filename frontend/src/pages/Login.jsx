@@ -27,6 +27,7 @@ function Login() {
   
         alert(response.data.message);
         navigate('/main');
+        window.location.reload(); // 새로고침
       } catch (error) {
         console.error("로그인 중 오류:", error.response?.data);
         alert("로그인에 실패했습니다.");

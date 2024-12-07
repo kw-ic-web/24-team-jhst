@@ -35,9 +35,7 @@ const createCharactersTableAndInsertData = async () => {
     }
     await sequelize.sync();
     await Characters.bulkCreate([
-      { name: 'Character1', image: null },
-      { name: 'Character2', image: null },
-      { name: 'Character3', image: null },
+      { name: '꽝!!', image: null },
     ]);
     console.log('Characters 테이블 초기화 및 데이터 삽입 성공');
   } catch (err) {

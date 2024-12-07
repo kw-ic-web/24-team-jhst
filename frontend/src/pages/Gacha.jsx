@@ -46,16 +46,23 @@ function Gacha() {
     try {
       const memberId = localStorage.getItem('memberId');
       const token = localStorage.getItem('token');
-
+  
       if (!memberId || !token) {
         alert('로그인이 필요합니다.');
         return;
       }
-
+  
+      // 추가된 부분: 포인트가 100보다 적을 경우 메시지를 설정하고 종료
+      if (userPoints < 100) {
+        setErrorMessage('포인트가 부족합니다.');
+        setShowResultModal(true); // 결과 모달 열기
+        return;
+      }
+  
       const response = await axios.get(`http://localhost:8000/characters/draw?memberId=${memberId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
+  
       if (response.status === 200) {
         const { character } = response.data;
         setCharacter(character); 

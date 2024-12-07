@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken'); // 토큰
 require('dotenv').config(); // .env
 const member_game = require('../../db/memberdb');
-const MemberGame = member_game.MemberGame; // member_game 테이블로 변경
+const MemberGame = member_game.MemberGame; 
 const bcrypt = require('bcrypt');
 
 // 토큰 검증 미들웨어
@@ -13,7 +13,7 @@ verifyToken = (req, res, next) => {
       return res.status(401).json({ message: '토큰이 제공되지 않았습니다.' });
     }
 
-    req.user = jwt.verify(token, process.env.JWT_SECRET); // req.user에 설정
+    req.user = jwt.verify(token, process.env.JWT_SECRET); 
     return next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
@@ -65,7 +65,7 @@ const login = async (req, res) => {
         );
         return res.json({
           code: 200,
-          message: '토큰이 발급되었습니다.',
+          message: '로그인되었습니다. 환영합니다.',
           token,
           memberId: memberGame.member_id, // memberId 추가
           redirectTo: '/main',
