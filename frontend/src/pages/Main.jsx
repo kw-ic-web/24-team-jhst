@@ -22,11 +22,11 @@ function Main() {
       navigate('/login');
     } else {
       axios
-        .get('http://localhost:8000/login/verifyToken', {
+        .get('https://team10.kwweb.duckdns.org/login/verifyToken', {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then(() => {
-          return axios.get('http://localhost:8000/users/viewInfo', {
+          return axios.get('https://team10.kwweb.duckdns.org/users/viewInfo', {
             headers: { Authorization: `Bearer ${token}` },
           });
         })
@@ -52,7 +52,7 @@ function Main() {
       }
 
       try {
-        const response = await axios.get(`http://localhost:8000/characters/active?memberId=${memberId}`, {
+        const response = await axios.get(`https://team10.kwweb.duckdns.org/characters/active?memberId=${memberId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setActiveCharacter(response.data);

@@ -35,7 +35,7 @@ const GameMulti = () => {
       const memberId = localStorage.getItem('memberId');
       const token = localStorage.getItem('token');
 
-      const response = await axios.get('http://localhost:8000/characters/active', {
+      const response = await axios.get('https://team10.kwweb.duckdns.org/characters/active', {
         headers: { Authorization: `Bearer ${token}` },
         params: { memberId },
       });
@@ -418,7 +418,7 @@ useEffect(() => {
         const memberId = localStorage.getItem('memberId');
         const token = localStorage.getItem('token');
   
-        const response = await axios.get('http://localhost:8000/characters/active', {
+        const response = await axios.get('https://team10.kwweb.duckdns.org/characters/active', {
           headers: { Authorization: `Bearer ${token}` },
           params: { memberId },
         });

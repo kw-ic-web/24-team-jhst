@@ -8,7 +8,7 @@ export const SocketProvider = ({ children }) => {
 
   if (!socketRef.current) {
     // 소켓 초기화
-    socketRef.current = io('http://localhost:8000', {
+    socketRef.current = io('https://team10.kwweb.duckdns.org', {
       autoConnect: false, // 필요 시 연결
     });
   }
@@ -22,11 +22,7 @@ export const SocketProvider = ({ children }) => {
     };
   }, []);
 
-  return (
-    <SocketContext.Provider value={socketRef.current}>
-      {children}
-    </SocketContext.Provider>
-  );
+  return <SocketContext.Provider value={socketRef.current}>{children}</SocketContext.Provider>;
 };
 
 export const useSocket = () => {

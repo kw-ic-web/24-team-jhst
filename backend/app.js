@@ -41,7 +41,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: 'http://localhost:3000', // 프론트엔드 URL
+    origin: ['http://localhost:3000', 'https://team10-front.kwweb.duckdns.org'], // 프론트엔드 URL
   })
 );
 
@@ -80,7 +80,6 @@ const charactersRouter = require('./game/characters/routes/characters');
 const adminRouter = require('./member/routes/admin');
 const singleplayRouter = require('./game/singleplay/routes/singleplay');
 const multiplayRouter = require('./game/multiplay/routes/multiplay'); // .js 생략 가능
-
 
 // 라우터 수동 등록
 app.use('/users', signupRouter); // 회원가입 라우터

@@ -30,7 +30,7 @@ const AdminPage = () => {
   // 회원 삭제
   const handleDeleteMember = async () => {
     try {
-      const response = await axios.post("http://localhost:8000/admin/deleteMember", {
+      const response = await axios.post("https://team10.kwweb.duckdns.org/admin/deleteMember", {
         member_id: deleteMemberId,
       });
       alert(response.data.message);
@@ -44,7 +44,7 @@ const AdminPage = () => {
   // 회원 포인트 조회
   const handleFetchPoint = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/admin/getMemberPoint/${pointMemberId}`);
+      const response = await axios.get(`https://team10.kwweb.duckdns.org/admin/getMemberPoint/${pointMemberId}`);
       setPointResult(response.data.point);
     } catch (error) {
       console.error("포인트 조회 오류:", error);
@@ -55,7 +55,7 @@ const AdminPage = () => {
   // 회원 포인트 수정
   const handleUpdatePoint = async () => {
     try {
-      const response = await axios.post("http://localhost:8000/admin/updateMemberPoint", {
+      const response = await axios.post("https://team10.kwweb.duckdns.org/admin/updateMemberPoint", {
         member_id: pointMemberId,
         point: pointValue,
       });
@@ -74,7 +74,7 @@ const AdminPage = () => {
       const reader = new FileReader();
       reader.onloadend = async () => {
         const imageBase64 = reader.result.split(",")[1];
-        const response = await axios.post("http://localhost:8000/admin/addCharacter", {
+        const response = await axios.post("https://team10.kwweb.duckdns.org/admin/addCharacter", {
           name: characterName,
           imageFile: imageBase64,
         });
@@ -104,7 +104,7 @@ const AdminPage = () => {
   // 캐릭터 삭제
   const handleDeleteCharacter = async () => {
     try {
-      const response = await axios.post("http://localhost:8000/admin/deleteCharacterByName", {
+      const response = await axios.post("https://team10.kwweb.duckdns.org/admin/deleteCharacterByName", {
         name: characterNameToDelete,
       });
       alert(response.data.message);
@@ -118,7 +118,7 @@ const AdminPage = () => {
   // 단어 추가
   const handleAddWord = async () => {
     try {
-      const response = await axios.post("http://localhost:8000/admin/addWord", {
+      const response = await axios.post("https://team10.kwweb.duckdns.org/admin/addWord", {
         en_word: englishWord,
         ko_word: koreanWord,
         difficulty: difficulty,
@@ -136,7 +136,7 @@ const AdminPage = () => {
   // 단어 조회
   const handleFetchWord = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/admin/getWord/${wordId}`);
+      const response = await axios.get(`https://team10.kwweb.duckdns.org/admin/getWord/${wordId}`);
       setWordResult(response.data);
     } catch (error) {
       console.error("단어 조회 오류:", error);
@@ -147,7 +147,7 @@ const AdminPage = () => {
   // 단어 수정
   const handleUpdateWord = async () => {
     try {
-      const response = await axios.post("http://localhost:8000/admin/updateWord", {
+      const response = await axios.post("https://team10.kwweb.duckdns.org/admin/updateWord", {
         word_id: wordId,
         en_word: updatedEnglishWord,
         ko_word: updatedKoreanWord,

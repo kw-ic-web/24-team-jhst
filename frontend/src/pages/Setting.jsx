@@ -15,7 +15,7 @@ function Setting() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get('http://localhost:8000/users/viewInfo', {
+    axios.get('https://team10.kwweb.duckdns.org/users/viewInfo', {
       headers: {
         Authorization: `Bearer ${token}`, 
       },
@@ -44,7 +44,7 @@ function Setting() {
     }
 
     const token = localStorage.getItem('token');
-    axios.put('http://localhost:8000/users/updateMember', {
+    axios.put('https://team10.kwweb.duckdns.org/users/updateMember', {
       name: userInfo.name,
       email: userInfo.email,
       pwd: userInfo.password,
@@ -65,7 +65,7 @@ function Setting() {
   const handleDeleteAccount = () => {
     if (window.confirm('정말로 회원탈퇴를 하시겠습니까?')) {
       const token = localStorage.getItem('token');
-      axios.delete('http://localhost:8000/users/deleteMember', {
+      axios.delete('https://team10.kwweb.duckdns.org/users/deleteMember', {
         headers: {
           Authorization: `Bearer ${token}`, 
         },

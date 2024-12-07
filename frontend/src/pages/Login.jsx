@@ -10,7 +10,7 @@ function Login() {
   const handleLogin = async () => {
     if (id && password) {
       try {
-        const response = await axios.post('http://localhost:8000/login', {
+        const response = await axios.post('https://team10.kwweb.duckdns.org/login', {
           id: id,
           pw: password,
         });

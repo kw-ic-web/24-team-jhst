@@ -11,7 +11,7 @@ const Ranking = () => {
 
   useEffect(() => {
     const memberId = localStorage.getItem('memberId'); 
-    axios.get(`http://localhost:8000/rankings?member_id=${memberId}`)
+    axios.get(`https://team10.kwweb.duckdns.org/rankings?member_id=${memberId}`)
       .then((response) => {
         setMyRanking(response.data.myRanking); // 내 랭킹 정보 저장
         setGlobalRanking(response.data.globalRanking); // 전체 랭킹 정보 저장

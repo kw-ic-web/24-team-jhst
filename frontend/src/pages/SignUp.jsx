@@ -23,7 +23,7 @@ function SignUp() {
   // 아이디 중복 확인 
   const checkUsernameAvailability = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/users/checkid', {
+      const response = await axios.post('https://team10.kwweb.duckdns.org/users/checkid', {
         id: formData.username,
       });
       setIsUsernameAvailable(response.data.available); 
@@ -47,7 +47,7 @@ function SignUp() {
     }
 
     try {
-      const response = await axios.post('http://localhost:8000/users/register', {
+      const response = await axios.post('https://team10.kwweb.duckdns.org/users/register', {
         id: formData.username,
         pwd: formData.password,
         name: formData.name,

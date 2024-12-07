@@ -22,7 +22,7 @@ function Gacha() {
       }
 
       try {
-        const response = await axios.get(`http://localhost:8000/users/viewInfo`, {
+        const response = await axios.get(`https://team10.kwweb.duckdns.org/users/viewInfo`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -59,7 +59,7 @@ function Gacha() {
         return;
       }
   
-      const response = await axios.get(`http://localhost:8000/characters/draw?memberId=${memberId}`, {
+      const response = await axios.get(`https://team10.kwweb.duckdns.org/characters/draw?memberId=${memberId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
   

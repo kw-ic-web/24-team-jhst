@@ -12,7 +12,7 @@ const WrongNote = () => {
     const fetchWrongWords = async () => {
       try {
         const memberId = localStorage.getItem('memberId');
-        const response = await axios.get(`http://localhost:8000/game/wrong-words?member_id=${memberId}`);
+        const response = await axios.get(`https://team10.kwweb.duckdns.org/game/wrong-words?member_id=${memberId}`);
         setWrongWords(response.data.data);
       } catch (error) {
         console.error('Failed to fetch wrong words:', error);
@@ -24,15 +24,15 @@ const WrongNote = () => {
         const memberId = localStorage.getItem('memberId');
         const token = localStorage.getItem('token');
 
-        // 활성 캐릭터 
-        const characterResponse = await axios.get('http://localhost:8000/characters/active', {
+        // 활성 캐릭터
+        const characterResponse = await axios.get('https://team10.kwweb.duckdns.org/characters/active', {
           headers: { Authorization: `Bearer ${token}` },
           params: { memberId },
         });
         setActiveCharacter(characterResponse.data);
 
         // 플레이어 이름
-        const playerResponse = await axios.get('http://localhost:8000/users/viewInfo', {
+        const playerResponse = await axios.get('https://team10.kwweb.duckdns.org/users/viewInfo', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setPlayerName(playerResponse.data.name);
@@ -78,8 +78,12 @@ const WrongNote = () => {
             {wrongWords.length > 0 ? (
               wrongWords.map((word) => (
                 <div key={word.word_id} className="p-2 bg-gray-100 rounded-md shadow-sm">
-                  <p><strong>단어 :</strong> {word.en_word}</p>
-                  <p><strong>뜻 :</strong> {word.ko_word}</p>
+                  <p>
+                    <strong>단어 :</strong> {word.en_word}
+                  </p>
+                  <p>
+                    <strong>뜻 :</strong> {word.ko_word}
+                  </p>
                 </div>
               ))
             ) : (

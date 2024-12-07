@@ -31,7 +31,7 @@ const GameSingle = () => {
   const fetchWordsFromBackend = async () => {
     try {
       const memberId = localStorage.getItem('memberId');
-      const response = await axios.get('http://localhost:8000/game/singleplay', {
+      const response = await axios.get('https://team10.kwweb.duckdns.org/game/singleplay', {
         params: { member_id: memberId },
       });
 
@@ -64,7 +64,7 @@ const GameSingle = () => {
       const memberId = localStorage.getItem('memberId');
       const token = localStorage.getItem('token');
 
-      const response = await axios.get('http://localhost:8000/characters/active', {
+      const response = await axios.get('https://team10.kwweb.duckdns.org/characters/active', {
         headers: { Authorization: `Bearer ${token}` },
         params: { memberId },
       });
@@ -201,7 +201,7 @@ const GameSingle = () => {
       try {
         const memberId = localStorage.getItem('memberId');
         const gameId = localStorage.getItem('gameId');
-        await axios.post('http://localhost:8000/game/roundplay/result', {
+        await axios.post('https://team10.kwweb.duckdns.org/game/roundplay/result', {
           member_id: memberId,
           results: updatedResults,
           game_id: gameId,

@@ -43,7 +43,7 @@ const ResultMulti = () => {
 // sendWinnerData 함수
 const sendWinnerData = async () => {
   try {
-    await axios.post('http://localhost:8000/multiplay/winner', {
+    await axios.post('https://team10.kwweb.duckdns.org/multiplay/winner', {
       game_id: game_id,
       winner: winner.member_id,
       loser: loser.member_id,
@@ -63,7 +63,7 @@ const sendWrongAnsData = async () => {
     for (const roundNum of wrongRounds) {
       const en_word = rounds[`round${roundNum}`]?.en_word;
       if (en_word) {
-        await axios.post('http://localhost:8000/multiplay/wrongans', {
+        await axios.post('https://team10.kwweb.duckdns.org/multiplay/wrongans', {
           member_id: players[0].member_id,
           en_word: en_word,
           game_id: game_id,

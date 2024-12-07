@@ -14,7 +14,7 @@ function Shop() {
     if (token) {
       // 보유 금액 조회
       axios
-        .get('http://localhost:8000/users/viewInfo', {
+        .get('https://team10.kwweb.duckdns.org/users/viewInfo', {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
@@ -26,7 +26,7 @@ function Shop() {
 
       // 보유 캐릭터 조회
       axios
-        .get('http://localhost:8000/characters/owned', {
+        .get('https://team10.kwweb.duckdns.org/characters/owned', {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
@@ -64,7 +64,7 @@ function Shop() {
 
       axios
         .post(
-          'http://localhost:8000/characters/select',
+          'https://team10.kwweb.duckdns.org/characters/select',
           {
             memberId: memberId,
             characterId: selectedCharacter.characterId,
