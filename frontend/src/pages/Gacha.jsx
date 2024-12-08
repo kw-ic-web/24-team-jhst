@@ -97,23 +97,23 @@ function Gacha() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-customWhite">
-      <h1 className="text-4xl font-medium mb-8 text-black">캐릭터 뽑기</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+      <h1 className="text-3xl font-bold mb-8 text-black">캐릭터 뽑기</h1>
 
       {/* 뽑기 상자 */}
       <div
-        className="w-64 h-64 bg-yellow-300 flex items-center justify-center rounded-lg cursor-pointer transition-transform duration-500 hover:scale-105 shadow-lg"
+        className="w-64 h-64 bg-customWhite flex items-center justify-center rounded-lg cursor-pointer transition-transform duration-500 hover:scale-105 shadow-lg"
         onClick={handleBoxClick}
       >
-        <span className="text-xl">🎁 뽑기 상자 클릭!</span>
+        <span className="text-xl text-white font-medium">🎁 뽑기 상자 클릭 !</span>
       </div>
 
       {/* 초기 모달 */}
       {showInitialModal && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-8 rounded shadow-lg w-80 text-center">
-            <h2 className="text-lg mb-6">내 보유 포인트: {userPoints}</h2>
-            <h2 className="text-xl mb-8">100 포인트 차감됩니다</h2>
+            <h2 className="text-lg mb-6">내 보유 포인트: <strong>{userPoints} </strong></h2>
+            <h2 className="text-xl mb-8"><strong>100</strong> 포인트 차감됩니다</h2>
             <div className="flex justify-around mt-4">
               <button
                 className="bg-main02 text-white py-2 px-6 rounded"

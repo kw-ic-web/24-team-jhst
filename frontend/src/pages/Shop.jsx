@@ -101,10 +101,10 @@ function Shop() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center mt-10 p-8 bg-white">
-      <h1 className="text-2xl font-bold mb-8">내 캐릭터</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gray-100">
+      <h1 className="text-3xl font-bold mb-8">내 캐릭터</h1>
 
-      <div className="absolute top-32 right-8 bg-yellow-300 text-black py-2 px-4 rounded-lg">
+      <div className="absolute top-28 right-8 bg-yellow-300 text-black py-3 px-6 rounded-md">
         보유 포인트 : {balance}
       </div>
 
@@ -149,7 +149,7 @@ function Shop() {
       {/* 모달 */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white p-6 roundedshadow-lg text-center">
+          <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <h2 className="text-xl font-bold mb-4">이 캐릭터로 선택하시겠습니까?</h2>
             <div className="flex justify-center gap-10">
               <button

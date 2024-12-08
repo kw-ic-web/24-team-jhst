@@ -34,14 +34,14 @@ const Header = () => {
       style={{ boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)' }}
     >
       <h1
-        className="text-2xl cursor-pointer"
+        className="text-2xl font-bold cursor-pointer"
         onClick={handleLogoClick}
       >
-        Spell Meow
+        SPELL MEOW
       </h1>
       <button
         onClick={handleLoginLogoutClick}
-        className="px-4 py-2 rounded"
+        className="px-6 py-2 text-white bg-main01 rounded-lg"
       >
         {isLoggedIn ? '로그아웃' : '로그인'}
       </button>

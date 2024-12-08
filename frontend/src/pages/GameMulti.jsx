@@ -7,8 +7,8 @@ import axios from 'axios';
 
 const PlayerScore = ({ name, score }) => (
   <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
-    <p>{name}</p>
-    <p>{score}점</p>
+    <p >{name}</p>
+    <p className='text-lg font-semibold'>{score} 점</p>
   </div>
 );
 
@@ -145,14 +145,14 @@ const GameMulti = () => {
     if (myPlayer && otherPlayer) {
       setPlayers([
         {
-          name: `나: ${myPlayer.member_id}`,
+          name: `나 : ${myPlayer.member_id}`,
           member_id: myPlayer.member_id,
           socket_id: myPlayer.id,
           score: 0,
           position: { x: myPlayer.x, y: myPlayer.y },
         },
         {
-          name: `상대방: ${otherPlayer.member_id}`,
+          name: `상대방 : ${otherPlayer.member_id}`,
           member_id: otherPlayer.member_id,
           socket_id: otherPlayer.id,
           score: 0,
@@ -406,51 +406,6 @@ useEffect(() => {
       socket.off('receiveCharacter', handleReceiveCharacter);
     };
   }, [socket]);
-  
-  
-
-
-  // 캐릭터 소켓
- /* useEffect(() => {
-    // 내 캐릭터 데이터 가져오기 및 소켓 전송
-    const fetchAndShareCharacter = async () => {
-      try {
-        const memberId = localStorage.getItem('memberId');
-        const token = localStorage.getItem('token');
-  
-        const response = await axios.get('https://team10.kwweb.duckdns.org/characters/active', {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { memberId },
-        });
-  
-        if (response.data) {
-          setActiveCharacter(response.data);
-          // 캐릭터 데이터를 소켓으로 상대방에게 전송
-          socket.emit('shareCharacter', {
-            roomName,
-            character: response.data,
-          });
-        }
-      } catch (error) {
-        console.error('Failed to fetch and share character:', error.message);
-      }
-    };
-  
-    fetchAndShareCharacter();
-  
-    // 상대방의 캐릭터 데이터 수신
-    socket.on('receiveCharacter', ({ playerId, character }) => {
-      setPlayers((prevPlayers) =>
-        prevPlayers.map((player) =>
-          player.socket_id === playerId ? { ...player, character } : player
-        )
-      );
-    });
-  
-    return () => {
-      socket.off('receiveCharacter');
-    };
-  }, [socket, roomName]); */
 
    //정답확인 승리처리
    useEffect(()=>{
@@ -540,35 +495,39 @@ useEffect(() => {
       
       {/* 라운드 모달 */}
       {showRoundModal && (
-      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-        <div className="bg-white w-3/4 max-w-4xl p-8 rounded-lg shadow-lg text-center text-black h-96">
-          <h2 className="text-6xl font-bold mb-6">
-            {`Round ${round}`}
-          </h2>
-          <p className="text-2xl">준비하세요!</p>
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white w-120 p-8 rounded-lg shadow-lg text-center text-black h-40 flex flex-col justify-center items-center">
+            <h2 className="text-2xl font-bold mb-4">
+              {`Round : ${round}`}
+            </h2>
+            <p className="text-xl font-bold">😸 준비하세요 !</p>
+          </div>
         </div>
-      </div>
       )}
       {/* 게임 종료 모달 */}
       {isGameOverModal && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white w-3/4 max-w-4xl p-8 rounded-lg shadow-lg text-center text-black h-96">
-            <h2 className="text-6xl font-bold mb-6">게임 종료!</h2>
-            <p className="text-2xl">결과를 확인하세요!</p>
+          <div className="bg-white w-120 p-8 rounded-lg shadow-lg text-center text-black h-40 flex flex-col justify-center items-center">
+            <h2 className="text-2xl font-bold mb-4">게임 종료 !</h2>
+            <p className="text-xl font-bold"> 😸 결과를 확인하세요 !</p>
           </div>
         </div>
       )}
+
+      
       {/* 게임 화면 */}
-      <div className="flex justify-between items-center w-full max-w-4xl mb-8 space-x-4">
+      <div className="flex justify-between items-center w-full max-w-4xl mb-4 space-x-4">
         <PlayerScore name={players[0]?.name} score={players[0]?.score || 0} />
+        
+        {/* 라운드 정보 */}
         <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
-          <p>라운드</p>
-          <p>{round}</p>
+          <p className="text-md">라운드</p>
+          <p className="text-lg font-semibold">{round} / 5</p>
         </div>
         <PlayerScore name={players[1]?.name} score={players[1]?.score || 0} />
       </div>
-      <div className="text-center bg-gray-300 p-4 rounded-md text-2xl mb-8 max-w-2xl w-full">
-        {mode || '로딩 중...'}
+      <div className="text-center bg-main01 text-white p-4 rounded-md mb-4 max-w-4xl w-full">
+        <span className='text-md'>제시 단어 :</span> <span className=' text-lg font-semibold'>{mode || '로딩 중...'}</span>
       </div>
       <div className="relative w-full max-w-4xl h-96 bg-white rounded-md">
          {/* 내 캐릭터 */}
@@ -583,11 +542,11 @@ useEffect(() => {
             <img
               src={activeCharacter.image || 'default-character.png'}
               alt={activeCharacter.name || 'Player'}
-              className="w-14 h-14 object-contain"
+              className="w-16 h-16 object-contain"
             />
           ) : (
             <div 
-              className="w-14 h-14 bg-red-500 rounded-full" 
+              className="w-16 h-16 bg-main01 rounded-full" 
               style={{ width: '56px', height: '56px' }} 
             />
           )}
@@ -600,7 +559,7 @@ useEffect(() => {
             {players[0]?.collectedLetters?.map((letter, index) => (
               <span
                 key={index}
-                className="text-white bg-black text-sm px-2 py-1 rounded"
+                className="text-white bg-black text-sm font-bold px-2 py-1 rounded"
               >
                 {letter}
               </span>
@@ -621,11 +580,11 @@ useEffect(() => {
             <img
               src={players[1].character.image || 'default-character.png'}
               alt={players[1].character.name || 'Opponent'}
-              className="w-14 h-14 object-contain"
+              className="w-16 h-16 object-contain"
             />
           ) : (
             <div 
-              className="w-14 h-14 bg-blue-500 rounded-full" 
+              className="w-16 h-16 bg-main02 rounded-full" 
               style={{ width: '56px', height: '56px' }} 
             />
           )}
@@ -637,7 +596,7 @@ useEffect(() => {
             {players[1]?.collectedLetters?.map((letter, index) => (
               <span
                 key={index}
-                className="text-white bg-black text-sm px-2 py-1 rounded"
+                className="text-white bg-black text-sm font-bold px-2 py-1 rounded"
               >
                 {letter}
               </span>
@@ -647,7 +606,7 @@ useEffect(() => {
         {letters.map((letterObj, index) => (
           <div
             key={index}
-            className="absolute text-black text-xl font-bold"
+            className="absolute text-black text-2xl font-bold"
             style={{
               left: `${letterObj.x}px`,
               top: `${letterObj.y}px`,

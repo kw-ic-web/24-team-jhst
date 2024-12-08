@@ -89,7 +89,7 @@ function Setting() {
     <div className="min-h-screen flex flex-col">
       <div className="flex-grow bg-white flex items-center justify-center">
         <div className="bg-white p-8 w-full max-w-md">
-          <h2 className="text-2xl font-bold mb-6 mt-14 text-center">설정</h2>
+          <h2 className="text-3xl font-bold mb-6 mt-14 text-center">설정</h2>
 
           <div className="mb-4">
             <input
@@ -144,7 +144,7 @@ function Setting() {
 
           <button
             onClick={handleDeleteAccount}
-            className="w-full bg-red-500 text-white py-3 rounded hover:bg-red-600 transition duration-200 mb-4"
+            className="w-full bg-red-400 text-white py-3 rounded hover:bg-red-600 transition duration-200 mb-4"
           >
             회원 탈퇴
           </button>
