@@ -25,7 +25,7 @@ const Ranking = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-white">
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gray-100">
       <h1 className="mt-10 text-3xl font-bold mb-6 text-center">
         RANKING
       </h1>

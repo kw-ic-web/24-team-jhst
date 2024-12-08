@@ -7,7 +7,7 @@ module.exports = {
         neodgm: ['neodgm', 'sans-serif'],
       },
       colors: {
-        customWhite: '#705C53',  
+        customWhite: '#282828',  
         main01:'#659287',
         main02:'#608BC1',
       },
