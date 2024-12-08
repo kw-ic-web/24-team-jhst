@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import meow3 from '../assets/images/meow3.png';
+import profmeow from '../assets/images/prof.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; 
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
@@ -33,18 +33,19 @@ function Home() {
 
       <div className="mt-5">
         <div className="flex justify-center">
-          <p className="text-2xl font-bold mr-4">SPELL</p>
-          <img src={meow3} alt="Game Cat" className="w-32 h-32" />
+          <p className="text-2xl font-bold mr-4">S P E L L</p>
+          <img src={profmeow} alt="Game Cat" className="w-24 mb-2" />
         </div>
         <div className="grid grid-cols-5 gap-4 mt-2">
           <span>A</span>
-          <span>E</span>
-          <span>W</span>
-          <span>D</span>
-          <span>M</span>
-          <span>L</span>
+          <span className='text-xl' > <strong>E</strong></span>
+          <span>K</span>
+          <span>U</span>
+          <span className='text-xl'> <strong>M</strong></span>
+          <span className='text-xl' > <strong>W</strong></span>
           <span>B</span>
-          <span>O</span>
+          <span className='text-xl' > <strong>O</strong></span>
+          <span> P</span>
           <span className='mb-10'>C</span>
         </div>
       </div>
