@@ -97,8 +97,8 @@ function Gacha() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-      <h1 className="text-3xl font-medium mb-8 text-black">캐릭터 뽑기</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+      <h1 className="text-3xl font-bold mb-8 text-black">캐릭터 뽑기</h1>
 
       {/* 뽑기 상자 */}
       <div

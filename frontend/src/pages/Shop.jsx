@@ -101,8 +101,8 @@ function Shop() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-white">
-      <h1 className="text-2xl font-bold mb-8">내 캐릭터</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gray-100">
+      <h1 className="text-3xl font-bold mb-8">내 캐릭터</h1>
 
       <div className="absolute top-28 right-8 bg-yellow-300 text-black py-3 px-6 rounded-md">
         보유 포인트 : {balance}

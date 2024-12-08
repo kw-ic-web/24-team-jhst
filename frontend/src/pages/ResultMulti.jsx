@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useLocation } from 'react-router-dom';
 import { FaStar } from "react-icons/fa";
 import axios from 'axios';
-import meow3 from '../assets/images/meow3.png'; // Ensure the path is correct
+import meow3 from '../assets/images/prof.png'; 
 
 const ResultMulti = () => {
   const navigate = useNavigate();
@@ -86,14 +86,14 @@ const sendWrongAnsData = async () => {
       <div className="flex items-center w-full max-w-6xl space-x-8">
 
         {/* winner */}
-        <div className="w-1/3 flex flex-col items-center justify-center bg-blue-500 p-6 rounded-lg">
-          <h1 className="text-4xl font-bold mb-4 text-white">WIN</h1>
-          <h2 className="text-xl font-bold mb-4 text-white">{winner?.name}</h2>
+        <div className="w-1/3 flex flex-col items-center justify-center bg-main01 p-6 rounded-lg">
+          <h1 className="text-2xl font-bold mb-4 text-white">WIN</h1>
+          <h2 className="text-lg font-bold mb-4 text-white">{winner?.name}</h2>
           {winner?.character?.image ? (
             <img
               src={winner.character.image}
               alt={winner.character.name || 'Character'}
-              className="w-28 h-28 mb-6"
+              className="w-28 h-28 mb-6 object-contain"
             />
           ) : (
             <img src={meow3} alt="Default Icon" className="w-28 h-28 mb-6" />
@@ -101,13 +101,13 @@ const sendWrongAnsData = async () => {
           
           <div className="flex items-center bg-gray-200 py-2 px-4 rounded-md">
             <FaStar className="text-yellow-500 mr-2" />
-            <span className="text-xl font-bold">+{winner.score}</span>
+            <span className="text-xl font-bold">+ {winner.score}</span>
           </div>
         </div>
 
         {/* Word list */}
-        <div className="w-1/3 bg-gray-700 p-6 rounded-lg shadow-lg">
-          <h2 className="text-lg font-bold mb-4 text-center text-white">단어 리스트</h2>
+        <div className="w-1/3 bg-customWhite p-6 rounded-lg shadow-lg">
+          <h2 className="text-xl font-bold mb-4 text-center text-white">단어 리스트</h2>
           <ul className="space-y-2 text-center text-white">
             {wordList.map((word, index) => (
               <li key={index} className="text-lg">
@@ -118,7 +118,7 @@ const sendWrongAnsData = async () => {
           <div className="mt-6 text-center">
             <button
               onClick={handleBack}
-              className="bg-green-500 text-white py-3 px-6 rounded hover:bg-green-600 transition duration-200"
+              className="bg-main01 text-white py-3 px-6 rounded hover:bg-green-600 transition duration-200"
             >
               홈으로 돌아가기
             </button>
@@ -126,21 +126,21 @@ const sendWrongAnsData = async () => {
         </div>
 
         {/* loser*/}
-        <div className="w-1/3 flex flex-col items-center justify-center bg-red-500 p-6 rounded-lg">
-          <h1 className="text-4xl font-bold mb-4 text-white">LOSE</h1>
-          <h2 className="text-xl font-bold mb-4 text-white">{loser?.name}</h2>
+        <div className="w-1/3 flex flex-col items-center justify-center bg-red-400 p-6 rounded-lg">
+          <h1 className="text-2xl font-bold mb-4 text-white">LOSE</h1>
+          <h2 className="text-lg font-bold mb-4 text-white">{loser?.name}</h2>
           {loser?.character?.image ? (
             <img
               src={loser.character.image}
               alt={loser.character.name || 'Character'}
-              className="w-28 h-28 mb-6"
+              className="w-28 h-28 mb-6 object-contain"
             />
           ) : (
-            <img src={meow3} alt="Default Icon" className="w-28 h-28 mb-6" />
+            <img src={meow3} alt="Default Icon" className="w-28 h-28 mb-6 object-contain" />
           )}
           <div className="flex items-center bg-gray-200 py-2 px-4 rounded-md">
             <FaStar className="text-yellow-500 mr-2" />
-            <span className="text-xl font-bold">+{loser.score}</span>
+            <span className="text-xl font-bold">+ {loser.score}</span>
           </div>
         </div>
 

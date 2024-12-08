@@ -328,7 +328,7 @@ const GameSingle = () => {
         {letters.map((letterObj, index) => (
           <div
             key={index}
-            className="absolute text-black text-xl font-bold"
+            className="absolute text-black text-2xl font-bold"
             style={{
               left: `${letterObj.x}px`,
               top: `${letterObj.y}px`,

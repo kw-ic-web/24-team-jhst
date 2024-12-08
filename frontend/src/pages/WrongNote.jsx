@@ -50,7 +50,7 @@ const WrongNote = () => {
       <span className='text-3xl font-bold mb-6'>오답노트</span>
       <div className="flex justify-between w-full max-w-4xl mb-8 gap-3">
         {/* 플레이어 정보 */}
-        <div className="bg-white p-4 rounded-lg shadow-md w-1/3 text-center">
+        <div className="bg-white p-4 rounded-lg flex flex-col items-center justify-center shadow-md w-1/3 text-center">
           {activeCharacter ? (
             <>
               <img
