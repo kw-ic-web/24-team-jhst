@@ -47,6 +47,7 @@ const WrongNote = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-8">
+      <span className='text-3xl font-bold mb-6'>오답노트</span>
       <div className="flex justify-between w-full max-w-4xl mb-8 gap-3">
         {/* 플레이어 정보 */}
         <div className="bg-white p-4 rounded-lg shadow-md w-1/3 text-center">
@@ -61,7 +62,7 @@ const WrongNote = () => {
               {/* 싱글플레이 버튼 */}
               <button
                 onClick={() => navigate('/game-single')}
-                className="mt-4 bg-blue-500 text-white w-full py-3 rounded-lg hover:bg-blue-700"
+                className="mt-4 bg-main02 text-white w-full py-3 rounded-md hover:bg-blue-700"
               >
                 싱글플레이 시작
               </button>
@@ -73,13 +74,13 @@ const WrongNote = () => {
 
         {/* 틀린 단어 목록 */}
         <div className="bg-white p-4 rounded-lg shadow-md w-2/3">
-          <h2 className="text-lg font-bold mb-4">틀린 단어 목록</h2>
+          <h2 className="text-lg font-bold ml-1 mb-4">틀린 단어 목록</h2>
           <div className="grid grid-cols-2 gap-4">
             {wrongWords.length > 0 ? (
               wrongWords.map((word) => (
                 <div key={word.word_id} className="p-2 bg-gray-100 rounded-md shadow-sm">
-                  <p><strong>단어 :</strong> {word.en_word}</p>
-                  <p><strong>뜻 :</strong> {word.ko_word}</p>
+                  <p>단어 : <strong>{word.en_word}</strong> </p>
+                  <p>뜻 : <strong>{word.ko_word}</strong> </p>
                 </div>
               ))
             ) : (

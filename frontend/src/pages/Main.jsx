@@ -123,8 +123,8 @@ function Main() {
   };
 
   return (
-    <div className="min-h-screen bg-customWhite flex items-center justify-center p-8">
-      <div className="bg-white p-8 w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-8">
+      <div className="bg-white p-8 w-full max-w-4xl">
         {/* 왼쪽 사이드바 */}
         <div className="flex flex-col space-y-4 mb-6">
           <button
@@ -163,7 +163,7 @@ function Main() {
               onClick={handleGameStartClick}
               className="w-full bg-main01 text-white py-3 rounded hover:bg-green-700 transition duration-200"
             >
-              게임 시작
+              멀티플레이 시작
             </button>
           ) : (
             <div className="w-full">
@@ -250,7 +250,7 @@ function Main() {
 
               <button
                 onClick={handleGameStart}
-                className="w-full bg-main02 text-white py-2 px-4 rounded-md mt-4"
+                className="w-full bg-main02 text-white py-3 px-4 rounded-md mt-4"
               >
                 게임 시작
               </button>

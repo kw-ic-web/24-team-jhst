@@ -283,22 +283,30 @@ const GameSingle = () => {
           <p className="text-xl font-bold">{popupMessage}</p>
         </div>
       )}
-      <div className="flex justify-between items-center w-full max-w-4xl mb-8 space-x-4">
-        <PlayerScore  name={player.name} timer={player.timer} />
-        <div className="text-center bg-gray-300 p-4 rounded-md flex-1 mx-2">
-          <p className="text-sm">라운드</p>
-          <p  className="text-lg font-semibold" >{round} / {TOTAL_ROUNDS}</p>
+      <div className="flex justify-between items-center w-full max-w-4xl mb-8">
+        {/* 플레이어 정보 */}
+        <div className="text-center bg-gray-200 p-4 rounded-md flex-1 mx-2">
+          <p className="text-md">플레이어: {player.name}</p>
+          <p className="text-lg font-semibold">{player.timer} 초</p>
         </div>
-      </div>
-      <div className="text-center bg-main01 text-white p-4 rounded-md mb-8 max-w-2xl w-full">
-        <p className='text-xl'>제시 단어</p>
-        <p className='text-2xl font-bold'>{word}</p>
+
+        {/* 제시 단어 */}
+        <div className="text-center bg-main01 text-white p-4 rounded-md flex-1 mx-2">
+          <p className="text-md">제시 단어</p>
+          <p className="text-lg font-semibold">{word}</p>
+        </div>
+
+        {/* 라운드 정보 */}
+        <div className="text-center bg-gray-200 p-4 rounded-md flex-1 mx-2">
+          <p className="text-md">라운드</p>
+          <p className="text-lg font-semibold">{round} / {TOTAL_ROUNDS}</p>
+        </div>
       </div>
       <div className="relative w-full max-w-4xl h-96 bg-white rounded-md">
         <img
           src={activeCharacter?.image || 'default-character.png'}
           alt={activeCharacter?.name || 'Player'}
-          className="w-14 h-14 absolute object-contain"
+          className="w-16 h-16 absolute object-contain"
           style={{
             left: `${player.position.x}px`,
             top: `${player.position.y}px`,
